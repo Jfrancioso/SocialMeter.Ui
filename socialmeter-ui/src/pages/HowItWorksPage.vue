@@ -12,8 +12,8 @@ const steps = [
   },
   {
     n: "02",
-    title: "Every post gets read for tone",
-    body: "Each post is scored from strongly negative to strongly positive. “Not as good as everyone says, but decent” lands near the middle; “absolute masterpiece” lands near the top. Sarcasm and slang are hard, so no single post moves the needle much."
+    title: "Every post gets read — in context",
+    body: "Each post is read against the title it was found for: is it actually a reaction to this movie or show, and how does the author feel about it? A thread arguing with a bot that happens to name the show doesn’t count, and “the sequel sucks but this one was great” scores as praise. Posts land anywhere from strongly negative to strongly positive, and no single one moves the needle much."
   },
   {
     n: "03",
