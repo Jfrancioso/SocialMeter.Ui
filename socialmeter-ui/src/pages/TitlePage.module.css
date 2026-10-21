@@ -242,6 +242,13 @@
   font-size: 16px;
 }
 
+.refreshHint {
+  margin-top: -4px;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }

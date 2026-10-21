@@ -14,15 +14,32 @@ const props = defineProps({
 const band = computed(() => meterBand(props.score, props.totalPosts));
 const hasSignal = computed(() => band.value.key !== "none");
 
-// Semicircle: radius 90 in a 220×124 box. Length = π·r.
+// Semicircle centred at (110,110), radius 90, in a 220×128 box. Length = π·r.
+const CX = 110;
+const CY = 110;
 const R = 90;
 const LEN = Math.PI * R;
+
 const mounted = ref(false);
 const progress = computed(() => (mounted.value && hasSignal.value ? Math.max(0, Math.min(100, props.score)) / 100 : 0));
 const dashOffset = computed(() => LEN * (1 - progress.value));
 
-// Needle angle: 0 → 180° (left), 100 → 0° (right)
-const needle = computed(() => 180 - progress.value * 180);
+// Marker sits exactly where the filled arc ends: angle runs from 180° (score 0, left) to 0° (score 100, right).
+const marker = computed(() => {
+  const theta = Math.PI * (1 - progress.value);
+  return { x: CX + R * Math.cos(theta), y: CY - R * Math.sin(theta) };
+});
+
+const ticks = [0, 25, 50, 75, 100].map((t) => {
+  const theta = Math.PI * (1 - t / 100);
+  return {
+    t,
+    x1: CX + (R + 12) * Math.cos(theta),
+    y1: CY - (R + 12) * Math.sin(theta),
+    x2: CX + (R + 18) * Math.cos(theta),
+    y2: CY - (R + 18) * Math.sin(theta)
+  };
+});
 
 const gradId = `meter-grad-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -30,7 +47,11 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
 </script>
 
 <template>
-  <div :class="[styles.gauge, styles[size], styles[`band-${band.key}`]]" role="img" :aria-label="hasSignal ? `SocialMeter ${score} out of 100, ${band.label}` : 'No SocialMeter signal yet'">
+  <div
+    :class="[styles.gauge, styles[size], styles[`band-${band.key}`]]"
+    role="img"
+    :aria-label="hasSignal ? `SocialMeter ${score} out of 100, ${band.label}` : 'No SocialMeter signal yet'"
+  >
     <svg viewBox="0 0 220 128" :class="styles.svg">
       <defs>
         <linearGradient :id="gradId" x1="0" x2="1" y1="0" y2="0">
@@ -43,15 +64,11 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
       </defs>
 
       <!-- track -->
-      <path d="M 20 110 A 90 90 0 0 1 200 110" :class="styles.track" pathLength="100" />
+      <path d="M 20 110 A 90 90 0 0 1 200 110" :class="styles.track" />
 
       <!-- ticks -->
       <g :class="styles.ticks">
-        <line v-for="t in [0, 25, 50, 75, 100]" :key="t"
-          :x1="110 + 102 * Math.cos(Math.PI - (t / 100) * Math.PI)"
-          :y1="110 - 102 * Math.sin(Math.PI - (t / 100) * Math.PI)"
-          :x2="110 + 108 * Math.cos(Math.PI - (t / 100) * Math.PI)"
-          :y2="110 - 108 * Math.sin(Math.PI - (t / 100) * Math.PI)" />
+        <line v-for="k in ticks" :key="k.t" :x1="k.x1" :y1="k.y1" :x2="k.x2" :y2="k.y2" />
       </g>
 
       <!-- value -->
@@ -63,10 +80,10 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
         :stroke-dashoffset="dashOffset"
       />
 
-      <!-- needle -->
-      <g :class="styles.needle" :style="{ transform: `rotate(${needle}deg)` }">
-        <line x1="-40" y1="0" x2="-76" y2="0" />
-        <circle cx="0" cy="0" r="5" />
+      <!-- marker at the end of the filled arc -->
+      <g v-if="hasSignal" :class="styles.marker">
+        <circle :cx="marker.x" :cy="marker.y" r="9" :class="styles.markerHalo" />
+        <circle :cx="marker.x" :cy="marker.y" r="5" :class="styles.markerDot" />
       </g>
     </svg>
 

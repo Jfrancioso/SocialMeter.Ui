@@ -90,6 +90,25 @@ const momentumText = computed(() => {
 const configuredSources = computed(() => (social.value?.sources ?? []).filter((s) => s.configured));
 const anyPosts = computed(() => (meter.value?.totalPosts ?? 0) > 0);
 
+// A live pull spends X credits, and the API refuses a second one inside its cool-down; say so on the button.
+const now = ref(Date.now());
+setInterval(() => (now.value = Date.now()), 30_000);
+
+const refreshWaitMinutes = computed(() => {
+  const at = social.value?.nextRefreshAllowedAt;
+  if (!at) return 0;
+  const ms = new Date(at.endsWith("Z") ? at : `${at}Z`).getTime() - now.value;
+  return ms > 0 ? Math.ceil(ms / 60_000) : 0;
+});
+
+const refreshHint = computed(() => {
+  if (!social.value) return "";
+  if (configuredSources.value.length === 0) return "No source connected — nothing to pull yet.";
+  if (refreshWaitMinutes.value > 0) return `Live pull available again in ${refreshWaitMinutes.value} min`;
+  const names = configuredSources.value.map((s) => (s.platform === "x" ? "X" : "Reddit")).join(" and ");
+  return `Pulls new posts from ${names}${configuredSources.value.some((s) => s.platform === "x") ? " · uses X API credits" : ""}`;
+});
+
 async function load() {
   controller?.abort();
   controller = new AbortController();
@@ -240,10 +259,17 @@ const sentimentChips = [
                 <span :class="styles.fact"><strong :class="styles[`conf-${meter.confidenceLabel}`]">{{ meter.confidenceLabel }}</strong> confidence</span>
                 <span v-if="momentumText" :class="[styles.fact, styles[`mom-${momentumText.dir}`]]">{{ momentumText.text }}</span>
               </div>
-              <button type="button" class="btn" :class="styles.refresh" :disabled="refreshing || !social" @click="loadSocial(true, controller?.signal)">
+              <button
+                type="button"
+                class="btn"
+                :class="styles.refresh"
+                :disabled="refreshing || !social || refreshWaitMinutes > 0 || configuredSources.length === 0"
+                @click="loadSocial(true, controller?.signal)"
+              >
                 <span :class="[styles.refreshIcon, refreshing && styles.spin]">↻</span>
                 {{ refreshing ? "Reading the room…" : "Refresh from sources" }}
               </button>
+              <span v-if="refreshHint" :class="styles.refreshHint">{{ refreshHint }}</span>
             </div>
           </aside>
         </header>
