@@ -49,6 +49,7 @@ const notes = [
   ["It is not a critic score.", "Critics are on the ratings strip next to it. The meter is the audience, unfiltered — then filtered for bots."],
   ["It moves.", "Opinions shift after opening weekend, after a finale, after a Reddit thread blows up. Readings refresh every few hours."],
   ["Low confidence means low confidence.", "A reading built on a handful of posts is a hint, not a verdict. We say so right next to the number."],
+  ["Deleted there, deleted here.", "We re-check every stored post against Reddit and X daily. If you deleted it, or a moderator removed it, it leaves our database and the score is recomputed without it. Nothing is kept longer than a year."],
   ["We keep some of the recipe to ourselves.", "Exact cut-offs for account age, reputation and weighting aren’t published. If they were, the first thing anyone would do is build accounts that just clear them."]
 ];
 </script>
