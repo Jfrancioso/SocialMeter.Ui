@@ -90,6 +90,11 @@ const momentumText = computed(() => {
 const configuredSources = computed(() => (social.value?.sources ?? []).filter((s) => s.configured));
 const anyPosts = computed(() => (meter.value?.totalPosts ?? 0) > 0);
 
+// Locked titles are outside the tracked set: no pulls, no spend. A leftover reading may still exist from
+// when the title was tracked, and we show it labelled as such rather than pretending it is current.
+const locked = computed(() => social.value != null && social.value.tracked === false);
+const trackedReason = computed(() => social.value?.trackedReason ?? title.value?.trackedReason ?? null);
+
 // A live pull spends X credits, and the API refuses a second one inside its cool-down; say so on the button.
 const now = ref(Date.now());
 setInterval(() => (now.value = Date.now()), 30_000);
@@ -103,6 +108,7 @@ const refreshWaitMinutes = computed(() => {
 
 const refreshHint = computed(() => {
   if (!social.value) return "";
+  if (locked.value) return "";
   if (configuredSources.value.length === 0) return "No source connected — nothing to pull yet.";
   if (refreshWaitMinutes.value > 0) return `Live pull available again in ${refreshWaitMinutes.value} min`;
   const names = configuredSources.value.map((s) => (s.platform === "x" ? "X" : "Reddit")).join(" and ");
@@ -227,6 +233,14 @@ const sentimentChips = [
           <div :class="styles.heroText">
             <div :class="styles.meta">
               <span v-for="(b, i) in metaBits" :key="i" :class="[styles.metaBit, i === 0 && styles.metaKind]">{{ b }}</span>
+              <span v-if="trackedReason" :class="styles.trackedChip" :title="`SocialMeter is measuring this title right now: ${trackedReason}`">
+                <span :class="styles.trackedDot" />
+                Tracking · {{ trackedReason }}
+              </span>
+              <span v-else-if="locked" :class="styles.lockedChip" title="Not in the tracked set right now, so no new posts are pulled">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                Not tracked right now
+              </span>
             </div>
             <h1 :class="styles.name">{{ title.name }}</h1>
             <p v-if="title.tagline" :class="styles.tagline">{{ title.tagline }}</p>
@@ -247,11 +261,26 @@ const sentimentChips = [
             <div :class="styles.meterCard">
               <div :class="styles.meterHead">
                 <span :class="styles.meterTitle">SocialMeter</span>
-                <span v-if="social?.lastRefreshedAt" :class="styles.meterWhen">updated {{ timeAgo(social.lastRefreshedAt) }}</span>
+                <span v-if="social?.lastRefreshedAt && !(locked && !anyPosts)" :class="styles.meterWhen">updated {{ timeAgo(social.lastRefreshedAt) }}</span>
               </div>
               <div v-if="!social" :class="[styles.gaugeSkeleton, 'skeleton']" />
+
+              <template v-else-if="locked && !anyPosts">
+                <div :class="styles.lockedPanel">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                  <strong>Not tracked right now</strong>
+                  <span>SocialMeter measures what people are talking about today: titles in theaters, on the air, trending, this season’s picks, and anything that’s gone electric. This one isn’t on that list at the moment, so there’s no reading.</span>
+                  <router-link :to="{ name: 'how-it-works' }" :class="styles.lockedLink">How tracking works →</router-link>
+                </div>
+              </template>
+
               <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" size="lg" />
-              <div v-if="meter" :class="styles.meterFacts">
+
+              <p v-if="locked && anyPosts" :class="styles.leftover">
+                Last reading from when this title was tracked. It isn’t being updated.
+              </p>
+
+              <div v-if="meter && !(locked && !anyPosts)" :class="styles.meterFacts">
                 <span :class="styles.fact"><strong>{{ formatNumber(meter.totalPosts) }}</strong> posts counted</span>
                 <span v-if="meter.filteredPosts" :class="styles.fact" title="Set aside by the trust filter: new accounts, duplicates, pile-ons">
                   <strong>{{ formatNumber(meter.filteredPosts) }}</strong> filtered
@@ -260,6 +289,7 @@ const sentimentChips = [
                 <span v-if="momentumText" :class="[styles.fact, styles[`mom-${momentumText.dir}`]]">{{ momentumText.text }}</span>
               </div>
               <button
+                v-if="!locked"
                 type="button"
                 class="btn"
                 :class="styles.refresh"
@@ -290,7 +320,12 @@ const sentimentChips = [
             <span :class="styles.sectionSub">What people are actually saying, weighted by how much the crowd agreed with them.</span>
           </div>
 
-          <div :class="styles.pulse">
+          <div v-if="locked && !anyPosts" :class="styles.lockedPulse">
+            <strong>No posts collected for this title.</strong>
+            <span>It isn’t in the tracked set, so SocialMeter isn’t reading Reddit or X for it. Critic and audience ratings above are still live.</span>
+          </div>
+
+          <div v-else :class="styles.pulse">
             <div :class="styles.pulseSide">
               <div :class="styles.panel">
                 <h3 :class="styles.h3">Sentiment mix</h3>

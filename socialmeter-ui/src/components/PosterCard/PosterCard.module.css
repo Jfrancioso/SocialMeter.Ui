@@ -59,6 +59,22 @@
   left: 8px;
 }
 
+.lock {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(10, 11, 16, 0.75);
+  border: 1px solid var(--line-2);
+  color: var(--text-3);
+  backdrop-filter: blur(6px);
+}
+
 .type {
   position: absolute;
   bottom: 8px;

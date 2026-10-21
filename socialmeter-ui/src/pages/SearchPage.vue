@@ -26,6 +26,11 @@ const filters = [
   { value: "tv", label: "TV" }
 ];
 
+// Tracked titles first; the rest are findable but locked, in a group the reader can expand.
+const tracked = computed(() => items.value.filter((t) => t.tracked !== false));
+const lockedItems = computed(() => items.value.filter((t) => t.tracked === false));
+const showLocked = ref(false);
+
 async function load(nextPage = 1) {
   if (!q.value) {
     items.value = [];
@@ -84,7 +89,23 @@ watch([q, type], () => load(1), { immediate: true });
 
       <div v-if="error" class="error-box">{{ error }}</div>
 
-      <TitleGrid v-else-if="items.length" :items="items" />
+      <template v-else-if="items.length">
+        <TitleGrid v-if="tracked.length" :items="tracked" />
+        <div v-else :class="styles.empty">
+          <strong>Nothing tracked matches “{{ q }}”.</strong>
+          <span>SocialMeter only measures what’s current, trending, seasonal or electric. Matches outside that set are below.</span>
+        </div>
+
+        <section v-if="lockedItems.length" :class="styles.lockedSection">
+          <button type="button" :class="styles.lockedToggle" :aria-expanded="showLocked" @click="showLocked = !showLocked">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+            {{ lockedItems.length }} not tracked right now
+            <span :class="styles.lockedCaret">{{ showLocked ? "▴" : "▾" }}</span>
+          </button>
+          <p :class="styles.lockedHint">Still browsable with critic ratings, but no social reading until they’re current or trending.</p>
+          <TitleGrid v-if="showLocked" :items="lockedItems" />
+        </section>
+      </template>
 
       <div v-else-if="loading" :class="styles.skeletons">
         <div v-for="i in 12" :key="i" :class="[styles.cardSkeleton, 'skeleton']" />

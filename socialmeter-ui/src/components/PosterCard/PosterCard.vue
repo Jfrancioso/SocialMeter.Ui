@@ -24,7 +24,10 @@ const to = computed(() => ({ name: "title", params: { type: props.title.mediaTyp
       <img v-if="poster" :src="poster" :alt="title.name" :class="styles.img" loading="lazy" />
       <div v-else :class="styles.noPoster">{{ title.name }}</div>
 
-      <MeterBadge :reading="reading" :class="styles.badge" />
+      <span v-if="title.tracked === false" :class="styles.lock" title="Not tracked right now — no social reading">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+      </span>
+      <MeterBadge v-else :reading="reading" :class="styles.badge" />
       <span :class="[styles.type, title.mediaType === 'tv' && styles.typeTv]">{{ mediaLabel(title.mediaType) }}</span>
     </div>
 

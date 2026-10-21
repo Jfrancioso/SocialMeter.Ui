@@ -46,6 +46,7 @@ const bands = [
 ];
 
 const notes = [
+  ["We only measure what’s current.", "Titles in theaters, on the air, coming soon, trending, this season’s picks (horror in October, love stories in February…), and anything that has gone electric. Everything else is browsable with critic ratings but locked — opinions on a ten-year-old film don’t change by the hour, and reading the whole internet for every title ever made isn’t worth anyone’s money."],
   ["It is not a critic score.", "Critics are on the ratings strip next to it. The meter is the audience, unfiltered — then filtered for bots."],
   ["It moves.", "Opinions shift after opening weekend, after a finale, after a Reddit thread blows up. Readings refresh every few hours."],
   ["Low confidence means low confidence.", "A reading built on a handful of posts is a hint, not a verdict. We say so right next to the number."],
