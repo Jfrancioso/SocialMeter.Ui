@@ -32,10 +32,54 @@ const steps = [
   },
   {
     n: "06",
-    title: "Then it all rolls up to one number",
-    body: "Everything above combines into a 0–100 reading where 50 means perfectly split. Confidence tells you how much weight sits behind the number; momentum shows whether the last two weeks are warmer or cooler than the overall read."
+    title: "Then it all rolls up to one number — with a margin",
+    body: "Everything above combines into a 0–100 reading where 50 means perfectly split. A handful of posts is pulled toward 50 until there’s enough evidence to say otherwise, and every reading comes with a 95% range. Confidence tells you how much of the number is posts rather than caution; the trend line says whether it is actually moving, tested, not eyeballed."
   }
 ];
+
+// The aggregation, in full. Thresholds for trust stay private; the maths does not — a score nobody can check is a vibe.
+const methods = [
+  {
+    name: "Weighted mean",
+    what: "Each post’s sentiment (−1 to +1) is weighted by engagement (log-scaled), recency, trust and substance. The weighted average, mapped to 0–100, is the raw score."
+  },
+  {
+    name: "Effective posts (Kish)",
+    what: "Kish’s effective sample size, (Σw)² / Σw², says how many equal posts a weight profile is worth — one viral post among ten is worth about one. Multiplied by the average trust-and-substance credit, so forty throwaway posts are worth a few."
+  },
+  {
+    name: "Bayesian average",
+    what: "The same formula IMDb publishes for its Top 250: score = (n·mean + k·neutral) / (n + k), where n is effective posts and k is currently six. With six effective posts the data and the prior count equally; Electric needs several times that."
+  },
+  {
+    name: "95% range",
+    what: "A Student-t interval on the weighted mean, from the standard error of a weighted mean with reliability weights, scaled by the same factor as the score. Unanimous posts never claim zero uncertainty: the per-post spread has a floor, because reading a post has noise of its own."
+  },
+  {
+    name: "Trend (Mann-Kendall)",
+    what: "One reading is kept per day. The Mann-Kendall test — the standard non-parametric test for a monotonic trend in a short series — decides whether the line is rising or cooling at p < 0.05; Sen’s slope gives the rate. Fewer than five daily readings: no verdict."
+  },
+  {
+    name: "Reading accuracy",
+    what: "The model that reads posts is checked against a hand-labelled set of real posts every time its instructions change: was the post about the title, how did the author feel, how much substance. A change that lowers accuracy doesn’t ship."
+  }
+];
+
+// Three real-shaped posts through the pipeline, numbers computed with the production code.
+const example = {
+  posts: [
+    { who: "X · 10 likes · 2 days old", text: "The third act is the best thing Villeneuve has done — the worm ride alone.", read: "+0.80", substance: "Specific", trust: "full", weight: "1.83" },
+    { who: "Reddit · 120 upvotes, 30 comments · 5 days old", text: "Really good. Long, though.", read: "+0.50", substance: "Some detail", trust: "full", weight: "2.62" },
+    { who: "X · 0 likes · 1 day old · young account", text: "mid", read: "−0.30", substance: "Bare", trust: "reduced", weight: "0.33" }
+  ],
+  steps: [
+    ["Weighted mean", "(1.83·0.80 + 2.62·0.50 − 0.33·0.30) / 4.77 = +0.56 → raw score 78"],
+    ["Effective posts", "Kish: 4.77² / (1.83² + 2.62² + 0.33²) = 2.21 · average credit 0.61 = 1.35"],
+    ["Bayesian average", "(1.35 · 0.56 + 6 · 0) / (1.35 + 6) = +0.10 → score 55 · confidence 18%"],
+    ["95% range", "t(1.21 df) × standard error, scaled by 0.18 → ±9 → 46–64"]
+  ],
+  verdict: "Three glowing posts read as 55 ± 9, Warm, low confidence — not Electric. Thirty posts like the first two would."
+};
 
 const bands = [
   { label: "Cold", range: "0–34", color: "var(--meter-cold)", text: "The crowd is mostly down on it." },
@@ -50,9 +94,9 @@ const notes = [
   ["For games, it’s the “right now” number.", "Steam’s percentage is an all-time verdict; for early-access and live-service games it can be years stale. SocialMeter reads the most recent Steam reviews — weighted by how long the reviewer actually played — together with X and Reddit, and shows it beside Steam’s all-time and 30-day scores. Launch was rough but the last patch landed? You’ll see it."],
   ["It is not a critic score.", "Critics are on the ratings strip next to it. The meter is the audience, unfiltered — then filtered for bots."],
   ["It moves.", "Opinions shift after opening weekend, after a finale, after a Reddit thread blows up. Readings refresh every few hours."],
-  ["Low confidence means low confidence.", "A reading built on a handful of posts is a hint, not a verdict. We say so right next to the number."],
+  ["Low confidence means low confidence.", "A reading built on a handful of posts is pulled toward 50 and shown with a wide range. We say so right next to the number, and the “why this score” panel on every title shows the posts and the arithmetic."],
   ["Deleted there, deleted here.", "We re-check every stored post against Reddit and X daily. If you deleted it, or a moderator removed it, it leaves our database and the score is recomputed without it. Nothing is kept longer than a year."],
-  ["We keep some of the recipe to ourselves.", "Exact cut-offs for account age, reputation and weighting aren’t published. If they were, the first thing anyone would do is build accounts that just clear them."]
+  ["We publish the maths, not the cut-offs.", "The aggregation is below in full, with a worked example. Exact cut-offs for account age, reputation and playtime aren’t published: if they were, the first thing anyone would do is build accounts that just clear them."]
 ];
 </script>
 
@@ -92,6 +136,45 @@ const notes = [
             <span :class="styles.bandText">{{ b.text }}</span>
           </li>
         </ul>
+      </section>
+
+      <section id="method" :class="styles.section">
+        <h2 :class="styles.h2">The method, in full</h2>
+        <p :class="styles.sectionLede">
+          Every reading on the site can be recomputed from its posts with the steps below. These are standard tools —
+          the same ones survey statisticians and ratings sites use — not a recipe of our own.
+        </p>
+        <div :class="styles.methods">
+          <div v-for="m in methods" :key="m.name" :class="styles.method">
+            <strong>{{ m.name }}</strong>
+            <span>{{ m.what }}</span>
+          </div>
+        </div>
+
+        <h3 :class="styles.h3">Worked example</h3>
+        <div :class="styles.example">
+          <table :class="styles.exampleTable">
+            <thead>
+              <tr><th>Post</th><th>Read as</th><th>Substance</th><th>Trust</th><th>Weight</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="(p, i) in example.posts" :key="i">
+                <td><span :class="styles.exWho">{{ p.who }}</span><span :class="styles.exText">“{{ p.text }}”</span></td>
+                <td :class="styles.num">{{ p.read }}</td>
+                <td>{{ p.substance }}</td>
+                <td>{{ p.trust }}</td>
+                <td :class="styles.num">{{ p.weight }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ol :class="styles.exampleSteps">
+            <li v-for="[name, calc] in example.steps" :key="name">
+              <strong>{{ name }}</strong>
+              <code>{{ calc }}</code>
+            </li>
+          </ol>
+          <p :class="styles.exampleVerdict">{{ example.verdict }}</p>
+        </div>
       </section>
 
       <section :class="styles.section">

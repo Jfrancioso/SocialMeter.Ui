@@ -38,6 +38,23 @@ const where = computed(() => {
 });
 
 const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Negative" };
+const readAs = computed(() => {
+  const s = props.post.sentimentScore;
+  return `Read as ${(sentimentLabel[props.post.sentiment] ?? props.post.sentiment).toLowerCase()} (${s > 0 ? "+" : ""}${s})`;
+});
+
+// "Why this score" chips: how much of the author's experience is in the post, and whether the trust policy discounted them.
+const substanceLabel = { bare: "Bare reaction", some: "Some detail", detailed: "Specific" };
+const substanceHint = {
+  bare: "A verdict with nothing behind it: “10/10”, “trash”, “peak”. Counts, but at half the weight of a detailed take.",
+  some: "An opinion with one general reason: “great visuals”, “too long”.",
+  detailed: "Names scenes, characters, mechanics, or makes an argument. Full substance weight."
+};
+const share = computed(() => {
+  const w = props.post.weightShare;
+  if (w == null) return null;
+  return w < 0.1 ? "<0.1%" : `${w}%`;
+});
 </script>
 
 <template>
@@ -54,10 +71,10 @@ const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Ne
           </span>
         </span>
       </div>
-      <span v-if="post.verdictUp != null" :class="[styles.pill, post.verdictUp ? styles['pill-positive'] : styles['pill-negative']]" :title="`Sentiment score ${post.sentimentScore}`">
+      <span v-if="post.verdictUp != null" :class="[styles.pill, post.verdictUp ? styles['pill-positive'] : styles['pill-negative']]" :title="readAs">
         {{ post.verdictUp ? "👍 Recommended" : "👎 Not recommended" }}
       </span>
-      <span v-else :class="[styles.pill, styles[`pill-${post.sentiment}`]]" :title="`Sentiment score ${post.sentimentScore}`">
+      <span v-else :class="[styles.pill, styles[`pill-${post.sentiment}`]]" :title="readAs">
         {{ sentimentLabel[post.sentiment] ?? post.sentiment }}
       </span>
     </header>
@@ -105,6 +122,13 @@ const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Ne
       <span :class="styles.stat" title="Comments">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1.1-3.7A8 8 0 1 1 20 12Z" /></svg>
         {{ formatCompact(post.comments) }}
+      </span>
+      <span :class="styles.chips">
+        <span v-if="post.substanceLevel" :class="[styles.chip, post.substanceLevel === 'detailed' && styles.chipStrong]" :title="substanceHint[post.substanceLevel]">
+          {{ substanceLabel[post.substanceLevel] ?? post.substanceLevel }}
+        </span>
+        <span v-if="post.trustLevel === 'reduced'" :class="[styles.chip, styles.chipMuted]" title="The trust policy discounted this author (young account, little history, or little playtime)">reduced weight</span>
+        <span v-if="share" :class="styles.chip" title="This post's share of everything that went into the score">{{ share }} of score</span>
       </span>
       <button v-if="shielded && revealed" type="button" :class="styles.hide" @click="revealed = false">Hide</button>
       <a v-if="post.sourceUrl" :href="post.sourceUrl" target="_blank" rel="noopener" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</a>

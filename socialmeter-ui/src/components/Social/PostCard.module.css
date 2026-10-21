@@ -232,11 +232,40 @@
 
 .foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 8px 14px;
   color: var(--text-3);
   font-size: 12px;
   font-weight: 600;
+}
+
+.chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip {
+  padding: 1px 7px;
+  border-radius: var(--pill);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: default;
+}
+
+.chipStrong {
+  background: rgba(255, 176, 0, 0.12);
+  color: var(--accent);
+}
+
+.chipMuted {
+  background: transparent;
+  border: 1px dashed var(--line-2);
 }
 
 .stat {

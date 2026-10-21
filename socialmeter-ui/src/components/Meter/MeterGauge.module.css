@@ -70,6 +70,24 @@
   filter: drop-shadow(0 0 14px rgba(255, 61, 143, 0.8)) drop-shadow(0 0 28px rgba(255, 61, 143, 0.4));
 }
 
+/* The 95 % band sits over the arc as a translucent sleeve, wider than the stroke so it reads as a range, not a value. */
+.band {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 22;
+  stroke-linecap: butt;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.margin {
+  margin-left: 4px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-3);
+  cursor: help;
+}
+
 /* The marker rides the end of the filled arc. cx/cy animate in step with the dash offset. */
 .marker circle {
   transition: cx 1.1s cubic-bezier(0.22, 1, 0.36, 1), cy 1.1s cubic-bezier(0.22, 1, 0.36, 1);

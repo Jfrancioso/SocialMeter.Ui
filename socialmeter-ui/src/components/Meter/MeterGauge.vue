@@ -8,7 +8,9 @@ const props = defineProps({
   totalPosts: { type: Number, default: 0 },
   label: { type: String, default: "" },
   size: { type: String, default: "lg" }, // "lg" | "md" | "sm"
-  caption: { type: String, default: "" }
+  caption: { type: String, default: "" },
+  /** 95 % half-width in points; draws a faint band on the arc and "±n" by the label. */
+  margin: { type: Number, default: null }
 });
 
 const band = computed(() => meterBand(props.score, props.totalPosts));
@@ -28,6 +30,14 @@ const dashOffset = computed(() => LEN * (1 - progress.value));
 const marker = computed(() => {
   const theta = Math.PI * (1 - progress.value);
   return { x: CX + R * Math.cos(theta), y: CY - R * Math.sin(theta) };
+});
+
+// The margin band covers score−margin..score+margin along the same arc: a dash of that length, offset to where it starts.
+const bandDash = computed(() => {
+  if (!hasSignal.value || props.margin == null) return null;
+  const lo = Math.max(0, props.score - props.margin) / 100;
+  const hi = Math.min(100, props.score + props.margin) / 100;
+  return { array: `${LEN * (hi - lo)} ${LEN}`, offset: -LEN * lo };
 });
 
 const ticks = [0, 25, 50, 75, 100].map((t) => {
@@ -81,6 +91,15 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
         :stroke-dashoffset="dashOffset"
       />
 
+      <!-- 95 % band around the reading -->
+      <path
+        v-if="bandDash && mounted"
+        d="M 20 110 A 90 90 0 0 1 200 110"
+        :class="styles.band"
+        :stroke-dasharray="bandDash.array"
+        :stroke-dashoffset="bandDash.offset"
+      />
+
       <!-- marker at the end of the filled arc -->
       <g v-if="hasSignal" :class="styles.marker">
         <circle :cx="marker.x" :cy="marker.y" r="9" :class="styles.markerHalo" />
@@ -97,7 +116,10 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
     </div>
 
     <div :class="styles.under">
-      <div :class="styles.label">{{ label || band.label }}</div>
+      <div :class="styles.label">
+        {{ label || band.label }}
+        <span v-if="hasSignal && margin != null" :class="styles.margin" :title="`95% range: ${Math.max(0, score - margin)}–${Math.min(100, score + margin)}`">±{{ margin }}</span>
+      </div>
       <div v-if="caption" :class="styles.caption">{{ caption }}</div>
     </div>
   </div>

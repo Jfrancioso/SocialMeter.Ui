@@ -1,0 +1,54 @@
+.wrap {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bar {
+  display: flex;
+  height: 10px;
+  border-radius: var(--pill);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.seg {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.empty {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.label {
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.value {
+  font-weight: 800;
+  color: var(--text);
+}

@@ -25,6 +25,8 @@ export default createRouter({
   ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
+    // "#method" and friends: land on the section, below the sticky nav. The target renders async, so give it a tick.
+    if (to.hash) return new Promise((resolve) => setTimeout(() => resolve({ el: to.hash, top: 80, behavior: "smooth" }), 50));
     return { left: 0, top: 0 };
   }
 });

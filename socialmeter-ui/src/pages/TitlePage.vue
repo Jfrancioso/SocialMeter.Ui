@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { getRatings, getSocialMeter, getSocialPosts, getTitle } from "../api";
+import { getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
 import { tmdbImage } from "../utils/tmdbImage";
 import { formatNumber, mediaLabel, runtimeLabel, timeAgo, yearOf } from "../utils/format";
 import { meterBand } from "../utils/meter";
@@ -9,6 +9,7 @@ import MeterGauge from "../components/Meter/MeterGauge.vue";
 import SentimentBar from "../components/Meter/SentimentBar.vue";
 import RatingsStrip from "../components/Ratings/RatingsStrip.vue";
 import PostCard from "../components/Social/PostCard.vue";
+import ScoreExplain from "../components/Social/ScoreExplain.vue";
 import SourceStatus from "../components/Social/SourceStatus.vue";
 import styles from "./TitlePage.module.css";
 
@@ -22,6 +23,8 @@ const { set } = useSnapshots();
 const title = ref(null);
 const ratings = ref(null);
 const social = ref(null);
+const explain = ref(null);
+const history = ref(null);
 const loading = ref(true);
 const notFound = ref(false);
 const error = ref(null);
@@ -89,11 +92,14 @@ const metaBits = computed(() => {
   return bits;
 });
 
-const momentumText = computed(() => {
-  const m = meter.value?.momentum;
-  if (m == null) return null;
-  if (Math.abs(m) < 3) return { text: "Holding steady", dir: "flat" };
-  return m > 0 ? { text: `Rising · +${m} in the last two weeks`, dir: "up" } : { text: `Cooling · ${m} in the last two weeks`, dir: "down" };
+// The hero shows the trend verdict in three words; the "why this score" section has the test behind it.
+const trendFact = computed(() => {
+  const t = history.value?.trend;
+  if (!t) return null;
+  if (t.direction === "rising") return { text: `Rising · +${t.slopePerDay}/day`, dir: "up" };
+  if (t.direction === "falling") return { text: `Cooling · ${t.slopePerDay}/day`, dir: "down" };
+  if (t.direction === "steady") return { text: `Steady over ${t.points} days`, dir: "flat" };
+  return { text: `Trend after ${t.pointsNeeded} days`, dir: "flat" };
 });
 
 const configuredSources = computed(() => (social.value?.sources ?? []).filter((s) => s.configured));
@@ -135,6 +141,8 @@ async function load() {
   title.value = null;
   ratings.value = null;
   social.value = null;
+  explain.value = null;
+  history.value = null;
   posterFailed.value = false;
   feed.value = [];
   feedPage.value = 1;
@@ -167,12 +175,24 @@ async function loadSocial(refresh, signal) {
     const data = await getSocialMeter(props.type, props.id, { refresh }, { signal });
     social.value = data;
     set(props.type, props.id, data.meter);
+    loadExplanation(signal);
     await loadFeed(1, signal);
   } catch (e) {
     if (e?.name !== "AbortError") social.value = { meter: null, sources: [], error: e?.message ?? String(e) };
   } finally {
     refreshing.value = false;
   }
+}
+
+// The breakdown and the daily line come from cached data only; they never trigger a pull.
+function loadExplanation(signal) {
+  if (!(social.value?.meter?.totalPosts > 0)) return;
+  getScoreExplanation(props.type, props.id, { signal })
+    .then((e) => (explain.value = e))
+    .catch((e) => { if (e?.name !== "AbortError") explain.value = null; });
+  getScoreHistory(props.type, props.id, { days: 30 }, { signal })
+    .then((h) => (history.value = h))
+    .catch((e) => { if (e?.name !== "AbortError") history.value = null; });
 }
 
 async function loadFeed(page, signal) {
@@ -284,7 +304,7 @@ const sentimentChips = [
                 </div>
               </template>
 
-              <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" size="lg" />
+              <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" :margin="meter?.stats?.margin ?? null" size="lg" />
 
               <p v-if="locked && anyPosts" :class="styles.leftover">
                 Last reading from when this title was tracked. It isn’t being updated.
@@ -295,8 +315,11 @@ const sentimentChips = [
                 <span v-if="meter.filteredPosts" :class="styles.fact" title="Set aside by the trust filter: new accounts, duplicates, pile-ons">
                   <strong>{{ formatNumber(meter.filteredPosts) }}</strong> filtered
                 </span>
+                <span v-if="meter.stats && anyPosts" :class="styles.fact" title="Kish effective sample size × average trust-and-substance credit">
+                  <strong>{{ meter.stats.effectivePosts }}</strong> effective
+                </span>
                 <span :class="styles.fact"><strong :class="styles[`conf-${meter.confidenceLabel}`]">{{ meter.confidenceLabel }}</strong> confidence</span>
-                <span v-if="momentumText" :class="[styles.fact, styles[`mom-${momentumText.dir}`]]">{{ momentumText.text }}</span>
+                <span v-if="trendFact && anyPosts" :class="[styles.fact, styles[`mom-${trendFact.dir}`]]">{{ trendFact.text }}</span>
               </div>
               <button
                 v-if="!locked"
@@ -323,6 +346,18 @@ const sentimentChips = [
             </span>
           </div>
           <RatingsStrip :meter="meter" :ratings="ratings?.ratings ?? null" :critics-average="ratings?.criticsAverage ?? null" :baseline-label="ratings?.baselineLabel ?? 'critics'" />
+        </section>
+
+        <!-- Why this score -->
+        <section v-if="anyPosts" :class="styles.section">
+          <div :class="styles.sectionHead">
+            <h2 :class="styles.h2">Why this score</h2>
+            <span :class="styles.sectionSub">
+              Every number here can be recomputed from the posts below.
+              <router-link :to="{ name: 'how-it-works', hash: '#method' }" :class="styles.hintLink">The method →</router-link>
+            </span>
+          </div>
+          <ScoreExplain :explain="explain" :history="history" :shielded="shield" />
         </section>
 
         <!-- Social pulse -->
