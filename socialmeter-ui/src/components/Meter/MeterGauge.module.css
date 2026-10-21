@@ -32,7 +32,14 @@
   --band: var(--meter-electric);
 }
 
+/* The arc box is what the number is positioned against — never the whole widget, which includes the label. */
+.arc {
+  position: relative;
+  width: 100%;
+}
+
 .svg {
+  display: block;
   width: 100%;
   height: auto;
   overflow: visible;
@@ -85,7 +92,7 @@
   top: 0;
   left: 0;
   right: 0;
-  /* the arc's open ends are at 86% of the box height; the number's baseline sits just above them */
+  /* the arc's open ends are at 86% of the arc box height; the number's baseline sits just above them */
   height: 86%;
   display: flex;
   align-items: flex-end;

@@ -52,6 +52,7 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
     role="img"
     :aria-label="hasSignal ? `SocialMeter ${score} out of 100, ${band.label}` : 'No SocialMeter signal yet'"
   >
+    <div :class="styles.arc">
     <svg viewBox="0 0 220 128" :class="styles.svg">
       <defs>
         <linearGradient :id="gradId" x1="0" x2="1" y1="0" y2="0">
@@ -92,6 +93,7 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
         <template v-if="hasSignal">{{ score }}</template>
         <template v-else>—</template>
       </div>
+    </div>
     </div>
 
     <div :class="styles.under">
