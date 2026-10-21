@@ -25,5 +25,15 @@ defineProps({
     <path d="M6.5 5.5h3.2l3.1 4.3 3.7-4.3h1.9l-4.7 5.5 5.3 7.5h-3.2l-3.4-4.7-4.1 4.7H6.4l5.1-5.9z" fill="#fff" />
   </svg>
 
+  <!-- Steam: the valve/piston mark, simplified -->
+  <svg v-else-if="platform === 'steam'" :width="size" :height="size" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="11" fill="#1b2838" stroke="#66c0f4" stroke-width="1" />
+    <circle cx="15.5" cy="8.5" r="3.2" fill="none" stroke="#c7d5e0" stroke-width="1.6" />
+    <circle cx="15.5" cy="8.5" r="1.1" fill="#c7d5e0" />
+    <circle cx="8.5" cy="15.5" r="2.6" fill="none" stroke="#c7d5e0" stroke-width="1.6" />
+    <path d="M10.6 14.1 13.2 10.8" stroke="#c7d5e0" stroke-width="1.6" stroke-linecap="round" />
+    <path d="M2 13.5 7.2 15.8" stroke="#c7d5e0" stroke-width="1.6" stroke-linecap="round" />
+  </svg>
+
   <span v-else :style="{ width: `${size}px`, height: `${size}px`, display: 'inline-block', borderRadius: '50%', background: 'var(--panel-3)' }" aria-hidden="true" />
 </template>

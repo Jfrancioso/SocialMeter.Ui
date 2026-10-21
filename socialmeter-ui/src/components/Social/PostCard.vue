@@ -25,8 +25,17 @@ const covered = computed(() => props.shielded && !revealed.value);
 const long = computed(() => props.post.content.length > 280);
 const text = computed(() => (long.value && !expanded.value ? `${props.post.content.slice(0, 280).trimEnd()}…` : props.post.content));
 
-const handle = computed(() => (props.post.platform === "x" ? `@${props.post.author}` : `u/${props.post.author}`));
-const where = computed(() => (props.post.platform === "reddit" && props.post.community ? `r/${props.post.community}` : props.post.platform === "x" ? "X" : ""));
+const handle = computed(() => {
+  if (props.post.platform === "x") return `@${props.post.author}`;
+  if (props.post.platform === "steam") return props.post.author;
+  return `u/${props.post.author}`;
+});
+const where = computed(() => {
+  if (props.post.platform === "reddit" && props.post.community) return `r/${props.post.community}`;
+  if (props.post.platform === "x") return "X";
+  if (props.post.platform === "steam") return props.post.playtimeHours != null ? `Steam · ${props.post.playtimeHours} h played` : "Steam";
+  return "";
+});
 
 const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Negative" };
 </script>
@@ -45,7 +54,10 @@ const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Ne
           </span>
         </span>
       </div>
-      <span :class="[styles.pill, styles[`pill-${post.sentiment}`]]" :title="`Sentiment score ${post.sentimentScore}`">
+      <span v-if="post.verdictUp != null" :class="[styles.pill, post.verdictUp ? styles['pill-positive'] : styles['pill-negative']]" :title="`Sentiment score ${post.sentimentScore}`">
+        {{ post.verdictUp ? "👍 Recommended" : "👎 Not recommended" }}
+      </span>
+      <span v-else :class="[styles.pill, styles[`pill-${post.sentiment}`]]" :title="`Sentiment score ${post.sentimentScore}`">
         {{ sentimentLabel[post.sentiment] ?? post.sentiment }}
       </span>
     </header>
@@ -86,7 +98,7 @@ const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Ne
     </div>
 
     <footer :class="styles.foot">
-      <span :class="styles.stat" :title="post.platform === 'x' ? 'Likes' : 'Upvotes'">
+      <span :class="styles.stat" :title="post.platform === 'x' ? 'Likes' : post.platform === 'steam' ? 'Found helpful' : 'Upvotes'">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 4 7 8h-4v8H9v-8H5z" /></svg>
         {{ formatCompact(post.upvotes) }}
       </span>
@@ -95,7 +107,7 @@ const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Ne
         {{ formatCompact(post.comments) }}
       </span>
       <button v-if="shielded && revealed" type="button" :class="styles.hide" @click="revealed = false">Hide</button>
-      <a v-if="post.sourceUrl" :href="post.sourceUrl" target="_blank" rel="noopener" :class="styles.link">Open post ↗</a>
+      <a v-if="post.sourceUrl" :href="post.sourceUrl" target="_blank" rel="noopener" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</a>
     </footer>
   </article>
 </template>

@@ -7,10 +7,11 @@ defineProps({
   sources: { type: Array, required: true }
 });
 
-const names = { reddit: "Reddit", x: "X" };
+const names = { reddit: "Reddit", x: "X", steam: "Steam reviews" };
 
 function describe(s) {
   if (!s.configured) return "Not connected — add API credentials";
+  if (s.platform === "steam" && s.fetched === 0) return "Games only";
   if (s.error) return s.error;
   if (s.fetched == null) return "Connected";
   return `${s.fetched} post${s.fetched === 1 ? "" : "s"} pulled on last refresh`;

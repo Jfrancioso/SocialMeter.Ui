@@ -8,7 +8,9 @@ const props = defineProps({
   meter: { type: Object, default: null },
   /** ExternalRating[] from /ratings, or null while loading */
   ratings: { type: Array, default: null },
-  criticsAverage: { type: Number, default: null }
+  criticsAverage: { type: Number, default: null },
+  /** What criticsAverage is: "critics" for films and shows, "Steam all-time" for games. */
+  baselineLabel: { type: String, default: "critics" }
 });
 
 const band = computed(() => (props.meter ? meterBand(props.meter.score, props.meter.totalPosts) : null));
@@ -19,18 +21,29 @@ const gap = computed(() => {
   return props.meter.score - props.criticsAverage;
 });
 
+const isGame = computed(() => props.baselineLabel === "Steam all-time");
+
 const gapText = computed(() => {
   if (gap.value == null) return "";
+  if (isGame.value) {
+    if (Math.abs(gap.value) < 5) return "Players right now agree with Steam's all-time verdict";
+    return gap.value > 0
+      ? `Players right now are ${gap.value} points warmer than Steam's all-time verdict`
+      : `Players right now are ${-gap.value} points cooler than Steam's all-time verdict`;
+  }
   if (Math.abs(gap.value) < 5) return "Fans and critics agree";
   return gap.value > 0 ? `Fans are ${gap.value} points warmer than the critics` : `Critics are ${-gap.value} points warmer than the fans`;
 });
+
+const gapMeta = computed(() => (isGame.value ? `Steam all-time ${props.criticsAverage}` : `critics avg ${props.criticsAverage}`));
 
 const logos = {
   tmdb: "TMDB",
   imdb: "IMDb",
   rottenTomatoes: "RT",
   metacritic: "MC",
-  steam: "STEAM"
+  steam: "STEAM",
+  steamRecent: "30D"
 };
 </script>
 
@@ -80,7 +93,7 @@ const logos = {
     <div v-if="gapText" :class="styles.gap">
       <span :class="styles.gapDot" />
       {{ gapText }}
-      <span v-if="criticsAverage != null" :class="styles.gapMeta">critics avg {{ criticsAverage }}</span>
+      <span v-if="criticsAverage != null" :class="styles.gapMeta">{{ gapMeta }}</span>
     </div>
   </section>
 </template>

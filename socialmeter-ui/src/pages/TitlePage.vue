@@ -318,9 +318,11 @@ const sentimentChips = [
         <section :class="styles.section">
           <div :class="styles.sectionHead">
             <h2 :class="styles.h2">Ratings, side by side</h2>
-            <span :class="styles.sectionSub">Everything on a 0–100 scale so the fan pulse and the critics line up.</span>
+            <span :class="styles.sectionSub">
+              {{ type === "game" ? "SocialMeter is players right now; Steam's numbers are the all-time and 30-day consensus." : "Everything on a 0–100 scale so the fan pulse and the critics line up." }}
+            </span>
           </div>
-          <RatingsStrip :meter="meter" :ratings="ratings?.ratings ?? null" :critics-average="ratings?.criticsAverage ?? null" />
+          <RatingsStrip :meter="meter" :ratings="ratings?.ratings ?? null" :critics-average="ratings?.criticsAverage ?? null" :baseline-label="ratings?.baselineLabel ?? 'critics'" />
         </section>
 
         <!-- Social pulse -->
@@ -347,7 +349,7 @@ const sentimentChips = [
                 <h3 :class="styles.h3">By platform</h3>
                 <ul :class="styles.platforms">
                   <li v-for="p in meter.platforms" :key="p.platform" :class="styles.platform">
-                    <span :class="styles.platformName">{{ p.platform === "x" ? "X" : "Reddit" }}</span>
+                    <span :class="styles.platformName">{{ { x: "X", reddit: "Reddit", steam: "Steam reviews" }[p.platform] ?? p.platform }}</span>
                     <span :class="styles.platformPosts">{{ p.posts }} posts</span>
                     <span :class="styles.platformScore" :style="{ color: meterBand(p.score).color }">{{ p.score }}</span>
                   </li>
@@ -383,6 +385,7 @@ const sentimentChips = [
                 <span :class="styles.filterSep" />
                 <button type="button" :class="['chip', platformFilter === 'reddit' && 'is-active']" @click="setFilter('platform', 'reddit')">Reddit</button>
                 <button type="button" :class="['chip', platformFilter === 'x' && 'is-active']" @click="setFilter('platform', 'x')">X</button>
+                <button v-if="type === 'game'" type="button" :class="['chip', platformFilter === 'steam' && 'is-active']" @click="setFilter('platform', 'steam')">Steam</button>
 
                 <button
                   type="button"
