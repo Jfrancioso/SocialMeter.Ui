@@ -76,6 +76,12 @@
   color: var(--s);
 }
 
+.bodyWrap {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
 .body {
   margin: 0;
   font-size: 14px;
@@ -83,6 +89,66 @@
   color: var(--text);
   white-space: pre-line;
   word-break: break-word;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+/* Spoiler shield: blur the words hard enough that nothing is readable, keep the shape so the card doesn't jump. */
+.covered .body {
+  filter: blur(9px);
+  opacity: 0.55;
+  user-select: none;
+  pointer-events: none;
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-md);
+  background: rgba(10, 11, 16, 0.35);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.cover:hover {
+  background: rgba(10, 11, 16, 0.5);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.coverTitle {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.coverHint {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.hide {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hide:hover {
+  color: var(--text);
 }
 
 .more {

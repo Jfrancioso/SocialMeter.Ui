@@ -36,6 +36,27 @@ const feedLoading = ref(false);
 const sentimentFilter = ref("");
 const platformFilter = ref("");
 
+// Spoiler shield: on by default; the reader's choice is remembered on this device only.
+const SHIELD_KEY = "sm:spoilerShield";
+const shield = ref(readShield());
+
+function readShield() {
+  try {
+    return localStorage.getItem(SHIELD_KEY) !== "off";
+  } catch {
+    return true;
+  }
+}
+
+function toggleShield() {
+  shield.value = !shield.value;
+  try {
+    localStorage.setItem(SHIELD_KEY, shield.value ? "on" : "off");
+  } catch {
+    // storage unavailable (private window etc.) — the toggle still works for this page
+  }
+}
+
 let controller = null;
 
 const backdrop = computed(() => tmdbImage(title.value?.backdropPath, "w1280"));
@@ -291,10 +312,23 @@ const sentimentChips = [
                 <span :class="styles.filterSep" />
                 <button type="button" :class="['chip', platformFilter === 'reddit' && 'is-active']" @click="setFilter('platform', 'reddit')">Reddit</button>
                 <button type="button" :class="['chip', platformFilter === 'x' && 'is-active']" @click="setFilter('platform', 'x')">X</button>
+
+                <button
+                  type="button"
+                  :class="[styles.shieldToggle, shield && styles.shieldOn]"
+                  :aria-pressed="shield"
+                  :title="shield ? 'Posts are hidden until you tap them' : 'Posts are shown in full'"
+                  @click="toggleShield"
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z" />
+                  </svg>
+                  Spoiler shield {{ shield ? "on" : "off" }}
+                </button>
               </div>
 
               <div v-if="feed.length" :class="styles.posts">
-                <PostCard v-for="p in feed" :key="p.id" :post="p" />
+                <PostCard v-for="p in feed" :key="p.id" :post="p" :shielded="shield" />
               </div>
 
               <div v-else-if="feedLoading || !social" :class="styles.posts">

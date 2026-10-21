@@ -24,6 +24,19 @@ a.card:hover {
   transform: translateY(-2px);
 }
 
+.verify {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  transition: color 0.15s ease;
+}
+
+a.card:hover .verify {
+  color: var(--accent);
+}
+
 .social {
   background: linear-gradient(135deg, color-mix(in srgb, var(--band) 22%, var(--panel)), var(--panel) 70%);
   border-color: color-mix(in srgb, var(--band) 45%, var(--line));
@@ -50,7 +63,9 @@ a.card:hover {
   --band: var(--meter-electric);
 }
 
-.unavailable {
+.unavailable .value,
+.unavailable .detail,
+.unavailable .source {
   opacity: 0.55;
 }
 

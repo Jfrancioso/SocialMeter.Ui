@@ -69,6 +69,7 @@ const logos = {
         <div :class="styles.value">{{ r.available ? r.value : "—" }}</div>
         <div :class="styles.detail">{{ r.detail }}</div>
         <div v-if="r.available" :class="styles.track"><div :class="styles.fill" :style="{ width: `${r.normalized}%` }" /></div>
+        <span v-if="r.url" :class="styles.verify">Verify on {{ r.displayName }} ↗</span>
       </a>
     </template>
     <template v-else>
