@@ -15,18 +15,21 @@ const props = defineProps({
 const { get } = useSnapshots();
 const reading = computed(() => get(props.title.mediaType, props.title.tmdbId));
 
-// Steam doesn't have portrait art for every game; fall back to the wide header when the poster 404s.
+// Steam doesn't have portrait art for every game; when the poster 404s, show the wide header letterboxed
+// over a blurred copy of itself rather than a bad 2:3 crop.
 const posterFailed = ref(false);
+const landscape = computed(() => posterFailed.value && !!props.title.headerImage);
 const poster = computed(() =>
-  posterFailed.value ? tmdbImage(props.title.backdropPath) : tmdbImage(props.title.posterPath, "w342")
+  posterFailed.value ? props.title.headerImage || tmdbImage(props.title.backdropPath) : tmdbImage(props.title.posterPath, "w342")
 );
 const to = computed(() => ({ name: "title", params: { type: props.title.mediaType, id: props.title.tmdbId } }));
 </script>
 
 <template>
   <router-link :to="to" :class="[styles.card, layout === 'grid' && styles.grid]">
-    <div :class="styles.frame">
-      <img v-if="poster" :src="poster" :alt="title.name" :class="styles.img" loading="lazy" @error="posterFailed = true" />
+    <div :class="[styles.frame, landscape && styles.frameLandscape]">
+      <div v-if="landscape" :class="styles.blur" :style="{ backgroundImage: `url(${poster})` }" />
+      <img v-if="poster" :src="poster" :alt="title.name" :class="[styles.img, landscape && styles.imgLandscape]" loading="lazy" @error="posterFailed = true" />
       <div v-else :class="styles.noPoster">{{ title.name }}</div>
 
       <span v-if="title.tracked === false" :class="styles.lock" title="Not tracked right now — no social reading">

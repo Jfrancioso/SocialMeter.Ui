@@ -71,6 +71,13 @@
   background: var(--panel-2);
 }
 
+/* A landscape Steam header standing in for a poster: keep the card footprint, don't crop the art. */
+.posterLandscape {
+  aspect-ratio: auto;
+  width: 240px;
+  align-self: center;
+}
+
 .heroText {
   min-width: 0;
   padding-bottom: 6px;

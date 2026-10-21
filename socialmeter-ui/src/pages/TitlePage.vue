@@ -64,8 +64,9 @@ const backdrop = computed(() => tmdbImage(title.value?.backdropPath, "w1280"));
 // Steam portrait art is missing for some games; fall back to the (guaranteed) header image.
 const posterFailed = ref(false);
 const poster = computed(() =>
-  posterFailed.value ? tmdbImage(title.value?.backdropPath) : tmdbImage(title.value?.posterPath, "w500")
+  posterFailed.value ? title.value?.headerImage || tmdbImage(title.value?.backdropPath) : tmdbImage(title.value?.posterPath, "w500")
 );
+const posterLandscape = computed(() => posterFailed.value && !!title.value?.headerImage);
 const meter = computed(() => social.value?.meter ?? null);
 const band = computed(() => (meter.value ? meterBand(meter.value.score, meter.value.totalPosts) : null));
 const hasSignal = computed(() => band.value && band.value.key !== "none");
@@ -236,7 +237,7 @@ const sentimentChips = [
       <div class="container">
         <!-- Hero -->
         <header :class="styles.hero">
-          <img v-if="poster" :src="poster" :alt="title.name" :class="styles.poster" @error="posterFailed = true" />
+          <img v-if="poster" :src="poster" :alt="title.name" :class="[styles.poster, posterLandscape && styles.posterLandscape]" @error="posterFailed = true" />
           <div v-else :class="[styles.poster, styles.posterEmpty]" />
 
           <div :class="styles.heroText">
