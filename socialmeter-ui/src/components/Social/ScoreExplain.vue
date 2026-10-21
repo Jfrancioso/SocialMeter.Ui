@@ -65,6 +65,14 @@ const filteredText = computed(() => {
   return f.map((r) => `${r.reason} (${r.count})`).join(" · ");
 });
 
+// The drivers list is the long part; collapsed by default and remembered per device.
+const DRIVERS_KEY = "sm:driversOpen";
+const driversOpen = ref((() => { try { return localStorage.getItem(DRIVERS_KEY) === "1"; } catch { return false; } })());
+function toggleDrivers() {
+  driversOpen.value = !driversOpen.value;
+  try { localStorage.setItem(DRIVERS_KEY, driversOpen.value ? "1" : "0"); } catch { /* storage unavailable */ }
+}
+
 // Driver excerpts respect the spoiler shield; each row reveals on its own.
 const revealed = ref(new Set());
 function reveal(id) {
@@ -131,12 +139,18 @@ const covered = (id) => props.shielded && !revealed.value.has(id);
 
     <!-- Drivers and notes -->
     <div v-if="explain" :class="[styles.panel, styles.wide]">
-      <div :class="styles.driversHead">
-        <h3 :class="styles.h3">What pulls hardest</h3>
-        <span :class="styles.driversSub">Each post’s share of the total weight. No single post should own the number.</span>
-      </div>
+      <button type="button" :class="styles.driversHead" :aria-expanded="driversOpen" @click="toggleDrivers">
+        <span :class="[styles.chev, driversOpen && styles.chevOpen]" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6" /></svg>
+        </span>
+        <h3 :class="[styles.h3, styles.h3Inline]">What pulls hardest</h3>
+        <span :class="styles.driversSub">
+          <template v-if="driversOpen">Each post’s share of the total weight. No single post should own the number.</template>
+          <template v-else-if="explain.drivers.length">Top post carries {{ explain.drivers[0].weightShare }}% of the weight · {{ explain.drivers.length }} shown</template>
+        </span>
+      </button>
 
-      <ol :class="styles.drivers">
+      <ol v-show="driversOpen" :class="styles.drivers">
         <li v-for="d in explain.drivers" :key="d.id" :class="[styles.driver, styles[`s-${d.sentiment}`]]">
           <span :class="styles.share" :style="{ '--w': `${Math.min(100, d.weightShare * 2)}%` }">
             <strong>{{ d.weightShare < 0.1 ? "<0.1" : d.weightShare }}%</strong>

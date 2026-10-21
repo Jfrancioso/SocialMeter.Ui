@@ -60,6 +60,36 @@ function toggleShield() {
   }
 }
 
+// "Why this score" is for the curious; most readers want the posts. Collapsed by default, remembered per device.
+const WHY_KEY = "sm:whyOpen";
+const whyOpen = ref(readPref(WHY_KEY, false));
+
+function readPref(key, fallback) {
+  try {
+    const v = localStorage.getItem(key);
+    return v == null ? fallback : v === "1";
+  } catch {
+    return fallback;
+  }
+}
+
+function toggleWhy() {
+  whyOpen.value = !whyOpen.value;
+  try {
+    localStorage.setItem(WHY_KEY, whyOpen.value ? "1" : "0");
+  } catch {
+    // storage unavailable — the toggle still works for this page
+  }
+}
+
+const whySummary = computed(() => {
+  const m = meter.value;
+  if (!m?.stats) return "";
+  const bits = [`${m.score} ±${m.stats.margin}`, `${m.stats.effectivePosts} effective posts`, `${m.confidenceLabel} confidence`];
+  if (trendFact.value) bits.push(trendFact.value.text.toLowerCase());
+  return bits.join(" · ");
+});
+
 let controller = null;
 
 const backdrop = computed(() => tmdbImage(title.value?.backdropPath, "w1280"));
@@ -350,14 +380,23 @@ const sentimentChips = [
 
         <!-- Why this score -->
         <section v-if="anyPosts" :class="styles.section">
-          <div :class="styles.sectionHead">
-            <h2 :class="styles.h2">Why this score</h2>
-            <span :class="styles.sectionSub">
-              Every number here can be recomputed from the posts below.
-              <router-link :to="{ name: 'how-it-works', hash: '#method' }" :class="styles.hintLink">The method →</router-link>
+          <button type="button" :class="[styles.disclosure, whyOpen && styles.disclosureOpen]" :aria-expanded="whyOpen" aria-controls="why-this-score" @click="toggleWhy">
+            <span :class="styles.disclosureChevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6" /></svg>
             </span>
+            <span :class="styles.disclosureText">
+              <h2 :class="styles.h2">Why this score</h2>
+              <span v-if="!whyOpen" :class="styles.sectionSub">{{ whySummary }}</span>
+              <span v-else :class="styles.sectionSub">Every number here can be recomputed from the posts below.</span>
+            </span>
+            <span :class="styles.disclosureHint">{{ whyOpen ? "Hide the maths" : "Show the maths" }}</span>
+          </button>
+          <div v-show="whyOpen" id="why-this-score" :class="styles.disclosureBody">
+            <ScoreExplain :explain="explain" :history="history" :shielded="shield" />
+            <p :class="styles.hint">
+              <router-link :to="{ name: 'how-it-works', hash: '#method' }" :class="styles.hintLink">How every one of these numbers is computed →</router-link>
+            </p>
           </div>
-          <ScoreExplain :explain="explain" :history="history" :shielded="shield" />
         </section>
 
         <!-- Social pulse -->
