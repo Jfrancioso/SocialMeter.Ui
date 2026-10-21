@@ -278,6 +278,15 @@
   border-radius: 130px 130px 12px 12px;
 }
 
+.slowHint {
+  margin: -2px 0 0;
+  max-width: 260px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
 .meterFacts {
   display: flex;
   flex-wrap: wrap;

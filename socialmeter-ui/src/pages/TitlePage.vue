@@ -199,8 +199,16 @@ async function load() {
   loadSocial(false, signal);
 }
 
+// A first look at a tracked title pulls from the sources and reads every post, which takes a while; say so
+// rather than leave a skeleton with no explanation.
+const slowLoad = ref(false);
+let slowTimer = null;
+
 async function loadSocial(refresh, signal) {
   if (refresh) refreshing.value = true;
+  slowLoad.value = false;
+  clearTimeout(slowTimer);
+  slowTimer = setTimeout(() => (slowLoad.value = social.value == null || refresh), 2500);
   try {
     const data = await getSocialMeter(props.type, props.id, { refresh }, { signal });
     social.value = data;
@@ -211,6 +219,8 @@ async function loadSocial(refresh, signal) {
     if (e?.name !== "AbortError") social.value = { meter: null, sources: [], error: e?.message ?? String(e) };
   } finally {
     refreshing.value = false;
+    clearTimeout(slowTimer);
+    slowLoad.value = false;
   }
 }
 
@@ -323,7 +333,10 @@ const sentimentChips = [
                 <span :class="styles.meterTitle">SocialMeter</span>
                 <span v-if="social?.lastRefreshedAt && !(locked && !anyPosts)" :class="styles.meterWhen">updated {{ timeAgo(social.lastRefreshedAt) }}</span>
               </div>
-              <div v-if="!social" :class="[styles.gaugeSkeleton, 'skeleton']" />
+              <template v-if="!social">
+                <div :class="[styles.gaugeSkeleton, 'skeleton']" />
+                <p v-if="slowLoad" :class="styles.slowHint">Reading the room: pulling fresh posts and reading each one. First looks take about half a minute.</p>
+              </template>
 
               <template v-else-if="locked && !anyPosts">
                 <div :class="styles.lockedPanel">
