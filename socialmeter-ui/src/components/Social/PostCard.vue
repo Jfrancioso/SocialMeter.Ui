@@ -13,6 +13,11 @@ const props = defineProps({
 const expanded = ref(false);
 const revealed = ref(false);
 
+// Sensitive media (flagged by the platform) stays hidden until the reader asks, even with the shield off.
+const showSensitive = ref(false);
+const media = computed(() => props.post.media ?? []);
+const mediaHidden = computed(() => props.post.sensitive && !showSensitive.value);
+
 // Turning the shield back on re-covers every post.
 watch(() => props.shielded, (on) => { if (on) revealed.value = false; });
 
@@ -50,6 +55,26 @@ const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Ne
       <button v-if="long && !covered" type="button" :class="styles.more" @click="expanded = !expanded">
         {{ expanded ? "Show less" : "Read more" }}
       </button>
+
+      <div v-if="media.length" :class="[styles.media, media.length > 1 && styles.mediaGrid]" :aria-hidden="covered">
+        <button v-if="mediaHidden" type="button" :class="styles.sensitive" @click="showSensitive = true">
+          <span :class="styles.sensitiveTitle">Sensitive media</span>
+          <span :class="styles.sensitiveHint">Flagged by {{ post.platform === "x" ? "X" : "Reddit" }} · tap to show</span>
+        </button>
+        <a
+          v-for="(m, i) in media.slice(0, 4)"
+          v-else
+          :key="i"
+          :href="post.sourceUrl ?? m.url"
+          target="_blank"
+          rel="noopener"
+          :class="styles.mediaItem"
+          :title="m.alt || (m.type === 'video' ? 'Video' : 'Image')"
+        >
+          <img :src="m.url" :alt="m.alt || ''" loading="lazy" :class="styles.mediaImg" />
+          <span v-if="m.type !== 'photo'" :class="styles.mediaBadge">{{ m.type === "video" ? "▶ video" : "GIF" }}</span>
+        </a>
+      </div>
 
       <button v-if="covered" type="button" :class="styles.cover" @click="revealed = true">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
