@@ -1,115 +1,87 @@
 .row {
-  margin-bottom: 18px;
+  margin-bottom: 36px;
 }
 
 .head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 14px;
 }
 
 .title {
-  margin: 0;
-  font-size: 18px;
-  position: relative;
-  padding-left: 12px;
+  font-size: 20px;
+  font-weight: 800;
 }
 
-.title::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 60%;
-  background: var(--accent);
-  border-radius: 2px;
+.subtitle {
+  margin: 2px 0 0;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .more {
-  color: var(--muted3);
-  font-size: 12px;
-  cursor: pointer;
+  margin-right: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.shell {
-  display: grid;
-  grid-template-columns: 56px 1fr 56px; /* gutter | scroller | gutter */
+.more:hover {
+  color: var(--accent);
+}
+
+.nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-}
-
-.gutter {
-  display: flex;
   justify-content: center;
-  align-items: center;
+  padding-bottom: 3px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.nav:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--line-3);
 }
 
 .scroll {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   overflow-x: auto;
-  padding: 4px 6px 16px; /* bottom padding so scrollbar doesn't overlap */
-  scroll-behavior: smooth;
-
-  min-height: 330px;
-
-  /* snap */
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: 6px;
-
-  scrollbar-width: none;
+  /* bleed to the page edge so cards aren't clipped on the sides */
+  margin: 0 calc(-1 * var(--page-x));
+  padding: 6px var(--page-x) 10px;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--page-x);
 }
 
-.scroll::-webkit-scrollbar {
-  height: 10px;
-  display: none;
-}
-.shell:hover .scroll::-webkit-scrollbar {
-  display: block;
-}
-.scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-}
-.scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* Make each card a snap point (works even though PosterCard is a component) */
 .scroll > * {
   scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
-/* NAV BUTTONS (hidden until hover) */
-.nav {
-  width: 44px;
-  height: 88px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  font-size: 28px;
-  font-weight: 900;
-  cursor: pointer;
-
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  backdrop-filter: blur(6px);
-}
-
-.shell:hover .nav {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .empty {
-  color: rgba(255, 255, 255, 0.6);
-  display: flex;
-  align-items: center;
-  padding: 10px;
+  color: var(--text-3);
+  padding: 20px 0;
+}
+
+@media (max-width: 640px) {
+  .nav {
+    display: none;
+  }
 }

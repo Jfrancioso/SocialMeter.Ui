@@ -1,0 +1,196 @@
+.page {
+  padding: 48px 0 40px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 40px;
+  align-items: center;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  max-width: 720px;
+}
+
+.title em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--accent), var(--meter-electric));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lede {
+  margin: 18px 0 0;
+  max-width: 640px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.heroGauge {
+  padding: 22px 22px 18px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  box-shadow: var(--shadow-pop);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 40px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  padding: 22px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.stepN {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  padding-top: 4px;
+}
+
+.stepTitle {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.stepBody {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.6;
+  font-size: 14.5px;
+}
+
+.section {
+  margin-top: 48px;
+}
+
+.h2 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.bands {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.band {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, transparent), transparent);
+}
+
+.bandLabel {
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--c);
+}
+
+.bandRange {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 700;
+}
+
+.bandText {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.notes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.note {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--line-2);
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.note strong {
+  color: var(--text);
+}
+
+.cta {
+  margin-top: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(255, 176, 0, 0.08), rgba(255, 61, 143, 0.06));
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+  .heroGauge {
+    justify-self: start;
+  }
+  .steps,
+  .notes {
+    grid-template-columns: 1fr;
+  }
+  .bands {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

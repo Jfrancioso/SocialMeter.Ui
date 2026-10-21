@@ -1,50 +1,42 @@
 <script setup>
-import { useRouter } from "vue-router";
+import { computed } from "vue";
+import { tmdbImage } from "../../utils/tmdbImage";
+import { mediaLabel, yearOf } from "../../utils/format";
+import { useSnapshots } from "../../composables/useSnapshots";
+import MeterBadge from "../Meter/MeterBadge.vue";
 import styles from "./PosterCard.module.css";
 
 const props = defineProps({
-  movie: { type: Object, required: true }
+  title: { type: Object, required: true },
+  /** "row" keeps a fixed width for horizontal scrollers; "grid" fills its column. */
+  layout: { type: String, default: "row" }
 });
 
-const router = useRouter();
-
-function posterUrl(path) {
-  return path ? `https://image.tmdb.org/t/p/w342${path}` : null;
-}
-
-function goToDetails() {
-  const id = props.movie.tmdbId ?? props.movie.id;
-  if (!id) return;
-  router.push({ name: "movie-details", params: { id } });
-}
-
-function onWatchOptionsClick(e) {
-  // Prevent clicking this button from navigating to details
-  e.stopPropagation();
-  // later: open a modal or dropdown
-}
+const { get } = useSnapshots();
+const reading = computed(() => get(props.title.mediaType, props.title.tmdbId));
+const poster = computed(() => tmdbImage(props.title.posterPath, "w342"));
+const to = computed(() => ({ name: "title", params: { type: props.title.mediaType, id: props.title.tmdbId } }));
 </script>
 
 <template>
-  <article :class="styles.card" @click="goToDetails" role="button" tabindex="0">
+  <router-link :to="to" :class="[styles.card, layout === 'grid' && styles.grid]">
     <div :class="styles.frame">
-      <img
-        v-if="posterUrl(movie.posterPath)"
-        :src="posterUrl(movie.posterPath)"
-        :alt="movie.title"
-        :class="styles.img"
-      />
+      <img v-if="poster" :src="poster" :alt="title.name" :class="styles.img" loading="lazy" />
+      <div v-else :class="styles.noPoster">{{ title.name }}</div>
+
+      <MeterBadge :reading="reading" :class="styles.badge" />
+      <span :class="[styles.type, title.mediaType === 'tv' && styles.typeTv]">{{ mediaLabel(title.mediaType) }}</span>
     </div>
 
     <div :class="styles.meta">
-      <div :class="styles.rating">
-        <span :class="styles.star">★</span>
-        <span :class="styles.score">{{ (movie.voteAverage ?? 0).toFixed(1) }}</span>
+      <div :class="styles.name">{{ title.name }}</div>
+      <div :class="styles.sub">
+        <span v-if="yearOf(title.releaseDate)">{{ yearOf(title.releaseDate) }}</span>
+        <span v-if="title.voteCount" :class="styles.tmdb">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="m12 2 2.9 6.6 7.1.7-5.4 4.8 1.6 7L12 17.5 5.8 21l1.6-7L2 9.3l7.1-.7z"/></svg>
+          {{ title.voteAverage.toFixed(1) }}
+        </span>
       </div>
-
-      <div :class="styles.title">{{ movie.title }}</div>
-
-      <button :class="styles.btn" @click="onWatchOptionsClick">Watch options</button>
     </div>
-  </article>
+  </router-link>
 </template>

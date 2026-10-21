@@ -1,5 +1,18 @@
-# Vue 3 + Vite
+# SocialMeter UI
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Vue 3 + Vite front end for SocialMeter. Talks to the .NET API through the Vite dev proxy
+(`/api` → `https://localhost:7101`, see `vite.config.js`), so start the API first.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+```bash
+npm install
+npm run dev
+```
+
+## Layout
+
+- `src/pages` — Home, Title (movie or show), Browse, Search
+- `src/components/Meter` — the SocialMeter gauge, card badge and sentiment bar
+- `src/components/Social` — post feed cards and source status
+- `src/components/Ratings` — side-by-side ratings strip (SocialMeter vs TMDB / IMDb / RT / Metacritic)
+- `src/composables/useSnapshots.js` — shared cache of readings so cards can show a score without a fetch each
+- `src/api.js` — every API call in one place

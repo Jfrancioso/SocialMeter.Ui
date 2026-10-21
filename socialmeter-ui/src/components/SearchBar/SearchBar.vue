@@ -1,188 +1,144 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { searchTitles } from "../../api";
+import { tmdbImage } from "../../utils/tmdbImage";
+import { mediaLabel, yearOf } from "../../utils/format";
 import styles from "./SearchBar.module.css";
 
+const emit = defineEmits(["navigate"]);
 const router = useRouter();
 
-const props = defineProps({
-  modelValue: { type: String, default: "" },
-  category: { type: String, default: "all" },
-  categories: {
-    type: Array,
-    default: () => [
-      { value: "all", label: "All" },
-      { value: "movies", label: "Movies" },
-      { value: "tv", label: "TV" },
-      { value: "people", label: "People" }
-    ]
-  },
-  placeholder: { type: String, default: "Search SocialMeter…" }
-});
-
-const emit = defineEmits([
-  "update:modelValue",
-  "update:category",
-  "submit",
-  "clear"
-]);
-
-const text = ref(props.modelValue);
-const cat = ref(props.category);
-
-// Autocomplete state
+const text = ref("");
 const suggestions = ref([]);
-const showDropdown = ref(false);
+const open = ref(false);
 const loading = ref(false);
-let debounceTimer = null;
+const active = ref(-1);
+const root = ref(null);
 
-watch(() => props.modelValue, v => (text.value = v ?? ""));
-watch(() => props.category, v => (cat.value = v ?? "all"));
+let timer = null;
+let controller = null;
 
-// Debounced search
-watch(text, (newQuery) => {
-  clearTimeout(debounceTimer);
-  
-  if (!newQuery || newQuery.length < 2) {
+watch(text, (q) => {
+  clearTimeout(timer);
+  controller?.abort();
+  active.value = -1;
+
+  if (!q || q.trim().length < 2) {
     suggestions.value = [];
-    showDropdown.value = false;
+    open.value = false;
     return;
   }
-  
-  debounceTimer = setTimeout(async () => {
-    await fetchSuggestions(newQuery);
-  }, 300);
+  timer = setTimeout(() => fetchSuggestions(q.trim()), 250);
 });
 
-// Fetch suggestions
-async function fetchSuggestions(query) {
+async function fetchSuggestions(q) {
   loading.value = true;
+  controller = new AbortController();
   try {
-    const response = await fetch(
-      `https://localhost:7101/api/movies/search?query=${encodeURIComponent(query)}`
-    );
-    const data = await response.json();
-    
-    // DEBUG: Log the data to see what we're getting
-    console.log('Search results:', data.items);
-    
-    suggestions.value = data.items.slice(0, 8);
-    showDropdown.value = true;
+    const data = await searchTitles(q, {}, { signal: controller.signal });
+    suggestions.value = data.items.slice(0, 7);
+    open.value = true;
   } catch (err) {
-    console.error('Search failed:', err);
-    suggestions.value = [];
+    if (err?.name !== "AbortError") suggestions.value = [];
   } finally {
     loading.value = false;
   }
 }
 
-// FIXED: Use tmdbId instead of id
-function selectSuggestion(movie) {
-  console.log('Selected movie:', movie); // DEBUG
-  showDropdown.value = false;
-  text.value = '';
-  emit("update:modelValue", '');
-  router.push(`/movie/${movie.tmdbId}`);
+function go(title) {
+  close();
+  text.value = "";
+  emit("navigate");
+  router.push({ name: "title", params: { type: title.mediaType, id: title.tmdbId } });
 }
 
-function updateText(v) {
-  text.value = v;
-  emit("update:modelValue", v);
+function submit() {
+  const q = text.value.trim();
+  if (!q) return;
+  if (active.value >= 0 && suggestions.value[active.value]) {
+    go(suggestions.value[active.value]);
+    return;
+  }
+  close();
+  emit("navigate");
+  router.push({ name: "search", query: { q } });
 }
 
-function updateCat(v) {
-  cat.value = v;
-  emit("update:category", v);
+function close() {
+  open.value = false;
+  active.value = -1;
 }
 
-function onSubmit() {
-  showDropdown.value = false;
-  emit("submit", { query: text.value.trim(), category: cat.value });
+function onKey(e) {
+  if (!open.value || !suggestions.value.length) return;
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    active.value = (active.value + 1) % suggestions.value.length;
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    active.value = (active.value - 1 + suggestions.value.length) % suggestions.value.length;
+  } else if (e.key === "Escape") {
+    close();
+  }
 }
 
-function onClear() {
-  updateText("");
-  suggestions.value = [];
-  showDropdown.value = false;
-  emit("clear");
+function onDocumentClick(e) {
+  if (root.value && !root.value.contains(e.target)) close();
 }
 
-const hasText = computed(() => (text.value?.length ?? 0) > 0);
+onMounted(() => document.addEventListener("mousedown", onDocumentClick));
+onBeforeUnmount(() => {
+  document.removeEventListener("mousedown", onDocumentClick);
+  clearTimeout(timer);
+  controller?.abort();
+});
 </script>
 
 <template>
-  <div :class="styles.searchWrapper">
-    <form :class="styles.search" role="search" @submit.prevent="onSubmit">
-      <!-- Category -->
-      <label :class="styles.selectWrap" aria-label="Search category">
-        <select :class="styles.select" :value="cat" @change="updateCat($event.target.value)">
-          <option v-for="c in categories" :key="c.value" :value="c.value">
-            {{ c.label }}
-          </option>
-        </select>
-        <span :class="styles.caret" aria-hidden="true">▾</span>
-      </label>
-
-      <!-- Input -->
-      <div :class="styles.inputWrap">
-        <span :class="styles.icon" aria-hidden="true">⌕</span>
-
-        <input
-          :class="styles.input"
-          :value="text"
-          :placeholder="placeholder"
-          autocomplete="off"
-          spellcheck="false"
-          @input="updateText($event.target.value)"
-        />
-
-        <button
-          v-if="hasText"
-          type="button"
-          :class="styles.clear"
-          aria-label="Clear search"
-          @click="onClear"
-        >
-          ×
-        </button>
-      </div>
-
-      <!-- Submit -->
-      <button type="submit" :class="styles.submit" aria-label="Search">
-        🔎
-      </button>
+  <div ref="root" :class="styles.wrap">
+    <form :class="styles.form" role="search" @submit.prevent="submit">
+      <svg :class="styles.icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <input
+        v-model="text"
+        :class="styles.input"
+        type="search"
+        placeholder="Search movies and shows…"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search movies and shows"
+        @keydown="onKey"
+        @focus="suggestions.length && (open = true)"
+      />
+      <span v-if="loading" :class="styles.spinner" aria-hidden="true" />
+      <kbd v-else-if="!text" :class="styles.kbd">⏎</kbd>
     </form>
 
-    <!-- Dropdown -->
-    <div v-if="showDropdown && suggestions.length > 0" :class="styles.dropdown">
-      <div
-        v-for="movie in suggestions"
-        :key="movie.tmdbId"
-        :class="styles.suggestion"
-        @click="selectSuggestion(movie)"
+    <div v-if="open && suggestions.length" :class="styles.dropdown" role="listbox">
+      <button
+        v-for="(t, i) in suggestions"
+        :key="`${t.mediaType}-${t.tmdbId}`"
+        type="button"
+        :class="[styles.item, i === active && styles.itemActive]"
+        role="option"
+        :aria-selected="i === active"
+        @mouseenter="active = i"
+        @click="go(t)"
       >
-        <img 
-          v-if="movie.posterPath" 
-          :src="`https://image.tmdb.org/t/p/w92${movie.posterPath}`" 
-          :alt="movie.title"
-          :class="styles.poster"
-        />
-        <div v-else :class="styles.posterPlaceholder">
-          🎬
-        </div>
+        <img v-if="t.posterPath" :src="tmdbImage(t.posterPath, 'w92')" :alt="''" :class="styles.poster" loading="lazy" />
+        <div v-else :class="styles.posterEmpty" />
         <div :class="styles.info">
-          <div :class="styles.suggestionTitle">{{ movie.title }}</div>
-          <div :class="styles.year">{{ movie.releaseDate?.substring(0, 4) || 'N/A' }}</div>
+          <div :class="styles.name">{{ t.name }}</div>
+          <div :class="styles.meta">
+            <span :class="[styles.type, t.mediaType === 'tv' && styles.typeTv]">{{ mediaLabel(t.mediaType) }}</span>
+            <span v-if="yearOf(t.releaseDate)">{{ yearOf(t.releaseDate) }}</span>
+          </div>
         </div>
-      </div>
-      
-      <div :class="styles.seeAll" @click="onSubmit">
-        See all results for "{{ text }}"
-      </div>
-    </div>
-
-    <div v-if="loading && text.length >= 2" :class="styles.loadingIndicator">
-      Searching...
+      </button>
+      <button type="button" :class="styles.all" @click="submit">See all results for “{{ text.trim() }}”</button>
     </div>
   </div>
 </template>

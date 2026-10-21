@@ -1,24 +1,64 @@
 :root {
-  --bg: #0b0b0b;
-  --panel: #131313;
-  --panel2: #111;
-  --muted: #d8d8d8;
-  --muted2: #cfcfcf;
-  --muted3: #9a9a9a;
+  /* surfaces */
+  --bg: #0a0b10;
+  --bg-2: #0f1118;
+  --panel: #141722;
+  --panel-2: #1a1e2c;
+  --panel-3: #222738;
 
-  --border: rgba(255, 255, 255, 0.12);
-  --border2: rgba(255, 255, 255, 0.18);
-  --border3: rgba(255, 255, 255, 0.08);
+  /* lines */
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --line-3: rgba(255, 255, 255, 0.22);
 
+  /* text */
+  --text: #f3f5f9;
+  --text-2: #b9c0cf;
+  --text-3: #7f8799;
+
+  /* brand */
   --accent: #ffb000;
-  --danger: #ff6b6b;
+  --accent-2: #ff6a3d;
+  --accent-glow: rgba(255, 176, 0, 0.35);
 
+  /* sentiment */
+  --pos: #3ddc97;
+  --neu: #9aa3b2;
+  --neg: #ff5c7a;
+
+  /* the meter: cold → electric */
+  --meter-cold: #5b8cff;
+  --meter-lukewarm: #6fd0c5;
+  --meter-warm: #ffb000;
+  --meter-hot: #ff6a3d;
+  --meter-electric: #ff3d8f;
+  --meter-none: #596073;
+
+  /* platforms */
+  --reddit: #ff4500;
+  --x: #e7e9ea;
+
+  /* shape */
   --r-sm: 10px;
   --r-md: 14px;
-  --r-lg: 18px;
+  --r-lg: 20px;
+  --r-xl: 28px;
   --pill: 999px;
 
-  --shadow-hero: 0 14px 40px rgba(0, 0, 0, 0.55);
-  --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 24px 60px rgba(0, 0, 0, 0.6);
 
+  /* layout */
+  --nav-h: 64px;
+  --page-w: 1440px;
+  --page-x: 24px;
+
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --page-x: 16px;
+    --nav-h: 58px;
+  }
 }

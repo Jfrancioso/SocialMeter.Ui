@@ -1,69 +1,50 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router"; // ADD THIS LINE
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import styles from "./NavBar.module.css";
-
 import BrandLogo from "../BrandLogo/BrandLogo.vue";
 import SearchBar from "../SearchBar/SearchBar.vue";
 
-const router = useRouter();
+const scrolled = ref(false);
+const searchOpen = ref(false);
 
-const query = ref("");
-const category = ref("all");
-const menuOpen = ref(false);
-
-function toggleMenu() {
-  menuOpen.value = !menuOpen.value;
+function onScroll() {
+  scrolled.value = window.scrollY > 8;
 }
 
-function goHome() {
-  router.push('/');
-}
-
-function onSearch(payload) {
-  console.log("Search:", payload);
-}
+onMounted(() => {
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+});
+onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
 </script>
 
 <template>
-  <header :class="styles.nav">
+  <header :class="[styles.nav, scrolled && styles.scrolled]">
     <div :class="styles.inner">
-      <!-- LEFT -->
       <div :class="styles.left">
-        <!-- ADD CLICK HANDLER HERE -->
-        <div @click="goHome" :class="styles.brandWrapper">
-          <BrandLogo :class="styles.brand" />
-        </div>
-        
-        <button :class="styles.menuBtn" @click="toggleMenu" aria-label="Open menu">
-          <span :class="styles.menuIcon">≡</span>
-          <span :class="styles.menuText">Menu</span>
-        </button>
+        <BrandLogo />
+        <nav :class="styles.links" aria-label="Primary">
+          <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'movie' } }">Movies</router-link>
+          <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'tv' } }">TV</router-link>
+          <router-link :class="[styles.link, styles.linkMuted]" :to="{ name: 'how-it-works' }">How it works</router-link>
+        </nav>
       </div>
 
-      <!-- CENTER -->
-      <div :class="styles.center">
-        <SearchBar
-          v-model="query"
-          v-model:category="category"
-          placeholder="Search movies, shows, people…"
-          @submit="onSearch"
-        />
+      <div :class="[styles.center, searchOpen && styles.centerOpen]">
+        <SearchBar @navigate="searchOpen = false" />
       </div>
 
-      <!-- RIGHT -->
       <div :class="styles.right">
-        <a href="#" :class="styles.link">Watchlist</a>
-        <a href="#" :class="styles.link">Sign in</a>
-      </div>
-    </div>
-
-    <!-- Simple dropdown menu (placeholder) -->
-    <div v-if="menuOpen" :class="styles.menuPanel">
-      <div :class="styles.menuInner">
-        <a href="#" :class="styles.menuItem">Trending</a>
-        <a href="#" :class="styles.menuItem">Now Playing</a>
-        <a href="#" :class="styles.menuItem">Top Picks</a>
+        <button :class="styles.searchToggle" type="button" aria-label="Toggle search" @click="searchOpen = !searchOpen">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+        </button>
+        <span :class="styles.live">
+          <span :class="styles.liveDot" />
+          Live pulse
+        </span>
       </div>
     </div>
   </header>

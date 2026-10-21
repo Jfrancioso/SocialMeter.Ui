@@ -1,0 +1,324 @@
+<script setup>
+import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { getRatings, getSocialMeter, getSocialPosts, getTitle } from "../api";
+import { tmdbImage } from "../utils/tmdbImage";
+import { formatNumber, mediaLabel, runtimeLabel, timeAgo, yearOf } from "../utils/format";
+import { meterBand } from "../utils/meter";
+import { useSnapshots } from "../composables/useSnapshots";
+import MeterGauge from "../components/Meter/MeterGauge.vue";
+import SentimentBar from "../components/Meter/SentimentBar.vue";
+import RatingsStrip from "../components/Ratings/RatingsStrip.vue";
+import PostCard from "../components/Social/PostCard.vue";
+import SourceStatus from "../components/Social/SourceStatus.vue";
+import styles from "./TitlePage.module.css";
+
+const props = defineProps({
+  type: { type: String, required: true },
+  id: { type: Number, required: true }
+});
+
+const { set } = useSnapshots();
+
+const title = ref(null);
+const ratings = ref(null);
+const social = ref(null);
+const loading = ref(true);
+const notFound = ref(false);
+const error = ref(null);
+const refreshing = ref(false);
+const overviewOpen = ref(false);
+
+// feed
+const feed = ref([]);
+const feedPage = ref(1);
+const feedTotalPages = ref(0);
+const feedLoading = ref(false);
+const sentimentFilter = ref("");
+const platformFilter = ref("");
+
+let controller = null;
+
+const backdrop = computed(() => tmdbImage(title.value?.backdropPath, "w1280"));
+const poster = computed(() => tmdbImage(title.value?.posterPath, "w500"));
+const meter = computed(() => social.value?.meter ?? null);
+const band = computed(() => (meter.value ? meterBand(meter.value.score, meter.value.totalPosts) : null));
+const hasSignal = computed(() => band.value && band.value.key !== "none");
+
+const metaBits = computed(() => {
+  const t = title.value;
+  if (!t) return [];
+  const bits = [mediaLabel(t.mediaType)];
+  if (yearOf(t.releaseDate)) bits.push(yearOf(t.releaseDate));
+  if (t.mediaType === "tv") {
+    if (t.seasonCount) bits.push(`${t.seasonCount} season${t.seasonCount === 1 ? "" : "s"}`);
+    if (t.episodeCount) bits.push(`${t.episodeCount} episodes`);
+  } else if (t.runtimeMinutes) {
+    bits.push(runtimeLabel(t.runtimeMinutes));
+  }
+  if (t.status && t.status !== "Released") bits.push(t.status);
+  return bits;
+});
+
+const momentumText = computed(() => {
+  const m = meter.value?.momentum;
+  if (m == null) return null;
+  if (Math.abs(m) < 3) return { text: "Holding steady", dir: "flat" };
+  return m > 0 ? { text: `Rising · +${m} in the last two weeks`, dir: "up" } : { text: `Cooling · ${m} in the last two weeks`, dir: "down" };
+});
+
+const configuredSources = computed(() => (social.value?.sources ?? []).filter((s) => s.configured));
+const anyPosts = computed(() => (meter.value?.totalPosts ?? 0) > 0);
+
+async function load() {
+  controller?.abort();
+  controller = new AbortController();
+  const { signal } = controller;
+
+  loading.value = true;
+  notFound.value = false;
+  error.value = null;
+  title.value = null;
+  ratings.value = null;
+  social.value = null;
+  feed.value = [];
+  feedPage.value = 1;
+  overviewOpen.value = false;
+  sentimentFilter.value = "";
+  platformFilter.value = "";
+
+  try {
+    title.value = await getTitle(props.type, props.id, { signal });
+  } catch (e) {
+    if (e?.name === "AbortError") return;
+    if (e?.status === 404) notFound.value = true;
+    else error.value = e?.message ?? String(e);
+    loading.value = false;
+    return;
+  }
+  loading.value = false;
+
+  // The rest streams in behind the hero.
+  getRatings(props.type, props.id, { signal })
+    .then((r) => (ratings.value = r))
+    .catch(() => (ratings.value = { ratings: [], criticsAverage: null }));
+
+  loadSocial(false, signal);
+}
+
+async function loadSocial(refresh, signal) {
+  if (refresh) refreshing.value = true;
+  try {
+    const data = await getSocialMeter(props.type, props.id, { refresh }, { signal });
+    social.value = data;
+    set(props.type, props.id, data.meter);
+    await loadFeed(1, signal);
+  } catch (e) {
+    if (e?.name !== "AbortError") social.value = { meter: null, sources: [], error: e?.message ?? String(e) };
+  } finally {
+    refreshing.value = false;
+  }
+}
+
+async function loadFeed(page, signal) {
+  feedLoading.value = true;
+  try {
+    const data = await getSocialPosts(
+      props.type,
+      props.id,
+      { sentiment: sentimentFilter.value || undefined, platform: platformFilter.value || undefined, page, pageSize: 12 },
+      { signal }
+    );
+    feed.value = page === 1 ? data.items : [...feed.value, ...data.items];
+    feedPage.value = data.page;
+    feedTotalPages.value = data.totalPages;
+  } catch (e) {
+    if (e?.name !== "AbortError" && page === 1) feed.value = [];
+  } finally {
+    feedLoading.value = false;
+  }
+}
+
+function setFilter(kind, value) {
+  if (kind === "sentiment") sentimentFilter.value = sentimentFilter.value === value ? "" : value;
+  else platformFilter.value = platformFilter.value === value ? "" : value;
+  loadFeed(1, controller?.signal);
+}
+
+watch(() => [props.type, props.id], load, { immediate: true });
+onBeforeUnmount(() => controller?.abort());
+
+const sentimentChips = [
+  { value: "positive", label: "Positive" },
+  { value: "neutral", label: "Neutral" },
+  { value: "negative", label: "Negative" }
+];
+</script>
+
+<template>
+  <div :class="styles.page">
+    <div v-if="loading" class="container">
+      <div :class="[styles.heroSkeleton, 'skeleton']" />
+    </div>
+
+    <div v-else-if="notFound" class="container">
+      <div :class="styles.notFound">
+        <h1>Nothing here</h1>
+        <p>That title doesn’t exist on TMDB, or the link is off.</p>
+        <router-link to="/" class="btn btn-primary">Back home</router-link>
+      </div>
+    </div>
+
+    <div v-else-if="error" class="container">
+      <div class="error-box">{{ error }}</div>
+    </div>
+
+    <template v-else>
+      <!-- Backdrop -->
+      <div :class="styles.backdrop" :style="backdrop ? { backgroundImage: `url(${backdrop})` } : null">
+        <div :class="styles.backdropShade" />
+      </div>
+
+      <div class="container">
+        <!-- Hero -->
+        <header :class="styles.hero">
+          <img v-if="poster" :src="poster" :alt="title.name" :class="styles.poster" />
+          <div v-else :class="[styles.poster, styles.posterEmpty]" />
+
+          <div :class="styles.heroText">
+            <div :class="styles.meta">
+              <span v-for="(b, i) in metaBits" :key="i" :class="[styles.metaBit, i === 0 && styles.metaKind]">{{ b }}</span>
+            </div>
+            <h1 :class="styles.name">{{ title.name }}</h1>
+            <p v-if="title.tagline" :class="styles.tagline">{{ title.tagline }}</p>
+
+            <div :class="styles.genres">
+              <span v-for="g in title.genres" :key="g" :class="styles.genre">{{ g }}</span>
+            </div>
+
+            <p :class="[styles.overview, overviewOpen && styles.overviewOpen]">
+              {{ title.overview || "No overview available." }}
+            </p>
+            <button v-if="title.overview?.length > 320" type="button" :class="styles.readMore" @click="overviewOpen = !overviewOpen">
+              {{ overviewOpen ? "Less" : "More" }}
+            </button>
+          </div>
+
+          <aside :class="styles.heroMeter">
+            <div :class="styles.meterCard">
+              <div :class="styles.meterHead">
+                <span :class="styles.meterTitle">SocialMeter</span>
+                <span v-if="social?.lastRefreshedAt" :class="styles.meterWhen">updated {{ timeAgo(social.lastRefreshedAt) }}</span>
+              </div>
+              <div v-if="!social" :class="[styles.gaugeSkeleton, 'skeleton']" />
+              <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" size="lg" />
+              <div v-if="meter" :class="styles.meterFacts">
+                <span :class="styles.fact"><strong>{{ formatNumber(meter.totalPosts) }}</strong> posts counted</span>
+                <span v-if="meter.filteredPosts" :class="styles.fact" title="Set aside by the trust filter: new accounts, duplicates, pile-ons">
+                  <strong>{{ formatNumber(meter.filteredPosts) }}</strong> filtered
+                </span>
+                <span :class="styles.fact"><strong :class="styles[`conf-${meter.confidenceLabel}`]">{{ meter.confidenceLabel }}</strong> confidence</span>
+                <span v-if="momentumText" :class="[styles.fact, styles[`mom-${momentumText.dir}`]]">{{ momentumText.text }}</span>
+              </div>
+              <button type="button" class="btn" :class="styles.refresh" :disabled="refreshing || !social" @click="loadSocial(true, controller?.signal)">
+                <span :class="[styles.refreshIcon, refreshing && styles.spin]">↻</span>
+                {{ refreshing ? "Reading the room…" : "Refresh from sources" }}
+              </button>
+            </div>
+          </aside>
+        </header>
+
+        <!-- Side-by-side ratings -->
+        <section :class="styles.section">
+          <div :class="styles.sectionHead">
+            <h2 :class="styles.h2">Ratings, side by side</h2>
+            <span :class="styles.sectionSub">Everything on a 0–100 scale so the fan pulse and the critics line up.</span>
+          </div>
+          <RatingsStrip :meter="meter" :ratings="ratings?.ratings ?? null" :critics-average="ratings?.criticsAverage ?? null" />
+        </section>
+
+        <!-- Social pulse -->
+        <section :class="styles.section">
+          <div :class="styles.sectionHead">
+            <h2 :class="styles.h2">The social pulse</h2>
+            <span :class="styles.sectionSub">What people are actually saying, weighted by how much the crowd agreed with them.</span>
+          </div>
+
+          <div :class="styles.pulse">
+            <div :class="styles.pulseSide">
+              <div :class="styles.panel">
+                <h3 :class="styles.h3">Sentiment mix</h3>
+                <SentimentBar v-if="meter" :breakdown="meter.breakdown" />
+                <div v-else :class="[styles.barSkeleton, 'skeleton']" />
+              </div>
+
+              <div v-if="meter?.platforms?.length" :class="styles.panel">
+                <h3 :class="styles.h3">By platform</h3>
+                <ul :class="styles.platforms">
+                  <li v-for="p in meter.platforms" :key="p.platform" :class="styles.platform">
+                    <span :class="styles.platformName">{{ p.platform === "x" ? "X" : "Reddit" }}</span>
+                    <span :class="styles.platformPosts">{{ p.posts }} posts</span>
+                    <span :class="styles.platformScore" :style="{ color: meterBand(p.score).color }">{{ p.score }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div :class="styles.panel">
+                <h3 :class="styles.h3">Sources</h3>
+                <SourceStatus v-if="social?.sources" :sources="social.sources" />
+                <div v-else :class="[styles.barSkeleton, 'skeleton']" />
+                <p v-if="social && configuredSources.length === 0" :class="styles.hint">
+                  No social source is connected yet. Add Reddit or X API credentials to the API’s user secrets and the meter starts pulling live posts.
+                </p>
+                <p :class="styles.hint">
+                  Posts from brand-new accounts, repeat posts from one account and copy-pasted text don’t count.
+                  <router-link :to="{ name: 'how-it-works' }" :class="styles.hintLink">How scoring works →</router-link>
+                </p>
+              </div>
+            </div>
+
+            <div :class="styles.feed">
+              <div :class="styles.filters">
+                <button
+                  v-for="c in sentimentChips"
+                  :key="c.value"
+                  type="button"
+                  :class="['chip', sentimentFilter === c.value && 'is-active']"
+                  @click="setFilter('sentiment', c.value)"
+                >
+                  <span :class="styles.chipDot" :style="{ background: `var(--${c.value === 'positive' ? 'pos' : c.value === 'negative' ? 'neg' : 'neu'})` }" />
+                  {{ c.label }}
+                </button>
+                <span :class="styles.filterSep" />
+                <button type="button" :class="['chip', platformFilter === 'reddit' && 'is-active']" @click="setFilter('platform', 'reddit')">Reddit</button>
+                <button type="button" :class="['chip', platformFilter === 'x' && 'is-active']" @click="setFilter('platform', 'x')">X</button>
+              </div>
+
+              <div v-if="feed.length" :class="styles.posts">
+                <PostCard v-for="p in feed" :key="p.id" :post="p" />
+              </div>
+
+              <div v-else-if="feedLoading || !social" :class="styles.posts">
+                <div v-for="i in 4" :key="i" :class="[styles.postSkeleton, 'skeleton']" />
+              </div>
+
+              <div v-else :class="styles.empty">
+                <div :class="styles.emptyBolt">⚡</div>
+                <strong v-if="anyPosts">Nothing matches that filter.</strong>
+                <strong v-else>No posts measured yet.</strong>
+                <span v-if="!anyPosts">
+                  {{ configuredSources.length ? "The sources didn’t return anything for this title. Try a refresh in a bit." : "Connect Reddit or X in the API settings and hit refresh." }}
+                </span>
+              </div>
+
+              <div v-if="feedPage < feedTotalPages" :class="styles.loadMore">
+                <button type="button" class="btn" :disabled="feedLoading" @click="loadFeed(feedPage + 1, controller?.signal)">
+                  {{ feedLoading ? "Loading…" : "Load more posts" }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </template>
+  </div>
+</template>
