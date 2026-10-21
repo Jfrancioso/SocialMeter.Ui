@@ -1,0 +1,24 @@
+:root {
+  --bg: #0b0b0b;
+  --panel: #131313;
+  --panel2: #111;
+  --muted: #d8d8d8;
+  --muted2: #cfcfcf;
+  --muted3: #9a9a9a;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --border2: rgba(255, 255, 255, 0.18);
+  --border3: rgba(255, 255, 255, 0.08);
+
+  --accent: #ffb000;
+  --danger: #ff6b6b;
+
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --pill: 999px;
+
+  --shadow-hero: 0 14px 40px rgba(0, 0, 0, 0.55);
+  --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.6);
+
+}

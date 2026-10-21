@@ -1,0 +1,22 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: #fff;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 18px;
+}
+
+.title {
+  margin: 0 0 14px;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.error {
+  color: var(--danger);
+  white-space: pre-wrap;
+}
