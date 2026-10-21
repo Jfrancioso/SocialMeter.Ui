@@ -5,13 +5,13 @@ export default createRouter({
   routes: [
     { path: "/", name: "home", component: () => import("../pages/HomePage.vue") },
     {
-      path: "/title/:type(movie|tv)/:id(\\d+)",
+      path: "/title/:type(movie|tv|game)/:id(\\d+)",
       name: "title",
       component: () => import("../pages/TitlePage.vue"),
       props: (route) => ({ type: route.params.type, id: Number(route.params.id) })
     },
     {
-      path: "/browse/:type(movie|tv)",
+      path: "/browse/:type(movie|tv|game)",
       name: "browse",
       component: () => import("../pages/BrowsePage.vue"),
       props: true

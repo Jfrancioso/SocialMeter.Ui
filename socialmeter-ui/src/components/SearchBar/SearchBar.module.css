@@ -146,6 +146,11 @@
   color: #9db7ff;
 }
 
+.typeGame {
+  background: rgba(61, 220, 151, 0.14);
+  color: var(--pos);
+}
+
 .all {
   width: 100%;
   margin-top: 4px;

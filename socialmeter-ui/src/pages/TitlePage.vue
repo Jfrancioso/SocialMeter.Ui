@@ -60,7 +60,12 @@ function toggleShield() {
 let controller = null;
 
 const backdrop = computed(() => tmdbImage(title.value?.backdropPath, "w1280"));
-const poster = computed(() => tmdbImage(title.value?.posterPath, "w500"));
+
+// Steam portrait art is missing for some games; fall back to the (guaranteed) header image.
+const posterFailed = ref(false);
+const poster = computed(() =>
+  posterFailed.value ? tmdbImage(title.value?.backdropPath) : tmdbImage(title.value?.posterPath, "w500")
+);
 const meter = computed(() => social.value?.meter ?? null);
 const band = computed(() => (meter.value ? meterBand(meter.value.score, meter.value.totalPosts) : null));
 const hasSignal = computed(() => band.value && band.value.key !== "none");
@@ -73,6 +78,9 @@ const metaBits = computed(() => {
   if (t.mediaType === "tv") {
     if (t.seasonCount) bits.push(`${t.seasonCount} season${t.seasonCount === 1 ? "" : "s"}`);
     if (t.episodeCount) bits.push(`${t.episodeCount} episodes`);
+  } else if (t.mediaType === "game") {
+    if (t.developer) bits.push(t.developer);
+    if (t.platforms?.length) bits.push(t.platforms.join(" · "));
   } else if (t.runtimeMinutes) {
     bits.push(runtimeLabel(t.runtimeMinutes));
   }
@@ -126,6 +134,7 @@ async function load() {
   title.value = null;
   ratings.value = null;
   social.value = null;
+  posterFailed.value = false;
   feed.value = [];
   feedPage.value = 1;
   overviewOpen.value = false;
@@ -227,7 +236,7 @@ const sentimentChips = [
       <div class="container">
         <!-- Hero -->
         <header :class="styles.hero">
-          <img v-if="poster" :src="poster" :alt="title.name" :class="styles.poster" />
+          <img v-if="poster" :src="poster" :alt="title.name" :class="styles.poster" @error="posterFailed = true" />
           <div v-else :class="[styles.poster, styles.posterEmpty]" />
 
           <div :class="styles.heroText">
@@ -281,7 +290,7 @@ const sentimentChips = [
               </p>
 
               <div v-if="meter && !(locked && !anyPosts)" :class="styles.meterFacts">
-                <span :class="styles.fact"><strong>{{ formatNumber(meter.totalPosts) }}</strong> posts counted</span>
+                <span :class="styles.fact"><strong>{{ formatNumber(meter.totalPosts) }}</strong> {{ meter.totalPosts === 1 ? "post" : "posts" }} counted</span>
                 <span v-if="meter.filteredPosts" :class="styles.fact" title="Set aside by the trust filter: new accounts, duplicates, pile-ons">
                   <strong>{{ formatNumber(meter.filteredPosts) }}</strong> filtered
                 </span>

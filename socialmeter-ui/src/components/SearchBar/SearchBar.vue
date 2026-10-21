@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
         <div :class="styles.info">
           <div :class="styles.name">{{ t.name }}</div>
           <div :class="styles.meta">
-            <span :class="[styles.type, t.mediaType === 'tv' && styles.typeTv]">{{ mediaLabel(t.mediaType) }}</span>
+            <span :class="[styles.type, t.mediaType === 'tv' && styles.typeTv, t.mediaType === 'game' && styles.typeGame]">{{ mediaLabel(t.mediaType) }}</span>
             <span v-if="yearOf(t.releaseDate)">{{ yearOf(t.releaseDate) }}</span>
           </div>
         </div>

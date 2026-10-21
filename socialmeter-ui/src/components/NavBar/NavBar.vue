@@ -26,6 +26,7 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
         <nav :class="styles.links" aria-label="Primary">
           <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'movie' } }">Movies</router-link>
           <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'tv' } }">TV</router-link>
+          <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'game' } }">Games</router-link>
           <router-link :class="[styles.link, styles.linkMuted]" :to="{ name: 'how-it-works' }">How it works</router-link>
         </nav>
       </div>

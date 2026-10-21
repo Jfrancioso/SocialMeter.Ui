@@ -18,7 +18,9 @@ const moreFor = {
   now_playing: { name: "browse", params: { type: "movie" }, query: { tab: "popular" } },
   on_the_air: { name: "browse", params: { type: "tv" }, query: { tab: "trending" } },
   popular_movies: { name: "browse", params: { type: "movie" }, query: { tab: "popular" } },
-  popular_tv: { name: "browse", params: { type: "tv" }, query: { tab: "popular" } }
+  popular_tv: { name: "browse", params: { type: "tv" }, query: { tab: "popular" } },
+  top_games: { name: "browse", params: { type: "game" }, query: { tab: "trending" } },
+  most_played: { name: "browse", params: { type: "game" }, query: { tab: "popular" } }
 };
 
 const bands = [

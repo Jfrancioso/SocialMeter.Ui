@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { tmdbImage } from "../../utils/tmdbImage";
 import { mediaLabel, yearOf } from "../../utils/format";
 import { useSnapshots } from "../../composables/useSnapshots";
@@ -14,21 +14,26 @@ const props = defineProps({
 
 const { get } = useSnapshots();
 const reading = computed(() => get(props.title.mediaType, props.title.tmdbId));
-const poster = computed(() => tmdbImage(props.title.posterPath, "w342"));
+
+// Steam doesn't have portrait art for every game; fall back to the wide header when the poster 404s.
+const posterFailed = ref(false);
+const poster = computed(() =>
+  posterFailed.value ? tmdbImage(props.title.backdropPath) : tmdbImage(props.title.posterPath, "w342")
+);
 const to = computed(() => ({ name: "title", params: { type: props.title.mediaType, id: props.title.tmdbId } }));
 </script>
 
 <template>
   <router-link :to="to" :class="[styles.card, layout === 'grid' && styles.grid]">
     <div :class="styles.frame">
-      <img v-if="poster" :src="poster" :alt="title.name" :class="styles.img" loading="lazy" />
+      <img v-if="poster" :src="poster" :alt="title.name" :class="styles.img" loading="lazy" @error="posterFailed = true" />
       <div v-else :class="styles.noPoster">{{ title.name }}</div>
 
       <span v-if="title.tracked === false" :class="styles.lock" title="Not tracked right now — no social reading">
         <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
       </span>
       <MeterBadge v-else :reading="reading" :class="styles.badge" />
-      <span :class="[styles.type, title.mediaType === 'tv' && styles.typeTv]">{{ mediaLabel(title.mediaType) }}</span>
+      <span :class="[styles.type, title.mediaType === 'tv' && styles.typeTv, title.mediaType === 'game' && styles.typeGame]">{{ mediaLabel(title.mediaType) }}</span>
     </div>
 
     <div :class="styles.meta">

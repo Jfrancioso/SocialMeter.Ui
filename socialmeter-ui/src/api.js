@@ -41,6 +41,8 @@ export const getRatings = (type, id, opts) => httpGet(`/api/titles/${type}/${id}
 export const getTrending = (type, page = 1, opts) => httpGet(`/api/titles/trending${qs({ type, page })}`, opts);
 export const getPopular = (type, page = 1, opts) => httpGet(`/api/titles/${type}/popular${qs({ page })}`, opts);
 export const getTopRated = (type, page = 1, opts) => httpGet(`/api/titles/${type}/top-rated${qs({ page })}`, opts);
+export const getNewGames = (page = 1, opts) => httpGet(`/api/titles/game/new-releases${qs({ page })}`, opts);
+export const getComingSoonGames = (page = 1, opts) => httpGet(`/api/titles/game/coming-soon${qs({ page })}`, opts);
 
 // ---- SocialMeter ----
 export const getSocialMeter = (type, id, { refresh = false } = {}, opts) =>

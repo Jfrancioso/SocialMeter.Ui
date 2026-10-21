@@ -113,6 +113,11 @@ a.card:hover .verify {
   background: #ffcc33;
   color: #000;
 }
+.logo-steam {
+  background: linear-gradient(90deg, #1b2838, #2a475e);
+  color: #c7d5e0;
+  font-size: 9px;
+}
 
 .value {
   font-size: 30px;

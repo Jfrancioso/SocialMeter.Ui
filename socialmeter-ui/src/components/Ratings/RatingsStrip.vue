@@ -29,7 +29,8 @@ const logos = {
   tmdb: "TMDB",
   imdb: "IMDb",
   rottenTomatoes: "RT",
-  metacritic: "MC"
+  metacritic: "MC",
+  steam: "STEAM"
 };
 </script>
 

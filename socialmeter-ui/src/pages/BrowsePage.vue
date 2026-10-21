@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getPopular, getTopRated, getTrending } from "../api";
+import { getComingSoonGames, getNewGames, getPopular, getTopRated, getTrending } from "../api";
 import { useSnapshots } from "../composables/useSnapshots";
 import TitleGrid from "../components/TitleGrid/TitleGrid.vue";
 import styles from "./BrowsePage.module.css";
@@ -14,14 +14,23 @@ const route = useRoute();
 const router = useRouter();
 const { ensure } = useSnapshots();
 
-const tabs = [
+const screenTabs = [
   { key: "trending", label: "Trending", fetch: (type, page) => getTrending(type, page) },
   { key: "popular", label: "Popular", fetch: (type, page) => getPopular(type, page) },
   { key: "top-rated", label: "Top rated", fetch: (type, page) => getTopRated(type, page) }
 ];
 
-const tab = computed(() => tabs.find((t) => t.key === route.query.tab) ?? tabs[0]);
-const heading = computed(() => (props.type === "tv" ? "TV shows" : "Movies"));
+// Steam has no "top rated" list; its lists are about what's selling and being played right now.
+const gameTabs = [
+  { key: "trending", label: "Top sellers", fetch: (type, page) => getTrending(type, page) },
+  { key: "popular", label: "Most played", fetch: (type, page) => getPopular(type, page) },
+  { key: "new", label: "New releases", fetch: (type, page) => getNewGames(page) },
+  { key: "coming-soon", label: "Coming soon", fetch: (type, page) => getComingSoonGames(page) }
+];
+
+const tabs = computed(() => (props.type === "game" ? gameTabs : screenTabs));
+const tab = computed(() => tabs.value.find((t) => t.key === route.query.tab) ?? tabs.value[0]);
+const heading = computed(() => ({ tv: "TV shows", game: "Games" }[props.type] ?? "Movies"));
 
 const items = ref([]);
 const page = ref(1);

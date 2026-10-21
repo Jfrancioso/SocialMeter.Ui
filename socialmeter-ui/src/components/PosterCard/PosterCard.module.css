@@ -94,6 +94,10 @@
   color: #9db7ff;
 }
 
+.typeGame {
+  color: var(--pos);
+}
+
 .meta {
   padding: 10px 2px 0;
 }

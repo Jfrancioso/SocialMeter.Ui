@@ -28,5 +28,7 @@ export function timeAgo(iso) {
 }
 
 export function mediaLabel(type) {
-  return type === "tv" ? "TV show" : "Movie";
+  if (type === "tv") return "TV show";
+  if (type === "game") return "Game";
+  return "Movie";
 }

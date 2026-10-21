@@ -11,7 +11,7 @@ const router = useRouter();
 const { ensure } = useSnapshots();
 
 const q = computed(() => String(route.query.q ?? "").trim());
-const type = computed(() => (["movie", "tv"].includes(route.query.type) ? route.query.type : ""));
+const type = computed(() => (["movie", "tv", "game"].includes(route.query.type) ? route.query.type : ""));
 
 const items = ref([]);
 const page = ref(1);
@@ -23,7 +23,8 @@ const error = ref(null);
 const filters = [
   { value: "", label: "All" },
   { value: "movie", label: "Movies" },
-  { value: "tv", label: "TV" }
+  { value: "tv", label: "TV" },
+  { value: "game", label: "Games" }
 ];
 
 // Tracked titles first; the rest are findable but locked, in a group the reader can expand.
