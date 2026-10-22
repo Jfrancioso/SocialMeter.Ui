@@ -20,7 +20,7 @@ provide("season", season);
     </router-view>
   </main>
   <footer class="app-footer">
-    <span>Chatterbub reads Reddit, X and Steam to measure how people really feel about movies, shows and games.</span>
+    <span>Chatterbub reads public posts on X and Steam reviews to measure how people really feel about movies, shows and games.</span>
     <span>Title data and images from TMDB and Steam. Ratings from TMDB, IMDb, Rotten Tomatoes, Metacritic and Steam.</span>
     <span>
       This product uses the <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a> API but is not endorsed or certified by TMDB.

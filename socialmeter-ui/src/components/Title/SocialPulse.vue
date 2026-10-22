@@ -1,11 +1,12 @@
 <script setup>
+import { computed } from "vue";
 import { meterBand } from "../../utils/meter";
 import SentimentBar from "../Meter/SentimentBar.vue";
 import PostCard from "../Social/PostCard.vue";
 import styles from "./SocialPulse.module.css";
 
 // The posts behind the number: sentiment mix and per-platform readings on the side, the filterable feed in the middle.
-defineProps({
+const props = defineProps({
   type: { type: String, required: true },
   social: { type: Object, default: null },
   meter: { type: Object, default: null },
@@ -30,12 +31,22 @@ const sentimentChips = [
 ];
 
 const platformName = { x: "X", reddit: "Reddit", steam: "Steam reviews" };
+
+// One filter per source that is actually connected, so a platform with nothing behind it never shows a button.
+// Steam reviews only exist for games.
+const chipLabel = { reddit: "Reddit", x: "X", steam: "Steam" };
+const platformChips = computed(() =>
+  props.configuredSources
+    .map((s) => s.platform)
+    .filter((p) => chipLabel[p] && (p !== "steam" || props.type === "game"))
+    .map((p) => ({ value: p, label: chipLabel[p] }))
+);
 </script>
 
 <template>
   <div v-if="locked && !anyPosts" :class="styles.lockedPulse">
     <strong>No posts collected for this title.</strong>
-    <span>It isn’t in the tracked set, so Chatterbub isn’t reading Reddit or X for it. Critic and audience ratings above are still live.</span>
+    <span>It isn’t in the tracked set, so Chatterbub isn’t reading posts about it. Critic and audience ratings above are still live.</span>
   </div>
 
   <div v-else :class="styles.pulse">
@@ -71,9 +82,15 @@ const platformName = { x: "X", reddit: "Reddit", steam: "Steam reviews" };
           {{ c.label }}
         </button>
         <span :class="styles.filterSep" />
-        <button type="button" :class="['chip', platformFilter === 'reddit' && 'is-active']" @click="$emit('filter', 'platform', 'reddit')">Reddit</button>
-        <button type="button" :class="['chip', platformFilter === 'x' && 'is-active']" @click="$emit('filter', 'platform', 'x')">X</button>
-        <button v-if="type === 'game'" type="button" :class="['chip', platformFilter === 'steam' && 'is-active']" @click="$emit('filter', 'platform', 'steam')">Steam</button>
+        <button
+          v-for="p in platformChips"
+          :key="p.value"
+          type="button"
+          :class="['chip', platformFilter === p.value && 'is-active']"
+          @click="$emit('filter', 'platform', p.value)"
+        >
+          {{ p.label }}
+        </button>
 
         <button
           type="button"

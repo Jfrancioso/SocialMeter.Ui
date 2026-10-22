@@ -8,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "We listen where people actually talk",
-    body: "For every movie, show and game we pull public posts from Reddit and X that mention the title by name. Not reviews written for us — conversations people were already having."
+    body: "For every movie, show and game we pull public posts from X that mention the title by name, plus the newest Steam reviews for games. Not reviews written for us — conversations people were already having."
   },
   {
     n: "02",
@@ -69,7 +69,7 @@ const methods = [
 const example = {
   posts: [
     { who: "X · 10 likes · 2 days old", text: "The third act is the best thing Villeneuve has done — the worm ride alone.", read: "+0.80", substance: "Specific", trust: "full", weight: "1.83" },
-    { who: "Reddit · 120 upvotes, 30 comments · 5 days old", text: "Really good. Long, though.", read: "+0.50", substance: "Some detail", trust: "full", weight: "2.62" },
+    { who: "X · 120 likes, 30 replies · 5 days old", text: "Really good. Long, though.", read: "+0.50", substance: "Some detail", trust: "full", weight: "2.62" },
     { who: "X · 0 likes · 1 day old · young account", text: "mid", read: "−0.30", substance: "Bare", trust: "reduced", weight: "0.33" }
   ],
   steps: [
@@ -93,9 +93,9 @@ const notes = [
   ["We only measure what’s current.", "Titles in theaters, on the air, coming soon, trending, this season’s picks (horror in October, love stories in February…), games topping Steam’s sellers and player charts, and anything that has gone electric. Everything else is browsable with critic ratings but locked — opinions on a ten-year-old film don’t change by the hour, and reading the whole internet for every title ever made isn’t worth anyone’s money."],
   ["For games, it’s the “right now” number.", "Steam’s percentage is an all-time verdict; for early-access and live-service games it can be years stale. Chatterbub reads the most recent Steam reviews — weighted by how long the reviewer actually played — together with X and Reddit, and shows it beside Steam’s all-time and 30-day scores. Launch was rough but the last patch landed? You’ll see it."],
   ["It is not a critic score.", "Critics are on the ratings strip next to it. The meter is the audience, unfiltered — then filtered for bots."],
-  ["It moves.", "Opinions shift after opening weekend, after a finale, after a Reddit thread blows up. Readings refresh every few hours."],
+  ["It moves.", "Opinions shift after opening weekend, after a finale, after one thread blows up. Readings refresh every few hours."],
   ["Low confidence means low confidence.", "A reading built on a handful of posts is pulled toward 50 and shown with a wide range. We say so right next to the number, and the “why this score” panel on every title shows the posts and the arithmetic."],
-  ["Deleted there, deleted here.", "We re-check every stored post against Reddit and X daily. If you deleted it, or a moderator removed it, it leaves our database and the score is recomputed without it. Nothing is kept longer than a year."],
+  ["Deleted there, deleted here.", "We re-check every stored post against the site it came from daily. If you deleted it, or a moderator removed it, it leaves our database and the score is recomputed without it. Nothing is kept longer than a year."],
   ["We publish the maths, not the cut-offs.", "The aggregation is below in full, with a worked example. Exact cut-offs for account age, reputation and playtime aren’t published: if they were, the first thing anyone would do is build accounts that just clear them."]
 ];
 </script>
@@ -188,7 +188,7 @@ const notes = [
       </section>
 
       <section :class="styles.cta">
-        <span>Sources: public posts on Reddit and X. Title data and artwork from TMDB. Critic and audience ratings from TMDB, IMDb, Rotten Tomatoes and Metacritic.</span>
+        <span>Sources: public posts on X and Steam reviews. Title data and artwork from TMDB. Critic and audience ratings from TMDB, IMDb, Rotten Tomatoes and Metacritic.</span>
         <router-link to="/" class="btn btn-primary">See what’s trending</router-link>
       </section>
     </div>
