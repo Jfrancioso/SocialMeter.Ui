@@ -1,0 +1,150 @@
+.card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line-2);
+  background: rgba(16, 18, 26, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-pop);
+}
+
+.head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.when {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.gaugeSkeleton {
+  width: 260px;
+  height: 150px;
+  border-radius: 130px 130px 12px 12px;
+}
+
+.slowHint {
+  margin: -2px 0 0;
+  max-width: 260px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.lockedPanel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 18px 10px 8px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.lockedPanel strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.lockedLink {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.leftover {
+  margin: -4px 0 0;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.fact strong {
+  color: var(--text);
+}
+
+.conf-high {
+  color: var(--pos) !important;
+}
+.conf-medium {
+  color: var(--accent) !important;
+}
+.conf-low {
+  color: var(--text-2) !important;
+}
+
+.trend-up {
+  color: var(--pos);
+  font-weight: 700;
+}
+.trend-down {
+  color: var(--neg);
+  font-weight: 700;
+}
+.trend-flat {
+  color: var(--text-3);
+}
+
+.refresh {
+  width: 100%;
+  justify-content: center;
+}
+
+.refreshIcon {
+  display: inline-block;
+  font-size: 16px;
+}
+
+.refreshHint {
+  margin-top: -4px;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1100px) {
+  .card {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    max-width: none;
+  }
+}

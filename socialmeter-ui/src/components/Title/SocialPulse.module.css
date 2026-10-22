@@ -1,0 +1,208 @@
+.lockedPulse {
+  display: grid;
+  gap: 4px;
+  padding: 36px 20px;
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--line-2);
+  text-align: center;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.lockedPulse strong {
+  color: var(--text);
+}
+
+.pulse {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.side {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  position: sticky;
+  top: calc(var(--nav-h) + 16px);
+}
+
+.panel {
+  min-width: 0;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.h3 {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+
+.barSkeleton {
+  height: 60px;
+}
+
+.platforms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.platform {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.platformName {
+  font-weight: 700;
+}
+
+.platformPosts {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.platformScore {
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.hintLink {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.feed {
+  min-width: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.filterSep {
+  width: 1px;
+  height: 22px;
+  background: var(--line-2);
+  margin: 0 4px;
+}
+
+.shieldToggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--pill);
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.shieldToggle:hover {
+  color: var(--text);
+  border-color: var(--line-3);
+}
+
+.shieldOn {
+  color: var(--accent);
+  border-color: rgba(255, 176, 0, 0.45);
+  background: rgba(255, 176, 0, 0.08);
+}
+
+.posts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.postSkeleton {
+  height: 150px;
+  border-radius: var(--r-lg);
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 48px 20px;
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--line-2);
+  text-align: center;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.empty strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.emptyBolt {
+  font-size: 28px;
+  filter: grayscale(1) opacity(0.5);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+@media (max-width: 1100px) {
+  .pulse {
+    grid-template-columns: 1fr;
+  }
+  .side {
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .shieldToggle {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+  .posts {
+    grid-template-columns: 1fr;
+  }
+}
