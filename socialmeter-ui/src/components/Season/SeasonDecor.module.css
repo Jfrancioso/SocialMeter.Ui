@@ -1,0 +1,131 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  /* Inside #app's stacking context a negative index paints under all in-flow content but over the page background. */
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ---- Halloween ---- */
+
+.moon {
+  position: absolute;
+  top: 8vh;
+  right: 8vw;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(255, 236, 200, 0.22), rgba(255, 200, 140, 0.08) 55%, transparent 72%);
+  filter: blur(2px);
+}
+
+.fog {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -6vh;
+  height: 34vh;
+  background:
+    radial-gradient(60% 80% at 20% 100%, rgba(140, 60, 255, 0.12), transparent 70%),
+    radial-gradient(50% 70% at 70% 100%, rgba(255, 122, 26, 0.08), transparent 70%),
+    linear-gradient(180deg, transparent, rgba(20, 10, 30, 0.6));
+  animation: fogDrift 40s ease-in-out infinite alternate;
+}
+
+.bat {
+  position: absolute;
+  fill: rgba(10, 6, 16, 0.9);
+  filter: drop-shadow(0 0 2px rgba(255, 122, 26, 0.25));
+  opacity: 0.75;
+  animation: batCross linear infinite;
+}
+
+@keyframes batCross {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(18vw, -4vh) scale(0.9);
+  }
+  50% {
+    transform: translate(34vw, 3vh) scale(1.05);
+  }
+  75% {
+    transform: translate(52vw, -2vh) scale(0.95);
+  }
+  100% {
+    transform: translate(70vw, 1vh) scale(1);
+  }
+}
+
+@keyframes fogDrift {
+  from {
+    transform: translateX(-3%);
+  }
+  to {
+    transform: translateX(3%);
+  }
+}
+
+/* ---- Holidays ---- */
+
+.flake {
+  position: absolute;
+  top: -2vh;
+  border-radius: 50%;
+  background: rgba(230, 242, 255, 0.7);
+  filter: blur(0.5px);
+  animation: snowFall linear infinite;
+}
+
+@keyframes snowFall {
+  from {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(4vw, 104vh);
+    opacity: 0.2;
+  }
+}
+
+/* ---- Romance ---- */
+
+.heart {
+  position: absolute;
+  bottom: -4vh;
+  fill: rgba(255, 107, 157, 0.35);
+  animation: heartRise linear infinite;
+}
+
+@keyframes heartRise {
+  from {
+    transform: translate(0, 0) rotate(-8deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(-3vw, -110vh) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+/* Readers who asked for less motion get the still scene: the moon and fog stay, nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  .bat,
+  .flake,
+  .heart,
+  .fog {
+    animation: none;
+  }
+  .flake,
+  .heart {
+    display: none;
+  }
+}

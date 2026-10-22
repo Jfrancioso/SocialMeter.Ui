@@ -1,8 +1,14 @@
 <script setup>
 import NavBar from "./components/NavBar/NavBar.vue";
+import SeasonDecor from "./components/Season/SeasonDecor.vue";
+import { useSeason } from "./composables/useSeason";
+
+// The site dresses for the season (Halloween in October, snow in December, ...); see docs/SEASONAL-THEMES.md.
+const { season } = useSeason();
 </script>
 
 <template>
+  <SeasonDecor :season="season" />
   <NavBar />
   <main class="app-main">
     <router-view v-slot="{ Component }">
