@@ -59,7 +59,7 @@ onMounted(async () => {
       </template>
 
       <div v-else-if="error" class="error-box">
-        Couldn’t reach the SocialMeter API.
+        Couldn’t reach Chatterbub right now.
         {{ error }}
       </div>
 

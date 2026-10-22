@@ -60,7 +60,7 @@ onMounted(() => requestAnimationFrame(() => (mounted.value = true)));
   <div
     :class="[styles.gauge, styles[size], styles[`band-${band.key}`]]"
     role="img"
-    :aria-label="hasSignal ? `SocialMeter ${score} out of 100, ${band.label}` : 'No SocialMeter signal yet'"
+    :aria-label="hasSignal ? `Chatterbub score ${score} out of 100, ${band.label}` : 'No Chatterbub score yet'"
   >
     <div :class="styles.arc">
     <svg viewBox="0 0 220 128" :class="styles.svg">

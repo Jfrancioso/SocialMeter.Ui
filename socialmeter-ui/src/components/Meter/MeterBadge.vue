@@ -12,8 +12,8 @@ const props = defineProps({
 const band = computed(() => (props.reading ? meterBand(props.reading.score, props.reading.totalPosts) : null));
 const title = computed(() =>
   band.value && band.value.key !== "none"
-    ? `SocialMeter ${props.reading.score} · ${band.value.label} · ${props.reading.totalPosts} posts`
-    : "No SocialMeter reading yet — open the title to take one"
+    ? `Chatterbub score ${props.reading.score} · ${band.value.label} · ${props.reading.totalPosts} posts`
+    : "No Chatterbub score yet. Open the title to take one."
 );
 </script>
 

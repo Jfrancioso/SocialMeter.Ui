@@ -94,7 +94,7 @@ watch([q, type], () => load(1), { immediate: true });
         <TitleGrid v-if="tracked.length" :items="tracked" />
         <div v-else :class="styles.empty">
           <strong>Nothing tracked matches “{{ q }}”.</strong>
-          <span>SocialMeter only measures what’s current, trending, seasonal or electric. Matches outside that set are below.</span>
+          <span>Chatterbub only measures what’s current, trending, seasonal or electric. Matches outside that set are below.</span>
         </div>
 
         <section v-if="lockedItems.length" :class="styles.lockedSection">

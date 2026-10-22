@@ -79,7 +79,7 @@ function download() {
   if (!blob.value) return;
   const a = document.createElement("a");
   a.href = objectUrl;
-  a.download = `socialmeter-${props.title.mediaType}-${props.title.tmdbId}.png`;
+  a.download = `chatterbub-${props.title.mediaType}-${props.title.tmdbId}.png`;
   a.click();
   status.value = "Downloaded.";
 }

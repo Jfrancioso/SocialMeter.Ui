@@ -90,7 +90,7 @@ const metaBits = computed(() => {
           <div :class="styles.heroText">
             <div :class="styles.meta">
               <span v-for="(b, i) in metaBits" :key="i" :class="[styles.metaBit, i === 0 && styles.metaKind]">{{ b }}</span>
-              <span v-if="trackedReason" :class="styles.trackedChip" :title="`SocialMeter is measuring this title right now: ${trackedReason}`">
+              <span v-if="trackedReason" :class="styles.trackedChip" :title="`Chatterbub is measuring this title right now: ${trackedReason}`">
                 <span :class="styles.trackedDot" />
                 Tracking · {{ trackedReason }}
               </span>
@@ -137,7 +137,7 @@ const metaBits = computed(() => {
           <div :class="styles.sectionHead">
             <h2 :class="styles.h2">Ratings, side by side</h2>
             <span :class="styles.sectionSub">
-              {{ type === "game" ? "SocialMeter is players right now; Steam's numbers are the all-time and 30-day consensus." : "Everything on a 0–100 scale so the fan pulse and the critics line up." }}
+              {{ type === "game" ? "The Chatterbub score is players right now; Steam's numbers are the all-time and 30-day consensus." : "Everything on a 0–100 scale so the fan pulse and the critics line up." }}
             </span>
           </div>
           <RatingsStrip :meter="meter" :ratings="ratings?.ratings ?? null" :critics-average="ratings?.criticsAverage ?? null" :baseline-label="ratings?.baselineLabel ?? 'critics'" />

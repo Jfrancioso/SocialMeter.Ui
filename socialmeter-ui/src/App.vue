@@ -20,7 +20,7 @@ provide("season", season);
     </router-view>
   </main>
   <footer class="app-footer">
-    <span>SocialMeter reads Reddit and X to measure how people really feel about movies, shows and games.</span>
+    <span>Chatterbub reads Reddit, X and Steam to measure how people really feel about movies, shows and games.</span>
     <span>Title data and images from TMDB and Steam. Ratings from TMDB, IMDb, Rotten Tomatoes, Metacritic and Steam.</span>
   </footer>
 </template>

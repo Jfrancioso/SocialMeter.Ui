@@ -8,7 +8,7 @@ Months are decided in UTC, like the API.
 
 | When | Key | Look | Motif | API row |
 |---|---|---|---|---|
-| October | `halloween` | Normal surfaces; accent warmed to pumpkin; the SocialMeter wordmark and a "Horror season" tag in the nav set in the dripping Creepster face | none, on purpose | Halloween picks (horror, mystery) |
+| October | `halloween` | Normal surfaces; accent warmed to pumpkin; the Chatterbub wordmark and a "Horror season" tag in the nav set in the dripping Creepster face | none, on purpose | Halloween picks (horror, mystery) |
 | November | `thanksgiving` | Amber and rust, warm panels | none (colour only) | Family table |
 | December | `holidays` | Ice blue with a red second accent | Slow snow | Holiday watch |
 | January | `awards` | Gold on black, less glow | none | Awards season (drama) |

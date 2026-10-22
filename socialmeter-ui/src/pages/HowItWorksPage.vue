@@ -91,7 +91,7 @@ const bands = [
 
 const notes = [
   ["We only measure what’s current.", "Titles in theaters, on the air, coming soon, trending, this season’s picks (horror in October, love stories in February…), games topping Steam’s sellers and player charts, and anything that has gone electric. Everything else is browsable with critic ratings but locked — opinions on a ten-year-old film don’t change by the hour, and reading the whole internet for every title ever made isn’t worth anyone’s money."],
-  ["For games, it’s the “right now” number.", "Steam’s percentage is an all-time verdict; for early-access and live-service games it can be years stale. SocialMeter reads the most recent Steam reviews — weighted by how long the reviewer actually played — together with X and Reddit, and shows it beside Steam’s all-time and 30-day scores. Launch was rough but the last patch landed? You’ll see it."],
+  ["For games, it’s the “right now” number.", "Steam’s percentage is an all-time verdict; for early-access and live-service games it can be years stale. Chatterbub reads the most recent Steam reviews — weighted by how long the reviewer actually played — together with X and Reddit, and shows it beside Steam’s all-time and 30-day scores. Launch was rough but the last patch landed? You’ll see it."],
   ["It is not a critic score.", "Critics are on the ratings strip next to it. The meter is the audience, unfiltered — then filtered for bots."],
   ["It moves.", "Opinions shift after opening weekend, after a finale, after a Reddit thread blows up. Readings refresh every few hours."],
   ["Low confidence means low confidence.", "A reading built on a handful of posts is pulled toward 50 and shown with a wide range. We say so right next to the number, and the “why this score” panel on every title shows the posts and the arithmetic."],
@@ -108,7 +108,7 @@ const notes = [
           <span :class="styles.eyebrow">How it works</span>
           <h1 :class="styles.title">One number for what the internet <em>actually</em> thinks.</h1>
           <p :class="styles.lede">
-            Star ratings can be review-bombed in an afternoon. SocialMeter listens to real conversations instead,
+            Star ratings can be review-bombed in an afternoon. Chatterbub listens to real conversations instead,
             weighs them by how real the people behind them are, and refuses to let any one voice shout.
           </p>
         </div>

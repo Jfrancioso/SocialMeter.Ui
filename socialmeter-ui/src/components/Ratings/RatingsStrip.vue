@@ -4,7 +4,7 @@ import { meterBand } from "../../utils/meter";
 import styles from "./RatingsStrip.module.css";
 
 const props = defineProps({
-  /** The SocialMeter reading: { score, label, totalPosts, confidenceLabel } or null while loading */
+  /** The Chatterbub reading: { score, label, totalPosts, confidenceLabel } or null while loading */
   meter: { type: Object, default: null },
   /** ExternalRating[] from /ratings, or null while loading */
   ratings: { type: Array, default: null },
@@ -52,7 +52,7 @@ const logos = {
     <div :class="[styles.card, styles.social, band && styles[`band-${band.key}`]]">
       <div :class="styles.source">
         <svg viewBox="0 0 64 64" width="14" height="14" aria-hidden="true"><path d="M36 6 L16 36 h14 l-4 22 L50 26 H36 Z" fill="currentColor" /></svg>
-        SocialMeter
+        Chatterbub
       </div>
       <div v-if="!meter" :class="[styles.valueSkeleton, 'skeleton']" />
       <template v-else>

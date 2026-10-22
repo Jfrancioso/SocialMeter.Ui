@@ -29,7 +29,7 @@ const shareOpen = ref(false);
 <template>
   <div :class="styles.card">
     <div :class="styles.head">
-      <span :class="styles.title">SocialMeter</span>
+      <span :class="styles.title">Chatterbub score</span>
       <span v-if="social?.lastRefreshedAt && !(locked && !anyPosts)" :class="styles.when">updated {{ timeAgo(social.lastRefreshedAt) }}</span>
     </div>
 
@@ -42,7 +42,7 @@ const shareOpen = ref(false);
       <div :class="styles.lockedPanel">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
         <strong>Not tracked right now</strong>
-        <span>SocialMeter measures what people are talking about today: titles in theaters, on the air, trending, this season’s picks, and anything that’s gone electric. This one isn’t on that list at the moment, so there’s no reading.</span>
+        <span>Chatterbub measures what people are talking about today: titles in theaters, on the air, trending, this season’s picks, and anything that’s gone electric. This one isn’t on that list at the moment, so there’s no reading.</span>
         <router-link :to="{ name: 'how-it-works' }" :class="styles.lockedLink">How tracking works →</router-link>
       </div>
     </template>

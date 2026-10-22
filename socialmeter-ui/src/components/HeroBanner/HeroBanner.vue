@@ -71,7 +71,7 @@ onMounted(async () => {
 
       <div :class="styles.meterCol">
         <div :class="styles.meterCard">
-          <div :class="styles.meterTitle">SocialMeter</div>
+          <div :class="styles.meterTitle">Chatterbub score</div>
           <div v-if="loadingMeter" :class="[styles.meterSkeleton, 'skeleton']" />
           <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" size="md" :caption="caption" />
         </div>

@@ -11,7 +11,7 @@ const PLATFORM = { x: "X", reddit: "Reddit", steam: "Steam" };
 export function shareCaption({ title, meter, ratings, url }) {
   const where = platformsText(meter);
   const beside = ratingsText(ratings);
-  return `${title.name} reads ${meter.score} ${meter.label} (±${meter.stats?.margin ?? "?"}) on SocialMeter, from ${meter.totalPosts} posts${where ? ` on ${where}` : ""}.${beside ? ` ${beside}.` : ""}\n${url}`;
+  return `${title.name} reads ${meter.score} ${meter.label} (±${meter.stats?.margin ?? "?"}) on Chatterbub, from ${meter.totalPosts} posts${where ? ` on ${where}` : ""}.${beside ? ` ${beside}.` : ""}\n${url}`;
 }
 
 /**
@@ -63,13 +63,13 @@ export async function renderShareCard({ title, meter, ratings, posterUrl, url, b
   ctx.font = font(900, 28);
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#f3f5f9";
-  ctx.fillText("Social", x + 40, 78);
-  const w = ctx.measureText("Social").width;
-  const brandGrad = ctx.createLinearGradient(x + 40 + w, 0, x + 40 + w + 100, 0);
+  ctx.fillText("Chatter", x + 40, 78);
+  const w = ctx.measureText("Chatter").width;
+  const brandGrad = ctx.createLinearGradient(x + 40 + w, 0, x + 40 + w + 60, 0);
   brandGrad.addColorStop(0, "#ffb000");
   brandGrad.addColorStop(1, "#ff3d8f");
   ctx.fillStyle = brandGrad;
-  ctx.fillText("Meter", x + 40 + w, 78);
+  ctx.fillText("bub", x + 40 + w, 78);
 
   // Title and meta.
   ctx.fillStyle = "#f3f5f9";

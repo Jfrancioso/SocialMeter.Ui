@@ -36,7 +36,7 @@ const platformName = { x: "X", reddit: "Reddit", steam: "Steam reviews" };
 <template>
   <div v-if="locked && !anyPosts" :class="styles.lockedPulse">
     <strong>No posts collected for this title.</strong>
-    <span>It isn’t in the tracked set, so SocialMeter isn’t reading Reddit or X for it. Critic and audience ratings above are still live.</span>
+    <span>It isn’t in the tracked set, so Chatterbub isn’t reading Reddit or X for it. Critic and audience ratings above are still live.</span>
   </div>
 
   <div v-else :class="styles.pulse">
