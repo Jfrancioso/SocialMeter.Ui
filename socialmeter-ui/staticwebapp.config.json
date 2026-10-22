@@ -21,6 +21,6 @@
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://image.tmdb.org https://*.akamaihd.net https://*.steamstatic.com https://pbs.twimg.com https://video.twimg.com https://i.redd.it https://preview.redd.it https://external-preview.redd.it; connect-src 'self' https://api.chatterbub.com https://*.azurewebsites.net; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'"
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://image.tmdb.org https://*.akamaihd.net https://*.steamstatic.com https://pbs.twimg.com https://video.twimg.com https://i.redd.it https://preview.redd.it https://external-preview.redd.it; connect-src 'self' https://api.chatterbub.com https://cloudflareinsights.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'"
   }
 }
