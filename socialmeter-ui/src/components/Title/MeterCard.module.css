@@ -131,6 +131,25 @@
   animation: spin 0.9s linear infinite;
 }
 
+.share {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.share:hover {
+  border-color: rgba(255, 176, 0, 0.4);
+  background: rgba(255, 176, 0, 0.08);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

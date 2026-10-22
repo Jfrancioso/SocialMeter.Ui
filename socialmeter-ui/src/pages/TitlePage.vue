@@ -116,6 +116,8 @@ const metaBits = computed(() => {
 
           <aside :class="styles.heroMeter">
             <MeterCard
+              :title="title"
+              :ratings="ratings"
               :social="social"
               :meter="meter"
               :locked="locked"

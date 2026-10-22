@@ -1,10 +1,14 @@
 <script setup>
+import { ref } from "vue";
 import { formatNumber, timeAgo } from "../../utils/format";
 import MeterGauge from "../Meter/MeterGauge.vue";
+import ShareDialog from "./ShareDialog.vue";
 import styles from "./MeterCard.module.css";
 
-// The hero's reading card: gauge, the facts under it, and the live-refresh button with its cost and cool-down hints.
+// The hero's reading card: gauge, the facts under it, the live-refresh button with its cost and cool-down hints, and the share card.
 defineProps({
+  title: { type: Object, default: null },
+  ratings: { type: Object, default: null },
   social: { type: Object, default: null },
   meter: { type: Object, default: null },
   locked: { type: Boolean, default: false },
@@ -18,6 +22,8 @@ defineProps({
 });
 
 defineEmits(["refresh"]);
+
+const shareOpen = ref(false);
 </script>
 
 <template>
@@ -69,5 +75,11 @@ defineEmits(["refresh"]);
       {{ refreshing ? "Reading the room…" : "Refresh from sources" }}
     </button>
     <span v-if="refreshHint" :class="styles.refreshHint">{{ refreshHint }}</span>
+
+    <button v-if="anyPosts && title && meter" type="button" :class="styles.share" @click="shareOpen = true">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="M12 15V3m0 0-4 4m4-4 4 4" /></svg>
+      Share this reading
+    </button>
+    <ShareDialog v-if="title && meter" :open="shareOpen" :title="title" :meter="meter" :ratings="ratings" @close="shareOpen = false" />
   </div>
 </template>
