@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue";
+import { PLATFORM_NAMES } from "../../utils/platforms";
 import { meterBand } from "../../utils/meter";
 import SentimentBar from "../Meter/SentimentBar.vue";
 import PostCard from "../Social/PostCard.vue";
@@ -30,11 +31,11 @@ const sentimentChips = [
   { value: "negative", label: "Negative", color: "var(--neg)" }
 ];
 
-const platformName = { x: "X", reddit: "Reddit", steam: "Steam reviews" };
+const platformName = { ...PLATFORM_NAMES, steam: "Steam reviews" };
 
 // One filter per source that is actually connected, so a platform with nothing behind it never shows a button.
 // Steam reviews only exist for games.
-const chipLabel = { reddit: "Reddit", x: "X", steam: "Steam" };
+const chipLabel = PLATFORM_NAMES;
 const platformChips = computed(() =>
   props.configuredSources
     .map((s) => s.platform)

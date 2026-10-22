@@ -1,3 +1,4 @@
+import { joinNames, platformName } from "../utils/platforms";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
 import { useSnapshots } from "./useSnapshots";
@@ -68,8 +69,11 @@ export function useTitlePage(route) {
     if (!social.value || locked.value) return "";
     if (configuredSources.value.length === 0) return "Live updates aren’t available for this title right now.";
     if (refreshWaitMinutes.value > 0) return `Live pull available again in ${refreshWaitMinutes.value} min`;
-    const names = configuredSources.value.map((s) => (s.platform === "x" ? "X" : s.platform === "steam" ? "Steam" : "Reddit")).join(" and ");
-    return `Pulls new posts from ${names}`;
+    // Steam reviews only exist for games, so a movie or show page doesn't promise them.
+    const names = configuredSources.value
+      .filter((s) => s.platform !== "steam" || route().type === "game")
+      .map((s) => platformName(s.platform));
+    return `Pulls new posts from ${joinNames(names)}`;
   });
 
   // ---- loading ----

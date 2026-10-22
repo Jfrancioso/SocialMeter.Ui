@@ -70,7 +70,7 @@ onMounted(async () => {
           <div :class="styles.legendIntro">
             <strong>The meter</strong>
             <span>
-              We read public posts on X, score every post’s tone, and weigh it by engagement and how real the account is. 50 is perfectly split.
+              We read public posts on X and Bluesky, score every post’s tone, and weigh it by engagement and how real the account is. 50 is perfectly split.
               <router-link :to="{ name: 'how-it-works' }" :class="styles.legendLink">How it works →</router-link>
             </span>
           </div>

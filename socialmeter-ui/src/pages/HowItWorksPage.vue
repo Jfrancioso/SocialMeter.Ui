@@ -8,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "We listen where people actually talk",
-    body: "For every movie, show and game we pull public posts from X that mention the title by name, plus the newest Steam reviews for games. Not reviews written for us — conversations people were already having."
+    body: "For every movie, show and game we pull public posts from X and Bluesky that mention the title by name, plus the newest Steam reviews for games. Not reviews written for us — conversations people were already having."
   },
   {
     n: "02",
@@ -188,7 +188,7 @@ const notes = [
       </section>
 
       <section :class="styles.cta">
-        <span>Sources: public posts on X and Steam reviews. Title data and artwork from TMDB. Critic and audience ratings from TMDB, IMDb, Rotten Tomatoes and Metacritic.</span>
+        <span>Sources: public posts on X and Bluesky, and Steam reviews. Title data and artwork from TMDB. Critic and audience ratings from TMDB, IMDb, Rotten Tomatoes and Metacritic.</span>
         <router-link to="/" class="btn btn-primary">See what’s trending</router-link>
       </section>
     </div>

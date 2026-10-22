@@ -24,7 +24,7 @@ const contact = "privacy@chatterbub.com";
         <section :class="styles.section">
           <h2 :class="styles.h2">Public posts we read</h2>
           <p>
-            For each title we collect public posts from X and public reviews from Steam that mention it. For
+            For each title we collect public posts from X and Bluesky and public reviews from Steam that mention it. For
             each post we keep its text, the author’s public username, a link to the post and its images, its upvotes and
             replies (and playtime for Steam reviews), and the account’s age and standing on that platform.
           </p>
@@ -37,7 +37,7 @@ const contact = "privacy@chatterbub.com";
         <section :class="styles.section">
           <h2 :class="styles.h2">How long we keep it</h2>
           <ul :class="styles.list">
-            <li>We delete X posts once they’re a year old.</li>
+            <li>We delete X and Bluesky posts once they’re a year old.</li>
             <li>We delete Steam reviews once they’re 120 days old.</li>
             <li>We regularly recheck the posts we hold. If a post is deleted where it was published, we delete it here too.</li>
             <li>We delete Refresh records after 90 days.</li>
@@ -61,7 +61,7 @@ const contact = "privacy@chatterbub.com";
             <li>Your browser saves a few display settings on your device, like the spoiler shield and which panels are open. They’re never sent to us.</li>
             <li>When you press Refresh, or a visit brings in new posts, we note the time, the title and whether new posts were pulled. Nothing about who pressed it is kept.</li>
             <li>Cloudflare and Azure receive your IP address to deliver pages and enforce rate limits. Rate-limit records are kept in memory and cleared within an hour.</li>
-            <li>Posters, post images and fonts load from TMDB, Steam, X and Google Fonts. Those services receive your IP address, just as they would from any other site that shows their images.</li>
+            <li>Posters, post images and fonts load from TMDB, Steam, X, Bluesky and Google Fonts. Those services receive your IP address, just as they would from any other site that shows their images.</li>
           </ul>
         </section>
 

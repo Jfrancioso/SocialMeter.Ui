@@ -1,4 +1,5 @@
 <script setup>
+import { authorHandle, platformName } from "../../utils/platforms";
 import { computed, ref, watch } from "vue";
 import { formatCompact, timeAgo } from "../../utils/format";
 import PlatformIcon from "./PlatformIcon.vue";
@@ -25,14 +26,10 @@ const covered = computed(() => props.shielded && !revealed.value);
 const long = computed(() => props.post.content.length > 280);
 const text = computed(() => (long.value && !expanded.value ? `${props.post.content.slice(0, 280).trimEnd()}…` : props.post.content));
 
-const handle = computed(() => {
-  if (props.post.platform === "x") return `@${props.post.author}`;
-  if (props.post.platform === "steam") return props.post.author;
-  return `u/${props.post.author}`;
-});
+const handle = computed(() => authorHandle(props.post.platform, props.post.author));
 const where = computed(() => {
   if (props.post.platform === "reddit" && props.post.community) return `r/${props.post.community}`;
-  if (props.post.platform === "x") return "X";
+  if (props.post.platform === "x" || props.post.platform === "bluesky") return platformName(props.post.platform);
   if (props.post.platform === "steam") return props.post.playtimeHours != null ? `Steam · ${props.post.playtimeHours} h played` : "Steam";
   return "";
 });
@@ -88,7 +85,7 @@ const share = computed(() => {
       <div v-if="media.length" :class="[styles.media, media.length > 1 && styles.mediaGrid]" :aria-hidden="covered">
         <button v-if="mediaHidden" type="button" :class="styles.sensitive" @click="showSensitive = true">
           <span :class="styles.sensitiveTitle">Sensitive media</span>
-          <span :class="styles.sensitiveHint">Flagged by {{ post.platform === "x" ? "X" : "Reddit" }} · tap to show</span>
+          <span :class="styles.sensitiveHint">Flagged by {{ platformName(post.platform) }} · tap to show</span>
         </button>
         <a
           v-for="(m, i) in media.slice(0, 4)"

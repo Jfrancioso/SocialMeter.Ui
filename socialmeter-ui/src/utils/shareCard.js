@@ -1,3 +1,4 @@
+import { PLATFORM_NAMES } from "./platforms";
 // Draws the share card (1200 × 630, the shape of a link preview) from a title and its reading, entirely in the browser.
 // Nothing is sent anywhere: the PNG comes off a canvas and goes to the clipboard or a download.
 
@@ -5,7 +6,7 @@ export const CARD_W = 1200;
 export const CARD_H = 630;
 
 const BAND_HEX = { cold: "#5b8cff", lukewarm: "#6fd0c5", warm: "#ffb000", hot: "#ff6a3d", electric: "#ff3d8f", none: "#596073" };
-const PLATFORM = { x: "X", reddit: "Reddit", steam: "Steam" };
+const PLATFORM = PLATFORM_NAMES;
 
 /** The caption copied beside the image. */
 export function shareCaption({ title, meter, ratings, url }) {

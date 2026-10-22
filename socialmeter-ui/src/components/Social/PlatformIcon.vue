@@ -25,6 +25,15 @@ defineProps({
     <path d="M6.5 5.5h3.2l3.1 4.3 3.7-4.3h1.9l-4.7 5.5 5.3 7.5h-3.2l-3.4-4.7-4.1 4.7H6.4l5.1-5.9z" fill="#fff" />
   </svg>
 
+  <!-- Bluesky: the butterfly -->
+  <svg v-else-if="platform === 'bluesky'" :width="size" :height="size" viewBox="0 0 24 24" aria-hidden="true">
+    <rect width="24" height="24" rx="6" fill="var(--bluesky)" />
+    <path
+      d="M7.6 6.4c1.7 1.3 3.6 3.9 4.4 5.3.8-1.4 2.7-4 4.4-5.3 1.2-.9 3.2-1.6 3.2.7 0 .5-.3 3.9-.4 4.5-.5 1.9-2.5 2.4-4.3 2.1 3.1.5 3.9 2.3 2.2 4-3.3 3.4-4.7-.8-5.1-1.9l-.1-.3-.1.3c-.4 1.1-1.8 5.3-5.1 1.9-1.7-1.7-.9-3.5 2.2-4-1.8.3-3.8-.2-4.3-2.1-.1-.6-.4-4-.4-4.5 0-2.3 2-1.6 3.2-.7z"
+      fill="#fff"
+    />
+  </svg>
+
   <!-- Steam: the valve/piston mark, simplified -->
   <svg v-else-if="platform === 'steam'" :width="size" :height="size" viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="12" r="11" fill="#1b2838" stroke="#66c0f4" stroke-width="1" />

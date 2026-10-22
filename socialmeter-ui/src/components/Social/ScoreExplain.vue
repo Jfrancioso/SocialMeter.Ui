@@ -1,4 +1,5 @@
 <script setup>
+import { PLATFORM_NAMES, authorHandle } from "../../utils/platforms";
 import { computed, ref } from "vue";
 import { timeAgo } from "../../utils/format";
 import TrendLine from "../Meter/TrendLine.vue";
@@ -55,8 +56,8 @@ const substanceShares = computed(() =>
   }))
 );
 
-const platformName = { x: "X", reddit: "Reddit", steam: "Steam" };
-const handle = (d) => (d.platform === "x" ? `@${d.author}` : d.platform === "reddit" ? `u/${d.author}` : d.author);
+const platformName = PLATFORM_NAMES;
+const handle = (d) => authorHandle(d.platform, d.author);
 const signed = (n) => (n > 0 ? `+${n}` : `${n}`);
 
 const filteredText = computed(() => {
