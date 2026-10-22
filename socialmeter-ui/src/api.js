@@ -9,8 +9,23 @@ export class ApiError extends Error {
   }
 }
 
-async function httpGet(path, { signal } = {}) {
-  const res = await fetch(API_BASE + path, { signal, headers: { Accept: "application/json" } });
+// A deploy restarts the API for about half a minute; a 5xx or a dropped connection in that window is retried once
+// after a short pause so a restart reads as a slow load, not an outage. 4xx answers are final and never retried.
+const RETRY_AFTER_MS = 3000;
+
+async function httpGet(path, { signal } = {}, attempt = 0) {
+  let res;
+  try {
+    res = await fetch(API_BASE + path, { signal, headers: { Accept: "application/json" } });
+  } catch (e) {
+    if (e?.name === "AbortError" || attempt > 0) throw e;
+    await new Promise((r) => setTimeout(r, RETRY_AFTER_MS));
+    return httpGet(path, { signal }, attempt + 1);
+  }
+  if (res.status >= 500 && attempt === 0) {
+    await new Promise((r) => setTimeout(r, RETRY_AFTER_MS));
+    return httpGet(path, { signal }, attempt + 1);
+  }
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
     try {
