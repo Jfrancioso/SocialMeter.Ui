@@ -1,4 +1,6 @@
-// All calls go through the Vite dev proxy ("/api" -> the .NET API), so no host is hard-coded here.
+// In development every call goes through the Vite proxy ("/api" -> the .NET API). In production the build sets
+// VITE_API_BASE to the API's origin (see .github/workflows/deploy.yml); no host is hard-coded here.
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/$/, "");
 
 export class ApiError extends Error {
   constructor(status, message) {
@@ -8,7 +10,7 @@ export class ApiError extends Error {
 }
 
 async function httpGet(path, { signal } = {}) {
-  const res = await fetch(path, { signal, headers: { Accept: "application/json" } });
+  const res = await fetch(API_BASE + path, { signal, headers: { Accept: "application/json" } });
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
     try {
