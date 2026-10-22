@@ -40,6 +40,7 @@ const contact = "privacy@chatterbub.com";
             <li>We delete Reddit and X posts once they’re a year old.</li>
             <li>We delete Steam reviews once they’re 120 days old.</li>
             <li>We regularly recheck the posts we hold. If a post is deleted where it was published, we delete it here too.</li>
+            <li>We delete Refresh records after 90 days.</li>
           </ul>
         </section>
 
@@ -58,6 +59,7 @@ const contact = "privacy@chatterbub.com";
           <ul :class="styles.list">
             <li>You don’t sign up and we don’t set cookies. Cloudflare may set a strictly necessary security cookie.</li>
             <li>Your browser saves a few display settings on your device, like the spoiler shield and which panels are open. They’re never sent to us.</li>
+            <li>When you press Refresh, or a visit brings in new posts, we note the time, the title and whether new posts were pulled. Nothing about who pressed it is kept.</li>
             <li>Cloudflare and Azure receive your IP address to deliver pages and enforce rate limits. Rate-limit records are kept in memory and cleared within an hour.</li>
             <li>Posters, post images and fonts load from TMDB, Steam, Reddit, X and Google Fonts. Those services receive your IP address, just as they would from any other site that shows their images.</li>
           </ul>
