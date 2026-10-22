@@ -32,3 +32,22 @@
   background-clip: text;
   color: transparent;
 }
+
+/* October: the wordmark alone goes horror, in a dripping display face and pumpkin orange. Nothing else on the page changes. */
+:global(:root[data-season="halloween"]) .text,
+:global(:root[data-season="halloween"]) .text em {
+  font-family: "Creepster", "Inter", system-ui, cursive;
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  background: linear-gradient(180deg, #ffc266 0%, #ff7a1a 55%, #d13d00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(90, 20, 0, 0.6)) drop-shadow(0 0 10px rgba(255, 122, 26, 0.35));
+}
+
+:global(:root[data-season="halloween"]) .bolt {
+  filter: drop-shadow(0 0 10px rgba(255, 122, 26, 0.6));
+}

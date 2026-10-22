@@ -8,7 +8,7 @@ Months are decided in UTC, like the API.
 
 | When | Key | Look | Motif | API row |
 |---|---|---|---|---|
-| October | `halloween` | Pumpkin orange and violet on near-black purple | Low moon, drifting fog, six bats crossing | Halloween picks (horror, mystery) |
+| October | `halloween` | Normal surfaces; accent warmed to pumpkin; the SocialMeter wordmark and a "Horror season" tag in the nav set in the dripping Creepster face | none, on purpose | Halloween picks (horror, mystery) |
 | November | `thanksgiving` | Amber and rust, warm panels | none (colour only) | Family table |
 | December | `holidays` | Ice blue with a red second accent | Slow snow | Holiday watch |
 | January | `awards` | Gold on black, less glow | none | Awards season (drama) |
@@ -21,9 +21,8 @@ Rules that hold for every season:
 - **Meter and sentiment colours never change.** Cold to electric, positive and negative carry meaning; a theme that
   recoloured them would lie. Only surfaces, lines, the accent pair and the background glow move.
 - **One quiet motif at most**, behind the content, never interactive, low opacity. If a motif competes with a poster
-  or a number, it is too much.
-- **Reduced motion is honoured.** With `prefers-reduced-motion`, animated motifs stop (bats and fog hold still, snow
-  and hearts are hidden). The colours still apply.
+  or a number, it is too much. October has no motif: its cue is the wordmark, which is noticeable without touching the page.
+- **Reduced motion is honoured.** With `prefers-reduced-motion`, animated motifs are hidden. The colours still apply.
 - **Nothing seasonal changes behaviour.** Themes are CSS tokens plus a decoration layer; the data is the same.
 
 ## Previewing a season
@@ -37,6 +36,7 @@ device preference, never a server setting.
 - `src/composables/useSeason.js`: the calendar (`seasonFor`) and the override; sets `data-season` on `<html>`.
 - `src/styles/seasons.css`: the tokens each season overrides, one block per season.
 - `src/components/Season/SeasonDecor.vue` and its CSS module: the motifs.
+- `src/components/BrandLogo/BrandLogo.module.css` and `NavBar.module.css`: October's wordmark and tag (the Creepster face is loaded in `index.html`).
 - `src/App.vue` mounts the decoration layer and calls the composable once.
 
 ## Adding or changing a season

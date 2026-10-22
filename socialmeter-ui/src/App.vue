@@ -1,10 +1,12 @@
 <script setup>
+import { provide } from "vue";
 import NavBar from "./components/NavBar/NavBar.vue";
 import SeasonDecor from "./components/Season/SeasonDecor.vue";
 import { useSeason } from "./composables/useSeason";
 
-// The site dresses for the season (Halloween in October, snow in December, ...); see docs/SEASONAL-THEMES.md.
+// The site dresses lightly for the season (a horror wordmark in October, snow in December, ...); see docs/SEASONAL-THEMES.md.
 const { season } = useSeason();
+provide("season", season);
 </script>
 
 <template>

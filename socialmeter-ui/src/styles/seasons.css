@@ -4,21 +4,13 @@
   The base look ("thrills") is tokens.css itself. See docs/SEASONAL-THEMES.md for the calendar and how to add one.
 */
 
-/* ---- Halloween (October): pumpkin and violet on a near-black purple ---- */
+/* ---- Halloween (October): deliberately light. The wordmark and the nav tag go horror (BrandLogo, NavBar); the page
+   keeps its normal surfaces, with only the accent and the top glow warmed to pumpkin. ---- */
 :root[data-season="halloween"] {
-  --bg: #0a0710;
-  --bg-2: #100b19;
-  --panel: #161022;
-  --panel-2: #1d1630;
-  --panel-3: #261d3e;
   --accent: #ff7a1a;
-  --accent-2: #b14cff;
   --accent-glow: rgba(255, 122, 26, 0.35);
-  --glow-1: rgba(255, 122, 26, 0.1);
-  --glow-2: rgba(140, 60, 255, 0.12);
-  --line: rgba(255, 170, 100, 0.08);
-  --line-2: rgba(255, 170, 100, 0.14);
-  --line-3: rgba(255, 170, 100, 0.22);
+  --glow-1: rgba(255, 122, 26, 0.09);
+  --glow-2: rgba(255, 61, 143, 0.06);
 }
 
 /* ---- Thanksgiving (November): amber and rust, warm panels ---- */

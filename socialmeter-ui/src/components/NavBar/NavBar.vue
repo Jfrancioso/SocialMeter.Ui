@@ -1,8 +1,11 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { inject, onBeforeUnmount, onMounted, ref } from "vue";
 import styles from "./NavBar.module.css";
 import BrandLogo from "../BrandLogo/BrandLogo.vue";
 import SearchBar from "../SearchBar/SearchBar.vue";
+
+// Provided by App.vue; the only seasonal thing in the nav is the small tag in October.
+const season = inject("season", ref("thrills"));
 
 const scrolled = ref(false);
 const searchOpen = ref(false);
@@ -23,6 +26,9 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
     <div :class="styles.inner">
       <div :class="styles.left">
         <BrandLogo />
+        <router-link v-if="season === 'halloween'" :class="styles.seasonTag" to="/#seasonal" title="Horror is in season: this month's picks are on the home page">
+          Horror season
+        </router-link>
         <nav :class="styles.links" aria-label="Primary">
           <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'movie' } }">Movies</router-link>
           <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'tv' } }">TV</router-link>
