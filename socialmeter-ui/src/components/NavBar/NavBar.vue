@@ -36,7 +36,7 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
       </div>
 
       <div :class="styles.right">
-        <button :class="styles.searchToggle" type="button" aria-label="Toggle search" @click="searchOpen = !searchOpen">
+        <button :class="styles.searchToggle" type="button" aria-label="Toggle search" :aria-expanded="searchOpen" @click="searchOpen = !searchOpen">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
@@ -49,4 +49,29 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
       </div>
     </div>
   </header>
+
+  <!-- Phones: primary navigation moves to a bottom tab bar, the pattern every phone app uses, so the top bar is just the brand and search.
+       A sibling of the header on purpose: inside it, the header's backdrop-filter would become its containing block and pin it to the top. -->
+  <nav :class="styles.tabs" aria-label="Primary (mobile)">
+      <router-link :class="styles.tab" :to="{ name: 'home' }" exact-active-class="is-active">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8" /><path d="M5 10v10h5v-6h4v6h5V10" /></svg>
+        <span>Home</span>
+      </router-link>
+      <router-link :class="styles.tab" :to="{ name: 'browse', params: { type: 'movie' } }">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M7 4v16M17 4v16M3 9h4M17 9h4M3 15h4M17 15h4" /></svg>
+        <span>Movies</span>
+      </router-link>
+      <router-link :class="styles.tab" :to="{ name: 'browse', params: { type: 'tv' } }">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
+        <span>TV</span>
+      </router-link>
+      <router-link :class="styles.tab" :to="{ name: 'browse', params: { type: 'game' } }">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4h-1l-2-2H9l-2 2H6a4 4 0 0 1-4-4v-2a4 4 0 0 1 4-4Z" /><path d="M8 12v3M6.5 13.5h3M15 13h.01M17.5 11.5h.01" /></svg>
+        <span>Games</span>
+      </router-link>
+      <router-link :class="styles.tab" :to="{ name: 'how-it-works' }">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+        <span>How</span>
+      </router-link>
+  </nav>
 </template>

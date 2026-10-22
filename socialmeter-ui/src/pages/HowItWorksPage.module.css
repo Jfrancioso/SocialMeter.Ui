@@ -309,9 +309,35 @@
   .methods {
     grid-template-columns: 1fr;
   }
-  .exampleTable th:nth-child(4),
-  .exampleTable td:nth-child(4) {
+  /* The example table becomes a stack of cards: the post on its own line, the four figures labelled beneath it. */
+  .exampleTable thead {
     display: none;
+  }
+  .exampleTable tr {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    column-gap: 18px;
+    row-gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .exampleTable td {
+    padding: 0;
+    border: none;
+  }
+  .exPost {
+    grid-column: 1 / -1;
+  }
+  .exampleTable td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 2px;
   }
   .bands {
     grid-template-columns: repeat(2, 1fr);

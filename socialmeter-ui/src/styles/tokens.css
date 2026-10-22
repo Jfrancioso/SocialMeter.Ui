@@ -60,5 +60,6 @@
   :root {
     --page-x: 16px;
     --nav-h: 58px;
+    --tabbar-h: 60px;
   }
 }

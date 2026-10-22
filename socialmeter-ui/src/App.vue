@@ -34,6 +34,13 @@ import NavBar from "./components/NavBar/NavBar.vue";
   border-top: 1px solid var(--line);
 }
 
+/* Phones: leave room for the bottom tab bar (and the home indicator on iOS) under every page. */
+@media (max-width: 640px) {
+  .app-footer {
+    padding-bottom: calc(48px + var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.18s ease, transform 0.18s ease;

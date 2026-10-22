@@ -159,11 +159,11 @@ const notes = [
             </thead>
             <tbody>
               <tr v-for="(p, i) in example.posts" :key="i">
-                <td><span :class="styles.exWho">{{ p.who }}</span><span :class="styles.exText">“{{ p.text }}”</span></td>
-                <td :class="styles.num">{{ p.read }}</td>
-                <td>{{ p.substance }}</td>
-                <td>{{ p.trust }}</td>
-                <td :class="styles.num">{{ p.weight }}</td>
+                <td :class="styles.exPost"><span :class="styles.exWho">{{ p.who }}</span><span :class="styles.exText">“{{ p.text }}”</span></td>
+                <td :class="styles.num" data-label="Read as">{{ p.read }}</td>
+                <td data-label="Substance">{{ p.substance }}</td>
+                <td data-label="Trust">{{ p.trust }}</td>
+                <td :class="styles.num" data-label="Weight">{{ p.weight }}</td>
               </tr>
             </tbody>
           </table>
