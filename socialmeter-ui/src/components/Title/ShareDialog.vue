@@ -16,6 +16,7 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 
 const previewUrl = ref("");
+const captionBox = ref(null);
 const blob = ref(null);
 const rendering = ref(false);
 const error = ref("");
@@ -67,7 +68,10 @@ async function copyCaption() {
     await navigator.clipboard.writeText(caption.value);
     status.value = "Caption copied.";
   } catch {
-    status.value = "Couldn't copy. Select the caption and copy it by hand.";
+    // Some browsers refuse clipboard writes; the caption is already in the box, so select it and let Ctrl+C finish the job.
+    captionBox.value?.focus();
+    captionBox.value?.select();
+    status.value = "Couldn't copy automatically. The caption is selected: press Ctrl+C (Cmd+C on a Mac).";
   }
 }
 
@@ -118,7 +122,7 @@ onBeforeUnmount(() => {
       </div>
       <p v-if="status" :class="styles.status" role="status">{{ status }}</p>
 
-      <textarea :class="styles.caption" readonly rows="3" :value="caption" aria-label="Caption" />
+      <textarea ref="captionBox" :class="styles.caption" readonly rows="3" :value="caption" aria-label="Caption" @focus="$event.target.select()" />
       <p :class="styles.hint">Paste the image into X, Reddit, Discord or Steam, then the caption. 1200 × 630, the shape of a link preview.</p>
     </div>
   </div>
