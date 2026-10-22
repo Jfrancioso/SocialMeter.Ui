@@ -53,7 +53,7 @@ export function useTitlePage(route) {
     return { text: `Trend after ${t.pointsNeeded} days`, dir: "flat" };
   });
 
-  // A live pull spends X credits, and the API refuses a second one inside its cool-down; say so on the button.
+  // The API refuses a second live pull inside its cool-down; say so on the button.
   const now = ref(Date.now());
   const clock = setInterval(() => (now.value = Date.now()), 30_000);
 
@@ -66,10 +66,10 @@ export function useTitlePage(route) {
 
   const refreshHint = computed(() => {
     if (!social.value || locked.value) return "";
-    if (configuredSources.value.length === 0) return "No source connected — nothing to pull yet.";
+    if (configuredSources.value.length === 0) return "Live updates aren’t available for this title right now.";
     if (refreshWaitMinutes.value > 0) return `Live pull available again in ${refreshWaitMinutes.value} min`;
     const names = configuredSources.value.map((s) => (s.platform === "x" ? "X" : s.platform === "steam" ? "Steam" : "Reddit")).join(" and ");
-    return `Pulls new posts from ${names}${configuredSources.value.some((s) => s.platform === "x") ? " · uses X API credits" : ""}`;
+    return `Pulls new posts from ${names}`;
   });
 
   // ---- loading ----

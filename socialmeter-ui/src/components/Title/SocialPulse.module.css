@@ -83,18 +83,6 @@
   font-size: 16px;
 }
 
-.hint {
-  margin: 12px 0 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-3);
-}
-
-.hintLink {
-  color: var(--accent);
-  font-weight: 700;
-}
-
 .feed {
   min-width: 0;
 }

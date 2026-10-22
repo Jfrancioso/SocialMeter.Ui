@@ -22,6 +22,14 @@ provide("season", season);
   <footer class="app-footer">
     <span>Chatterbub reads Reddit, X and Steam to measure how people really feel about movies, shows and games.</span>
     <span>Title data and images from TMDB and Steam. Ratings from TMDB, IMDb, Rotten Tomatoes, Metacritic and Steam.</span>
+    <span>
+      This product uses the <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a> API but is not endorsed or certified by TMDB.
+      IMDb ratings: information courtesy of <a href="https://www.imdb.com" target="_blank" rel="noopener">IMDb</a>, used with permission.
+    </span>
+    <nav class="app-footer-links" aria-label="About Chatterbub">
+      <router-link :to="{ name: 'how-it-works' }">How it works</router-link>
+      <router-link :to="{ name: 'privacy' }">Privacy</router-link>
+    </nav>
   </footer>
 </template>
 
@@ -40,6 +48,28 @@ provide("season", season);
   color: var(--text-3);
   font-size: 12px;
   border-top: 1px solid var(--line);
+}
+
+.app-footer a {
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.app-footer-links a {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-footer-links a:hover {
+  color: var(--accent);
 }
 
 /* Phones: leave room for the bottom tab bar (and the home indicator on iOS) under every page. */

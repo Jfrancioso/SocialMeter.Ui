@@ -2,7 +2,6 @@
 import { meterBand } from "../../utils/meter";
 import SentimentBar from "../Meter/SentimentBar.vue";
 import PostCard from "../Social/PostCard.vue";
-import SourceStatus from "../Social/SourceStatus.vue";
 import styles from "./SocialPulse.module.css";
 
 // The posts behind the number: sentiment mix and per-platform readings on the side, the filterable feed in the middle.
@@ -57,19 +56,6 @@ const platformName = { x: "X", reddit: "Reddit", steam: "Steam reviews" };
           </li>
         </ul>
       </div>
-
-      <div :class="styles.panel">
-        <h3 :class="styles.h3">Sources</h3>
-        <SourceStatus v-if="social?.sources" :sources="social.sources" />
-        <div v-else :class="[styles.barSkeleton, 'skeleton']" />
-        <p v-if="social && configuredSources.length === 0" :class="styles.hint">
-          No social source is connected yet. Add Reddit or X API credentials to the API’s user secrets and the meter starts pulling live posts.
-        </p>
-        <p :class="styles.hint">
-          Posts from brand-new accounts, repeat posts from one account and copy-pasted text don’t count.
-          <router-link :to="{ name: 'how-it-works' }" :class="styles.hintLink">How scoring works →</router-link>
-        </p>
-      </div>
     </div>
 
     <div :class="styles.feed">
@@ -116,7 +102,7 @@ const platformName = { x: "X", reddit: "Reddit", steam: "Steam reviews" };
         <strong v-if="anyPosts">Nothing matches that filter.</strong>
         <strong v-else>No posts measured yet.</strong>
         <span v-if="!anyPosts">
-          {{ configuredSources.length ? "The sources didn’t return anything for this title. Try a refresh in a bit." : "Connect Reddit or X in the API settings and hit refresh." }}
+          Nobody has posted about this title in a way we can measure yet. Check back soon.
         </span>
       </div>
 
