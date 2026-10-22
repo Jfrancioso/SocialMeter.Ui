@@ -17,9 +17,9 @@ export function useSnapshots() {
     keys.forEach((k) => pending.add(k));
 
     try {
-      // The API caps a request at 200 keys.
-      for (let i = 0; i < keys.length; i += 150) {
-        const chunk = keys.slice(i, i + 150);
+      // The API caps a request at 60 keys.
+      for (let i = 0; i < keys.length; i += 50) {
+        const chunk = keys.slice(i, i + 50);
         const found = await getSnapshots(chunk);
         chunk.forEach((k) => (snapshots[k] = found[k] ?? null));
       }
