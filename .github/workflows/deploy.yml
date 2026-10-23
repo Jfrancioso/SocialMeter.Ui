@@ -12,6 +12,10 @@ concurrency:
   group: deploy-ui
   cancel-in-progress: false
 
+# The workflow token can only read the repository; Azure is reached with its own secret, not this token.
+permissions:
+  contents: read
+
 jobs:
   deploy:
     if: vars.AZURE_SWA_CONFIGURED == 'true'
