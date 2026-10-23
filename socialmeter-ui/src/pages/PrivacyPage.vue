@@ -3,7 +3,7 @@ import styles from "./PrivacyPage.module.css";
 
 // Plain-language privacy notice. Keep it in step with what the API actually stores (Domain/Models/SocialPost.cs) and
 // the retention settings in appsettings.json; change the date below whenever the substance changes.
-const updated = "October 22, 2026";
+const updated = "October 23, 2026";
 const contact = "privacy@chatterbub.com";
 </script>
 
@@ -39,7 +39,8 @@ const contact = "privacy@chatterbub.com";
           <ul :class="styles.list">
             <li>We delete X and Bluesky posts once they’re a year old.</li>
             <li>We delete Steam reviews once they’re 120 days old.</li>
-            <li>We regularly recheck the posts we hold. If a post is deleted where it was published, we delete it here too.</li>
+            <li>We recheck the X and Bluesky posts we hold every day. If a post is deleted where it was published, we delete it here too.</li>
+            <li>We keep daily counts of clicks on links to other sites for as long as they're useful. They hold no personal data.</li>
             <li>We delete Refresh records after 90 days.</li>
           </ul>
         </section>
@@ -60,6 +61,7 @@ const contact = "privacy@chatterbub.com";
             <li>You don’t sign up and we don’t set cookies. Cloudflare may set a strictly necessary security cookie.</li>
             <li>Your browser saves a few display settings on your device, like the spoiler shield and which panels are open. They’re never sent to us.</li>
             <li>When you press Refresh, or a visit brings in new posts, we note the time, the title and whether new posts were pulled. Nothing about who pressed it is kept.</li>
+            <li>When you follow a link to another site (a post, a rating source, a trailer or a store), we add one to a daily count for that kind of link and that site. We don't record who clicked, from where, or from which page.</li>
             <li>Cloudflare and Azure receive your IP address to deliver pages and enforce rate limits. Rate-limit records are kept in memory and cleared within an hour.</li>
             <li>Trailers load only when you press Play trailer. Movie and show trailers then play in YouTube’s privacy-enhanced player, and game trailers stream from Steam, so that service receives your IP address.</li>
             <li>Posters, post images and fonts load from TMDB, Steam, X, Bluesky and Google Fonts. Those services receive your IP address, just as they would from any other site that shows their images.</li>
@@ -69,8 +71,8 @@ const contact = "privacy@chatterbub.com";
         <section :class="styles.section">
           <h2 :class="styles.h2">Removing your post</h2>
           <p>
-            If you delete a post where you published it, it disappears from Chatterbub the next time we check. To have a
-            post removed sooner, or to ask anything about this page, email
+            If you delete a post where you published it, it disappears from Chatterbub the next time we check. We can also
+            remove a post by hand at any time. To have one removed, or to ask anything about this page, email
             <a :href="`mailto:${contact}`" :class="styles.link">{{ contact }}</a> with a link to the post.
           </p>
         </section>

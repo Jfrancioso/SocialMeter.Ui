@@ -65,9 +65,14 @@ export function useTitlePage(route) {
     return ms > 0 ? Math.ceil(ms / 60_000) : 0;
   });
 
+  // The sources have never been read for this title (no reading at all yet, as opposed to a reading with no posts).
+  const neverRead = computed(() => social.value != null && !social.value.lastRefreshedAt);
+  const readsPaused = computed(() => !!social.value?.readsPaused);
+
   const refreshHint = computed(() => {
     if (!social.value || locked.value) return "";
     if (configuredSources.value.length === 0) return "Live updates aren’t available for this title right now.";
+    if (readsPaused.value) return `Live reads are paused for a few minutes. Try again in ${refreshWaitMinutes.value || 5} min.`;
     if (refreshWaitMinutes.value > 0) return `Live pull available again in ${refreshWaitMinutes.value} min`;
     // Steam reviews only exist for games, so a movie or show page doesn't promise them.
     const names = configuredSources.value
@@ -199,7 +204,7 @@ export function useTitlePage(route) {
   return {
     title, ratings, social, explain, history, loading, notFound, error, refreshing, slowLoad,
     feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
-    meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint,
+    meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, readsPaused,
     refresh, loadMore, setFilter, applyModeration
   };
 }

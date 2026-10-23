@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { meterBand } from "../../utils/meter";
+import OutboundLink from "../OutboundLink.vue";
 import styles from "./RatingsStrip.module.css";
 
 const props = defineProps({
@@ -68,13 +69,12 @@ const logos = {
     </div>
 
     <template v-if="ratings">
-      <a
+      <OutboundLink
         v-for="r in ratings"
         :key="r.source"
         :class="[styles.card, !r.available && styles.unavailable]"
-        :href="r.url ?? undefined"
-        :target="r.url ? '_blank' : undefined"
-        rel="noopener"
+        :href="r.url"
+        :kind="r.source.startsWith('steam') ? 'store' : 'rating'"
       >
         <div :class="styles.source">
           <span :class="[styles.logo, styles[`logo-${r.source}`]]">{{ logos[r.source] ?? r.displayName }}</span>
@@ -84,7 +84,7 @@ const logos = {
         <div :class="styles.detail">{{ r.detail }}</div>
         <div v-if="r.available" :class="styles.track"><div :class="styles.fill" :style="{ width: `${r.normalized}%` }" /></div>
         <span v-if="r.url" :class="styles.verify">Verify on {{ r.displayName }} ↗</span>
-      </a>
+      </OutboundLink>
     </template>
     <template v-else>
       <div v-for="i in 4" :key="i" :class="[styles.card, 'skeleton']" />

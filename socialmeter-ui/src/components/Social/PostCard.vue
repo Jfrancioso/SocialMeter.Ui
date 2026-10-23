@@ -4,6 +4,7 @@ import { computed, inject, nextTick, ref, watch } from "vue";
 import { formatCompact, timeAgo } from "../../utils/format";
 import { hidePost, restorePost } from "../../api";
 import { useAdmin } from "../../composables/useAdmin";
+import OutboundLink from "../OutboundLink.vue";
 import PlatformIcon from "./PlatformIcon.vue";
 import styles from "./PostCard.module.css";
 
@@ -181,19 +182,18 @@ const share = computed(() => {
           <span :class="styles.sensitiveTitle">Sensitive media</span>
           <span :class="styles.sensitiveHint">Flagged by {{ platformName(post.platform) }} · tap to show</span>
         </button>
-        <a
+        <OutboundLink
           v-for="(m, i) in media.slice(0, 4)"
           v-else
           :key="i"
           :href="post.sourceUrl ?? m.url"
-          target="_blank"
-          rel="noopener"
+          kind="post"
           :class="styles.mediaItem"
           :title="m.alt || (m.type === 'video' ? 'Video' : 'Image')"
         >
           <img :src="m.url" :alt="m.alt || ''" loading="lazy" :class="styles.mediaImg" />
           <span v-if="m.type !== 'photo'" :class="styles.mediaBadge">{{ m.type === "video" ? "▶ video" : "GIF" }}</span>
-        </a>
+        </OutboundLink>
       </div>
 
       <button v-if="covered" type="button" :class="styles.cover" @click="revealed = true">
@@ -222,7 +222,7 @@ const share = computed(() => {
         <span v-if="share" :class="styles.chip" title="This post's share of everything that went into the score">{{ share }} of score</span>
       </span>
       <button v-if="shielded && revealed" type="button" :class="styles.hide" @click="revealed = false">Hide</button>
-      <a v-if="post.sourceUrl" :href="post.sourceUrl" target="_blank" rel="noopener" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</a>
+      <OutboundLink v-if="post.sourceUrl" :href="post.sourceUrl" kind="post" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</OutboundLink>
       <button v-if="canModerate && !picking" type="button" :class="styles.modButton" title="Admin: remove this post from the feed and the score" @click="startRemove">
         Remove
       </button>

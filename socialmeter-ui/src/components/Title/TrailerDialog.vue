@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import OutboundLink from "../OutboundLink.vue";
 import styles from "./TrailerDialog.module.css";
 
 // Nothing loads until the reader presses Play: YouTube's player (privacy-enhanced, youtube-nocookie.com) for movies and
@@ -118,13 +119,13 @@ onBeforeUnmount(() => {
           <video v-else ref="video" controls playsinline :poster="trailer.thumbnail || undefined" />
           <div v-if="failed" :class="styles.failed">
             This trailer can't play here.
-            <a :href="fallbackUrl" target="_blank" rel="noopener">Watch on Steam ↗</a>
+            <OutboundLink :href="fallbackUrl" kind="trailer">Watch on Steam ↗</OutboundLink>
           </div>
         </div>
 
         <div :class="styles.foot">
           <span :class="styles.source">{{ isYouTube ? "Playing in YouTube's privacy-enhanced player" : "Streaming from Steam" }}</span>
-          <a :href="fallbackUrl" target="_blank" rel="noopener" :class="styles.out">{{ isYouTube ? "Watch on YouTube ↗" : "Watch on Steam ↗" }}</a>
+          <OutboundLink :href="fallbackUrl" kind="trailer" :class="styles.out">{{ isYouTube ? "Watch on YouTube ↗" : "Watch on Steam ↗" }}</OutboundLink>
         </div>
       </div>
     </div>

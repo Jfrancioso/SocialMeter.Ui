@@ -75,6 +75,17 @@ export const getScoreExplanation = (type, id, opts) => httpGet(`/api/socialmeter
 export const getScoreHistory = (type, id, { days = 30 } = {}, opts) =>
   httpGet(`/api/socialmeter/${type}/${id}/history${qs({ days })}`, opts);
 
+/** What the search box shows before anything is typed: { talkedAbout: [{ title, posts }], trending: [title] }. */
+export const getSearchSuggestions = (opts) => httpGet("/api/home/suggestions", opts);
+
+/**
+ * One anonymous outbound-click tally (see utils/outbound.js). Query string only, so the browser sends a plain request
+ * with no preflight; keepalive lets it finish while the new tab opens. Failures are ignored.
+ */
+export function countOutbound(kind, host) {
+  fetch(`${API_BASE}/api/events/outbound${qs({ kind, host })}`, { method: "POST", keepalive: true }).catch(() => {});
+}
+
 /** keys: ["movie:693134", "tv:1399"] → { "movie:693134": { score, label, ... } } (cached readings only) */
 export const getSnapshots = (keys, opts) =>
   keys.length ? httpGet(`/api/socialmeter/snapshots${qs({ keys: keys.join(",") })}`, opts) : Promise.resolve({});

@@ -20,7 +20,23 @@ const props = defineProps({
   feedLoading: { type: Boolean, default: false },
   sentimentFilter: { type: String, default: "" },
   platformFilter: { type: String, default: "" },
-  shielded: { type: Boolean, default: true }
+  shielded: { type: Boolean, default: true },
+  /** The sources have never been read for this title. */
+  neverRead: { type: Boolean, default: false },
+  /** A read was due but the hourly limit on live reads turned it away. */
+  readsPaused: { type: Boolean, default: false }
+});
+
+// With nothing counted there is nothing to chart or filter: one clear message instead of empty bars and chips.
+const emptyTitle = computed(() => (props.neverRead ? "Not read yet" : "No posts measured yet"));
+const emptyText = computed(() => {
+  if (props.neverRead && props.readsPaused)
+    return "We haven’t read posts for this title yet. Live reads pause for a few minutes when lots of new titles are opened at once. Check back shortly.";
+  if (props.neverRead) return "We haven’t read posts for this title yet.";
+  const filtered = props.meter?.filteredPosts ?? 0;
+  if (filtered > 0)
+    return `We found ${filtered} ${filtered === 1 ? "post" : "posts"}, but none passed our filters yet: not about this title, duplicates, or brand-new accounts.`;
+  return "Nobody has posted about this title in a way we can measure yet. Check back soon.";
 });
 
 defineEmits(["filter", "load-more", "toggle-shield"]);
@@ -48,6 +64,11 @@ const platformChips = computed(() =>
   <div v-if="locked && !anyPosts" :class="styles.lockedPulse">
     <strong>No posts collected for this title.</strong>
     <span>It isn’t in the tracked set, so Chatterbub isn’t reading posts about it. Critic and audience ratings above are still live.</span>
+  </div>
+
+  <div v-else-if="social && meter && !anyPosts" :class="styles.lockedPulse">
+    <strong>{{ emptyTitle }}</strong>
+    <span>{{ emptyText }}</span>
   </div>
 
   <div v-else :class="styles.pulse">

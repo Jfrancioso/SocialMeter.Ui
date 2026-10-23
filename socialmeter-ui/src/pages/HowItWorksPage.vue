@@ -95,7 +95,7 @@ const notes = [
   ["It is not a critic score.", "Critics are on the ratings strip next to it. The meter is the audience, unfiltered — then filtered for bots."],
   ["It moves.", "Opinions shift after opening weekend, after a finale, after one thread blows up. Readings refresh every few hours."],
   ["Low confidence means low confidence.", "A reading built on a handful of posts is pulled toward 50 and shown with a wide range. We say so right next to the number, and the “why this score” panel on every title shows the posts and the arithmetic."],
-  ["Deleted there, deleted here.", "We re-check every stored post against the site it came from daily. If you deleted it, or a moderator removed it, it leaves our database and the score is recomputed without it. Nothing is kept longer than a year."],
+  ["Deleted there, deleted here.", "We re-check stored X and Bluesky posts against the site they came from every day. If you deleted one, or a moderator there removed it, it leaves our database and the score is recomputed without it. Steam reviews are kept for 120 days, and nothing is kept longer than a year. We can also remove a post by hand if it slips past our filters; the score panel counts those as “removed by a moderator”."],
   ["We publish the maths, not the cut-offs.", "The aggregation is below in full, with a worked example. Exact cut-offs for account age, reputation and playtime aren’t published: if they were, the first thing anyone would do is build accounts that just clear them."]
 ];
 </script>

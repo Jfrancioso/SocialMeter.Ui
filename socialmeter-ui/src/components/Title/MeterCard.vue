@@ -18,7 +18,11 @@ defineProps({
   refreshWaitMinutes: { type: Number, default: 0 },
   configuredSources: { type: Array, default: () => [] },
   refreshHint: { type: String, default: "" },
-  trendFact: { type: Object, default: null }
+  trendFact: { type: Object, default: null },
+  /** The sources have never been read for this title. */
+  neverRead: { type: Boolean, default: false },
+  /** A read was due but the hourly limit on live reads turned it away. */
+  readsPaused: { type: Boolean, default: false }
 });
 
 defineEmits(["refresh"]);
@@ -38,6 +42,15 @@ const shareOpen = ref(false);
       <p v-if="slowLoad" :class="styles.slowHint">Reading the room: pulling fresh posts and reading each one. First looks take about half a minute.</p>
     </template>
 
+    <template v-else-if="neverRead && !locked">
+      <div :class="styles.lockedPanel">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        <strong>Not read yet</strong>
+        <span v-if="readsPaused">We haven’t read posts for this title yet. Live reads pause for a few minutes when lots of new titles are opened at once. Check back shortly.</span>
+        <span v-else>We haven’t read posts for this title yet. Press Refresh to take a first look.</span>
+      </div>
+    </template>
+
     <template v-else-if="locked && !anyPosts">
       <div :class="styles.lockedPanel">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
@@ -50,8 +63,9 @@ const shareOpen = ref(false);
     <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" :margin="meter?.stats?.margin ?? null" size="lg" />
 
     <p v-if="locked && anyPosts" :class="styles.leftover">Last reading from when this title was tracked. It isn’t being updated.</p>
+    <p v-else-if="readsPaused && !neverRead" :class="styles.leftover">Showing the last reading. Live reads are paused for a few minutes.</p>
 
-    <div v-if="meter && !(locked && !anyPosts)" :class="styles.facts">
+    <div v-if="meter && !neverRead && !(locked && !anyPosts)" :class="styles.facts">
       <span :class="styles.fact"><strong>{{ formatNumber(meter.totalPosts) }}</strong> {{ meter.totalPosts === 1 ? "post" : "posts" }} counted</span>
       <span v-if="meter.filteredPosts" :class="styles.fact" title="Set aside by the trust filter: new accounts, duplicates, pile-ons">
         <strong>{{ formatNumber(meter.filteredPosts) }}</strong> filtered

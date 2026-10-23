@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { timeAgo } from "../../utils/format";
 import TrendLine from "../Meter/TrendLine.vue";
 import ShareBar from "../Meter/ShareBar.vue";
+import OutboundLink from "../OutboundLink.vue";
 import PlatformIcon from "./PlatformIcon.vue";
 import styles from "./ScoreExplain.module.css";
 
@@ -170,7 +171,7 @@ const covered = (id) => props.shielded && !revealed.value.has(id);
               <span :class="[styles.chip, styles[`chip-${d.sentiment}`]]">read as {{ d.sentiment }} {{ signed(d.sentimentScore) }}</span>
               <span :class="styles.chip" :title="substanceHint[d.substanceLevel]">{{ substanceLabel[d.substanceLevel] ?? d.substanceLevel }}</span>
               <span v-if="d.trustLevel === 'reduced'" :class="[styles.chip, styles.chipMuted]" title="The trust policy discounted this author">reduced weight</span>
-              <a v-if="d.sourceUrl" :href="d.sourceUrl" target="_blank" rel="noopener" :class="styles.driverLink">{{ platformName[d.platform] ?? d.platform }} ↗</a>
+              <OutboundLink v-if="d.sourceUrl" :href="d.sourceUrl" kind="post" :class="styles.driverLink">{{ platformName[d.platform] ?? d.platform }} ↗</OutboundLink>
             </div>
           </div>
         </li>

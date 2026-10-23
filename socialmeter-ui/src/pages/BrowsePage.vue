@@ -20,10 +20,11 @@ const screenTabs = [
   { key: "top-rated", label: "Top rated", fetch: (type, page) => getTopRated(type, page) }
 ];
 
-// Steam has no "top rated" list; its lists are about what's selling and being played right now.
+// Steam has no "top rated" list; its lists are about what's selling and being played right now. Most played opens
+// first: Steam's top-sellers list is often only a handful of games once bundles and DLC are filtered out.
 const gameTabs = [
-  { key: "trending", label: "Top sellers", fetch: (type, page) => getTrending(type, page) },
   { key: "popular", label: "Most played", fetch: (type, page) => getPopular(type, page) },
+  { key: "trending", label: "Top sellers", fetch: (type, page) => getTrending(type, page) },
   { key: "new", label: "New releases", fetch: (type, page) => getNewGames(page) },
   { key: "coming-soon", label: "Coming soon", fetch: (type, page) => getComingSoonGames(page) }
 ];
