@@ -87,6 +87,7 @@ onMounted(async () => {
 
         <PosterRow
           v-for="row in rows"
+          :id="row.key"
           :key="row.key"
           :title="row.title"
           :subtitle="row.subtitle"
