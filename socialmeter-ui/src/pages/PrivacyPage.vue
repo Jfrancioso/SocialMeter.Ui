@@ -49,7 +49,7 @@ const contact = "privacy@chatterbub.com";
           <h2 :class="styles.h2">Services that handle data for us</h2>
           <ul :class="styles.list">
             <li><strong>Anthropic</strong> (the Claude API) reads post text to judge how the author feels about the title. Under Anthropic’s commercial terms, that text isn’t used to train its models.</li>
-            <li><strong>Microsoft Azure</strong> runs the service and its database.</li>
+            <li><strong>Microsoft Azure</strong> runs the service and its database. Its Application Insights records how our server handles each request (the page path, how long it took, any error) so we can find and fix problems. It runs on our server, not in your browser, sets no cookies, doesn’t keep your IP address, and blanks out what you type into search.</li>
             <li><strong>Cloudflare</strong> delivers the site, blocks abuse and counts visits without cookies.</li>
             <li><strong>TMDB, OMDb, IMDb, Rotten Tomatoes, Metacritic and Steam</strong> provide title details and ratings. We send them only which title we’re looking up, never anything about you.</li>
           </ul>

@@ -15,10 +15,15 @@ export function runtimeLabel(minutes) {
   return h ? `${h}h ${m ? `${m}m` : ""}`.trim() : `${m}m`;
 }
 
+/** The API's times are UTC but some arrive without the trailing Z; without it the browser would read them as local time. */
+export function parseUtc(iso) {
+  return new Date(iso.endsWith("Z") || /[+-]\d\d:\d\d$/.test(iso) ? iso : `${iso}Z`);
+}
+
 /** "3h ago", "2d ago", "Mar 2024" */
 export function timeAgo(iso) {
   if (!iso) return "";
-  const then = new Date(iso.endsWith("Z") ? iso : `${iso}Z`);
+  const then = parseUtc(iso);
   const diff = (Date.now() - then.getTime()) / 1000;
   if (diff < 60) return "just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;

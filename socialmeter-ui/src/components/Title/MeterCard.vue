@@ -21,8 +21,8 @@ defineProps({
   trendFact: { type: Object, default: null },
   /** The sources have never been read for this title. */
   neverRead: { type: Boolean, default: false },
-  /** A read was due but the hourly limit on live reads turned it away. */
-  readsPaused: { type: Boolean, default: false }
+  /** Set when a read was due but a limit on live reads turned it away: says for how long. Empty otherwise. */
+  pauseNote: { type: String, default: "" }
 });
 
 defineEmits(["refresh"]);
@@ -46,7 +46,7 @@ const shareOpen = ref(false);
       <div :class="styles.lockedPanel">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
         <strong>Not read yet</strong>
-        <span v-if="readsPaused">We haven’t read posts for this title yet. Live reads pause for a few minutes when lots of new titles are opened at once. Check back shortly.</span>
+        <span v-if="pauseNote">We haven’t read posts for this title yet. {{ pauseNote }}</span>
         <span v-else>We haven’t read posts for this title yet. Press Refresh to take a first look.</span>
       </div>
     </template>
@@ -63,7 +63,7 @@ const shareOpen = ref(false);
     <MeterGauge v-else :score="meter?.score" :total-posts="meter?.totalPosts ?? 0" :label="meter?.label" :margin="meter?.stats?.margin ?? null" size="lg" />
 
     <p v-if="locked && anyPosts" :class="styles.leftover">Last reading from when this title was tracked. It isn’t being updated.</p>
-    <p v-else-if="readsPaused && !neverRead" :class="styles.leftover">Showing the last reading. Live reads are paused for a few minutes.</p>
+    <p v-else-if="pauseNote && !neverRead" :class="styles.leftover">Showing the last reading. {{ pauseNote }}</p>
 
     <div v-if="meter && !neverRead && !(locked && !anyPosts)" :class="styles.facts">
       <span :class="styles.fact"><strong>{{ formatNumber(meter.totalPosts) }}</strong> {{ meter.totalPosts === 1 ? "post" : "posts" }} counted</span>

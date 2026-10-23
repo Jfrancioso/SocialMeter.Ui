@@ -1,6 +1,7 @@
 import { joinNames, platformName } from "../utils/platforms";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
+import { parseUtc } from "../utils/format";
 import { useSnapshots } from "./useSnapshots";
 
 /**
@@ -61,7 +62,7 @@ export function useTitlePage(route) {
   const refreshWaitMinutes = computed(() => {
     const at = social.value?.nextRefreshAllowedAt;
     if (!at) return 0;
-    const ms = new Date(at.endsWith("Z") ? at : `${at}Z`).getTime() - now.value;
+    const ms = parseUtc(at).getTime() - now.value;
     return ms > 0 ? Math.ceil(ms / 60_000) : 0;
   });
 
@@ -69,10 +70,22 @@ export function useTitlePage(route) {
   const neverRead = computed(() => social.value != null && !social.value.lastRefreshedAt);
   const readsPaused = computed(() => !!social.value?.readsPaused);
 
+  // Why live reads are paused and for how long, from the API's own answer: the hourly budget hands reads back within
+  // minutes, the daily limits reset at midnight UTC, and reads switched off by the operator come with no time at all.
+  // One sentence, used by the score card, the posts panel and the Refresh hint.
+  const pauseNote = computed(() => {
+    if (!readsPaused.value) return "";
+    const at = social.value?.nextRefreshAllowedAt;
+    if (!at) return "Live reads are paused for now.";
+    if (refreshWaitMinutes.value <= 15) return "Live reads are paused for a few minutes.";
+    return `Live reads are paused until ${parseUtc(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`;
+  });
+
   const refreshHint = computed(() => {
     if (!social.value || locked.value) return "";
     if (configuredSources.value.length === 0) return "Live updates aren’t available for this title right now.";
-    if (readsPaused.value) return `Live reads are paused for a few minutes. Try again in ${refreshWaitMinutes.value || 5} min.`;
+    if (readsPaused.value)
+      return refreshWaitMinutes.value > 0 && refreshWaitMinutes.value <= 15 ? `${pauseNote.value} Try again in ${refreshWaitMinutes.value} min.` : pauseNote.value;
     if (refreshWaitMinutes.value > 0) return `Live pull available again in ${refreshWaitMinutes.value} min`;
     // Steam reviews only exist for games, so a movie or show page doesn't promise them.
     const names = configuredSources.value
@@ -204,7 +217,7 @@ export function useTitlePage(route) {
   return {
     title, ratings, social, explain, history, loading, notFound, error, refreshing, slowLoad,
     feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
-    meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, readsPaused,
+    meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
     refresh, loadMore, setFilter, applyModeration
   };
 }

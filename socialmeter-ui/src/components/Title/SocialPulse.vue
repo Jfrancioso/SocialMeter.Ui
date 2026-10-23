@@ -23,15 +23,14 @@ const props = defineProps({
   shielded: { type: Boolean, default: true },
   /** The sources have never been read for this title. */
   neverRead: { type: Boolean, default: false },
-  /** A read was due but the hourly limit on live reads turned it away. */
-  readsPaused: { type: Boolean, default: false }
+  /** Set when a read was due but a limit on live reads turned it away: says for how long. Empty otherwise. */
+  pauseNote: { type: String, default: "" }
 });
 
 // With nothing counted there is nothing to chart or filter: one clear message instead of empty bars and chips.
 const emptyTitle = computed(() => (props.neverRead ? "Not read yet" : "No posts measured yet"));
 const emptyText = computed(() => {
-  if (props.neverRead && props.readsPaused)
-    return "We haven’t read posts for this title yet. Live reads pause for a few minutes when lots of new titles are opened at once. Check back shortly.";
+  if (props.neverRead && props.pauseNote) return `We haven’t read posts for this title yet. ${props.pauseNote}`;
   if (props.neverRead) return "We haven’t read posts for this title yet.";
   const filtered = props.meter?.filteredPosts ?? 0;
   if (filtered > 0)

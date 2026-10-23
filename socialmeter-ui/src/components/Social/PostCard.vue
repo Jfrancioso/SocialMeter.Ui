@@ -4,6 +4,7 @@ import { computed, inject, nextTick, ref, watch } from "vue";
 import { formatCompact, timeAgo } from "../../utils/format";
 import { hidePost, restorePost } from "../../api";
 import { useAdmin } from "../../composables/useAdmin";
+import { MODERATION_REASONS, reasonLabel } from "../../utils/moderation";
 import OutboundLink from "../OutboundLink.vue";
 import PlatformIcon from "./PlatformIcon.vue";
 import styles from "./PostCard.module.css";
@@ -32,13 +33,7 @@ async function startRemove() {
 
 // Switching Remove buttons off mid-way closes an open confirm step.
 watch(canModerate, (on) => { if (!on) picking.value = false; });
-const reasons = [
-  { value: "sensitive", label: "Sensitive" },
-  { value: "spam", label: "Spam" },
-  { value: "off-topic", label: "Off-topic" },
-  { value: "wrong-title", label: "Wrong title" },
-  { value: "other", label: "Other" }
-];
+const reasons = MODERATION_REASONS;
 const picking = ref(false);
 const working = ref(false);
 const modError = ref(null);
@@ -49,7 +44,7 @@ async function remove(reason) {
   modError.value = null;
   try {
     const result = await hidePost(props.post.id, reason, moderation.titleName.value);
-    removed.value = { reason: reasons.find((r) => r.value === reason)?.label ?? reason, score: result.score, label: result.label };
+    removed.value = { reason: reasonLabel(reason), score: result.score, label: result.label };
     picking.value = false;
     moderation.onModerated(result);
   } catch (e) {

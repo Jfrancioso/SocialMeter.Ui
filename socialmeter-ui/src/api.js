@@ -144,6 +144,9 @@ export const hidePost = (id, reason, titleName) => adminFetch(`/api/admin/posts/
 export const restorePost = (id) => adminFetch(`/api/admin/posts/${id}/restore`, { method: "POST" });
 export const getModerationLog = (take = 50) => adminFetch(`/api/admin/moderation${qs({ take })}`);
 
+/** Today's spend and pulls against the limits, each outside service's health, and the watch windows. */
+export const getGuardrails = () => adminFetch("/api/admin/guardrails");
+
 /** Where the browser goes to sign in: Cloudflare asks for the one-time code, then the API sends it back to /admin. */
 export const adminSignInUrl = () => `${API_BASE}/api/admin/sign-in${qs({ returnTo: `${window.location.origin}/admin` })}`;
 

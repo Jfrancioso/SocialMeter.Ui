@@ -21,7 +21,7 @@ const page = useTitlePage(() => ({ type: props.type, id: props.id }));
 const {
   title, ratings, social, explain, history, loading, notFound, error, refreshing, slowLoad,
   feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
-  meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, readsPaused,
+  meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
   refresh, loadMore, setFilter
 } = page;
 
@@ -139,7 +139,7 @@ const metaBits = computed(() => {
           <aside :class="styles.heroMeter">
             <MeterCard
             :never-read="neverRead"
-            :reads-paused="readsPaused"
+            :pause-note="pauseNote"
               :title="title"
               :ratings="ratings"
               :social="social"
@@ -178,7 +178,7 @@ const metaBits = computed(() => {
           </div>
           <SocialPulse
             :never-read="neverRead"
-            :reads-paused="readsPaused"
+            :pause-note="pauseNote"
             :type="type"
             :social="social"
             :meter="meter"

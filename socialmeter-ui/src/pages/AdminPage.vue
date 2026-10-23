@@ -1,9 +1,11 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { adminSignInUrl, getModerationLog, restorePost, setDevAdminKey } from "../api";
+import HealthPanel from "../components/Admin/HealthPanel.vue";
 import { useAdmin } from "../composables/useAdmin";
+import { mediaLabel, parseUtc, timeAgo } from "../utils/format";
+import { reasonLabel } from "../utils/moderation";
 import { platformName } from "../utils/platforms";
-import { timeAgo } from "../utils/format";
 import styles from "./AdminPage.module.css";
 
 // The operator's page. Signing in happens at Cloudflare (production) or with the admin key (local development); the
@@ -16,9 +18,6 @@ const log = ref([]);
 const logLoading = ref(false);
 const logError = ref(null);
 const busy = ref(new Set());
-
-const reasonLabel = { sensitive: "Sensitive", spam: "Spam", "off-topic": "Off-topic", "wrong-title": "Wrong title", other: "Other" };
-const typeLabel = { movie: "Movie", tv: "TV", game: "Game" };
 
 const signedIn = computed(() => !!admin.actor);
 
@@ -71,7 +70,7 @@ onMounted(start);
     <div class="container">
       <header :class="styles.head">
         <span :class="styles.eyebrow">Admin</span>
-        <h1 :class="styles.title">Moderation</h1>
+        <h1 :class="styles.title">Command center</h1>
         <p v-if="signedIn" :class="styles.who">
           Signed in as <strong>{{ admin.actor }}</strong>
           <button type="button" :class="styles.linkButton" @click="signOut">Sign out</button>
@@ -97,6 +96,8 @@ onMounted(start);
       </section>
 
       <template v-else>
+        <HealthPanel />
+
         <section :class="styles.panel">
           <h2 :class="styles.h2">Removing a post</h2>
           <p :class="styles.muted">
@@ -120,11 +121,11 @@ onMounted(start);
                 <span :class="[styles.badge, e.action === 'hide' ? styles.badgeHide : styles.badgeRestore]">
                   {{ e.action === "hide" ? "Removed" : "Restored" }}
                 </span>
-                <span v-if="e.reason" :class="styles.reason">{{ reasonLabel[e.reason] ?? e.reason }}</span>
+                <span v-if="e.reason" :class="styles.reason">{{ reasonLabel(e.reason) }}</span>
                 <router-link :to="`/title/${e.mediaType}/${e.tmdbId}`" :class="styles.titleLink">
-                  {{ e.titleName || `${typeLabel[e.mediaType] ?? e.mediaType} ${e.tmdbId}` }}
+                  {{ e.titleName || `${mediaLabel(e.mediaType)} ${e.tmdbId}` }}
                 </router-link>
-                <span :class="styles.when" :title="new Date(e.at.endsWith('Z') ? e.at : `${e.at}Z`).toLocaleString()">{{ timeAgo(e.at) }}</span>
+                <span :class="styles.when" :title="parseUtc(e.at).toLocaleString()">{{ timeAgo(e.at) }}</span>
               </div>
               <p v-if="e.postGone" :class="styles.muted">The post has since been deleted where it was published.</p>
               <p v-else :class="styles.excerpt">
