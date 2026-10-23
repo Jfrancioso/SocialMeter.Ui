@@ -2,6 +2,7 @@ import { joinNames, platformName } from "../utils/platforms";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
 import { parseUtc } from "../utils/format";
+import { setPageMeta, titleMeta } from "../utils/pageMeta";
 import { useSnapshots } from "./useSnapshots";
 
 /**
@@ -208,6 +209,11 @@ export function useTitlePage(route) {
   const loadMore = () => loadFeed(feedPage.value + 1);
 
   watch(route, load, { immediate: true });
+
+  // The tab title and description say what the edge Worker put in the first HTML (search engines read both).
+  watch([title, meter], ([t, m]) => {
+    if (t) setPageMeta(titleMeta(route().type, t, m));
+  });
   onBeforeUnmount(() => {
     controller?.abort();
     clearInterval(clock);

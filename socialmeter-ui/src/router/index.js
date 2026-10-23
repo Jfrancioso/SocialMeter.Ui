@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { setPageMeta } from "../utils/pageMeta";
 
-export default createRouter({
+// Tab titles for the fixed pages. Title pages set their own once the title loads (useTitlePage); the admin page sets its own.
+const PAGE_TITLES = {
+  "how-it-works": "How it works · Chatterbub",
+  privacy: "Privacy · Chatterbub",
+  search: "Search · Chatterbub"
+};
+const BROWSE_TITLES = { movie: "Movies", tv: "TV shows", game: "Games" };
+
+const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: "/", name: "home", component: () => import("../pages/HomePage.vue") },
@@ -33,3 +42,11 @@ export default createRouter({
     return { left: 0, top: 0 };
   }
 });
+
+router.afterEach((to) => {
+  if (to.name === "title" || to.name === "admin") return;
+  const title = to.name === "browse" ? `${BROWSE_TITLES[to.params.type]} · Chatterbub` : PAGE_TITLES[to.name];
+  setPageMeta({ title });
+});
+
+export default router;

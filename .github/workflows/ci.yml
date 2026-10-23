@@ -37,3 +37,8 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # The edge Worker (edge/seo-worker) has no dependencies; its tests use Node's built-in runner.
+      - name: Test the SEO Worker
+        working-directory: edge/seo-worker
+        run: node --test

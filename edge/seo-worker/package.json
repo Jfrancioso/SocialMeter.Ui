@@ -1,0 +1,10 @@
+{
+  "name": "chatterbub-seo-worker",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker that gives Chatterbub's title pages real titles, descriptions, link previews and structured data, and serves sitemap.xml.",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "node deploy.mjs"
+  }
+}
