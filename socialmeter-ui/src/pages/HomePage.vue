@@ -9,6 +9,7 @@ import styles from "./HomePage.module.css";
 const { ensure } = useSnapshots();
 
 const featured = ref(null);
+const featuredMeta = ref({ label: "", posts: null, days: 3 });
 const rows = ref([]);
 const loading = ref(true);
 const error = ref(null);
@@ -35,6 +36,7 @@ onMounted(async () => {
   try {
     const data = await getHome("US");
     featured.value = data.featured;
+    featuredMeta.value = { label: data.featuredLabel || "Trending on TMDB", posts: data.featuredPosts ?? null, days: data.featuredWindowDays || 3 };
     rows.value = data.rows;
     ensure(data.rows.flatMap((r) => r.items));
   } catch (e) {
@@ -64,7 +66,7 @@ onMounted(async () => {
       </div>
 
       <template v-else>
-        <HeroBanner v-if="featured" :title="featured" />
+        <HeroBanner v-if="featured" :title="featured" :label="featuredMeta.label" :posts="featuredMeta.posts" :days="featuredMeta.days" />
 
         <section :class="styles.legend" aria-label="How the meter reads">
           <div :class="styles.legendIntro">
