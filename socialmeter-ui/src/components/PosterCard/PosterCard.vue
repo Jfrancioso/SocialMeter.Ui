@@ -32,6 +32,10 @@ const rating = computed(() =>
   isGame.value ? `${Math.round(props.title.voteAverage * 10)}%` : props.title.voteAverage.toFixed(1)
 );
 const ratingSource = computed(() => (isGame.value ? "Steam reviews, all time" : "TMDB user score"));
+
+// Crowd vs critics: when the critics' score is known (Tomatometer and Metascore averaged), it sits under the poster and the
+// crowd's sits on it, so the two can be compared at a glance.
+const critics = computed(() => (isGame.value ? null : reading.value?.criticsScore ?? null));
 </script>
 
 <template>
@@ -52,7 +56,11 @@ const ratingSource = computed(() => (isGame.value ? "Steam reviews, all time" : 
       <div :class="styles.name">{{ title.name }}</div>
       <div :class="styles.sub">
         <span v-if="yearOf(title.releaseDate)">{{ yearOf(title.releaseDate) }}</span>
-        <span v-if="title.voteCount" :class="styles.rating" :title="ratingSource" :aria-label="`${ratingSource}: ${rating}`">
+        <span v-if="critics != null" :class="styles.rating" title="Critics: Rotten Tomatoes and Metacritic averaged" :aria-label="`Critics score: ${critics}`">
+          <span :class="styles.criticsMark" aria-hidden="true">CRITICS</span>
+          {{ critics }}
+        </span>
+        <span v-else-if="title.voteCount" :class="styles.rating" :title="ratingSource" :aria-label="`${ratingSource}: ${rating}`">
           <PlatformIcon v-if="isGame" platform="steam" :size="12" />
           <span v-else :class="styles.tmdbMark" aria-hidden="true">TMDB</span>
           {{ rating }}
