@@ -24,7 +24,7 @@ provide("season", season);
     <span>Title data and images from TMDB and Steam. Ratings from TMDB, IMDb, Rotten Tomatoes, Metacritic and Steam.</span>
     <span>
       This product uses the <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a> API but is not endorsed or certified by TMDB.
-      IMDb ratings: information courtesy of <a href="https://www.imdb.com" target="_blank" rel="noopener">IMDb</a>, used with permission.
+      IMDb ratings: Information courtesy of IMDb (<a href="https://www.imdb.com" target="_blank" rel="noopener">https://www.imdb.com</a>). Used with permission.
     </span>
     <nav class="app-footer-links" aria-label="About Chatterbub">
       <router-link :to="{ name: 'how-it-works' }">How it works</router-link>

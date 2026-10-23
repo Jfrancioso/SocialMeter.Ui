@@ -136,15 +136,23 @@
   font-size: 12px;
 }
 
-.tmdb {
+.rating {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   color: var(--text-2);
 }
 
-.tmdb svg {
-  color: var(--accent);
+/* TMDB's own name in its brand blue, as their attribution guidelines ask; not a copy of the logo. */
+.tmdbMark {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #0d253f;
+  background: #01b4e4;
 }
 
 @media (max-width: 640px) {

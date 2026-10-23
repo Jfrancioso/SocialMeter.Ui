@@ -4,6 +4,7 @@ import { tmdbImage } from "../../utils/tmdbImage";
 import { mediaLabel, yearOf } from "../../utils/format";
 import { useSnapshots } from "../../composables/useSnapshots";
 import MeterBadge from "../Meter/MeterBadge.vue";
+import PlatformIcon from "../Social/PlatformIcon.vue";
 import styles from "./PosterCard.module.css";
 
 const props = defineProps({
@@ -23,6 +24,14 @@ const poster = computed(() =>
   posterFailed.value ? props.title.headerImage || tmdbImage(props.title.backdropPath) : tmdbImage(props.title.posterPath, "w342")
 );
 const to = computed(() => ({ name: "title", params: { type: props.title.mediaType, id: props.title.tmdbId } }));
+
+// The rating under the poster is someone else's, so it says whose: TMDB's user score for movies and shows, Steam's
+// all-time share of positive reviews for games (stored as a 0-10 average, shown as the percentage Steam shows).
+const isGame = computed(() => props.title.mediaType === "game");
+const rating = computed(() =>
+  isGame.value ? `${Math.round(props.title.voteAverage * 10)}%` : props.title.voteAverage.toFixed(1)
+);
+const ratingSource = computed(() => (isGame.value ? "Steam reviews, all time" : "TMDB user score"));
 </script>
 
 <template>
@@ -43,9 +52,10 @@ const to = computed(() => ({ name: "title", params: { type: props.title.mediaTyp
       <div :class="styles.name">{{ title.name }}</div>
       <div :class="styles.sub">
         <span v-if="yearOf(title.releaseDate)">{{ yearOf(title.releaseDate) }}</span>
-        <span v-if="title.voteCount" :class="styles.tmdb">
-          <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="m12 2 2.9 6.6 7.1.7-5.4 4.8 1.6 7L12 17.5 5.8 21l1.6-7L2 9.3l7.1-.7z"/></svg>
-          {{ title.voteAverage.toFixed(1) }}
+        <span v-if="title.voteCount" :class="styles.rating" :title="ratingSource" :aria-label="`${ratingSource}: ${rating}`">
+          <PlatformIcon v-if="isGame" platform="steam" :size="12" />
+          <span v-else :class="styles.tmdbMark" aria-hidden="true">TMDB</span>
+          {{ rating }}
         </span>
       </div>
     </div>
