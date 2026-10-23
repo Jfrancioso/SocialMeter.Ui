@@ -134,6 +134,7 @@ onMounted(start);
               </p>
               <div :class="styles.entryFoot">
                 <span :class="styles.muted">by {{ e.actor }}</span>
+                <!-- A plain link on purpose: the operator checking a post isn't a visitor's click, so it isn't counted. -->
                 <a v-if="e.sourceUrl" :href="e.sourceUrl" target="_blank" rel="noopener" :class="styles.titleLink">Open post ↗</a>
                 <button v-if="e.action === 'hide' && e.currentlyHidden" type="button" class="btn" :disabled="busy.has(e.id)" @click="restore(e)">
                   {{ busy.has(e.id) ? "Restoring…" : "Restore" }}

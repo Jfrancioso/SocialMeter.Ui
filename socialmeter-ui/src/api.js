@@ -13,6 +13,19 @@ export class ApiError extends Error {
 // after a short pause so a restart reads as a slow load, not an outage. 4xx answers are final and never retried.
 const RETRY_AFTER_MS = 3000;
 
+/** The API's own explanation of a failed request (ProblemDetails title, or an error field), else the HTTP status. */
+async function errorFrom(res) {
+  let message = `${res.status} ${res.statusText}`;
+  try {
+    const body = await res.json();
+    if (body?.title) message = body.title;
+    if (body?.error) message = body.error;
+  } catch {
+    // body wasn't JSON; keep the status text
+  }
+  return new ApiError(res.status, message);
+}
+
 async function httpGet(path, { signal } = {}, attempt = 0) {
   let res;
   try {
@@ -26,17 +39,7 @@ async function httpGet(path, { signal } = {}, attempt = 0) {
     await new Promise((r) => setTimeout(r, RETRY_AFTER_MS));
     return httpGet(path, { signal }, attempt + 1);
   }
-  if (!res.ok) {
-    let message = `${res.status} ${res.statusText}`;
-    try {
-      const body = await res.json();
-      if (body?.title) message = body.title;
-      if (body?.error) message = body.error;
-    } catch {
-      // body wasn't JSON; keep the status text
-    }
-    throw new ApiError(res.status, message);
-  }
+  if (!res.ok) throw await errorFrom(res);
   return res.json();
 }
 
@@ -126,16 +129,7 @@ async function adminFetch(path, { method = "GET", body } = {}) {
     // Signed out, Access answers with a redirect to its sign-in page, which a cross-site fetch can't follow.
     throw new ApiError(0, "Not signed in");
   }
-  if (!res.ok) {
-    let message = `${res.status} ${res.statusText}`;
-    try {
-      const data = await res.json();
-      if (data?.title) message = data.title;
-    } catch {
-      // not JSON
-    }
-    throw new ApiError(res.status, message);
-  }
+  if (!res.ok) throw await errorFrom(res);
   return res.json();
 }
 

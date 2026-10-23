@@ -12,9 +12,11 @@ const props = defineProps({
 
 const target = computed(() => outboundHref(props.href));
 const count = () => trackOutbound(props.href, props.kind);
+// auxclick also fires for the right button, which only opens the menu; the middle button opens a new tab.
+const countMiddle = (e) => { if (e.button === 1) count(); };
 </script>
 
 <template>
-  <a v-if="href" :href="target" target="_blank" rel="noopener" @click="count" @auxclick="count"><slot /></a>
+  <a v-if="href" :href="target" target="_blank" rel="noopener" @click="count" @auxclick="countMiddle"><slot /></a>
   <a v-else><slot /></a>
 </template>
