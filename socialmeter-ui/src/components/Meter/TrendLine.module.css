@@ -59,3 +59,15 @@
   color: var(--text-3);
   font-size: 13px;
 }
+
+.change line {
+  stroke: var(--text-3);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+
+.change text {
+  fill: var(--text-3);
+  font-size: 10px;
+  font-weight: 700;
+}

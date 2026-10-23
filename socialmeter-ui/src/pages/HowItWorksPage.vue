@@ -40,16 +40,16 @@ const steps = [
 // The aggregation, in full. Thresholds for trust stay private; the maths does not — a score nobody can check is a vibe.
 const methods = [
   {
-    name: "Weighted mean",
-    what: "Each post’s sentiment (−1 to +1) is weighted by engagement (log-scaled), recency, trust and substance. The weighted average, mapped to 0–100, is the raw score."
+    name: "Tone and approval",
+    what: "Each post counts half for its tone (how strongly the author feels, −1 to +1) and half for its verdict (+1 liked it, −1 didn’t, 0 for a mixed or lukewarm reaction). Posts are weighted by engagement (log-scaled), recency, trust and substance, and the weighted average, mapped to 0–100, is the raw score. Approval says how many people liked it; tone says how strongly. Since 23 October 2026: before that the score averaged tone alone, which undersold praise that was near-unanimous but rarely worded at full strength."
   },
   {
     name: "Effective posts (Kish)",
-    what: "Kish’s effective sample size, (Σw)² / Σw², says how many equal posts a weight profile is worth — one viral post among ten is worth about one. Multiplied by the average trust-and-substance credit, so forty throwaway posts are worth a few."
+    what: "Kish’s effective sample size, (Σw)² / Σw², says how many equal posts a weight profile is worth — one viral post among ten is worth about one. Multiplied by the average trust, so forty posts from throwaway accounts are worth a few. Substance changes how much each post weighs, not how many posts there are."
   },
   {
     name: "Bayesian average",
-    what: "The same formula IMDb publishes for its Top 250: score = (n·mean + k·neutral) / (n + k), where n is effective posts and k is currently six. With six effective posts the data and the prior count equally; Electric needs several times that."
+    what: "The same formula IMDb publishes for its Top 250: score = (n·mean + k·neutral) / (n + k), where n is effective posts and k is currently four. With four effective posts the data and the prior count equally; Electric needs several times that."
   },
   {
     name: "95% range",
@@ -73,12 +73,12 @@ const example = {
     { who: "X · 0 likes · 1 day old · young account", text: "mid", read: "−0.30", substance: "Bare", trust: "reduced", weight: "0.33" }
   ],
   steps: [
-    ["Weighted mean", "(1.83·0.80 + 2.62·0.50 − 0.33·0.30) / 4.77 = +0.56 → raw score 78"],
-    ["Effective posts", "Kish: 4.77² / (1.83² + 2.62² + 0.33²) = 2.21 · average credit 0.61 = 1.35"],
-    ["Bayesian average", "(1.35 · 0.56 + 6 · 0) / (1.35 + 6) = +0.10 → score 55 · confidence 18%"],
-    ["95% range", "t(1.21 df) × standard error, scaled by 0.18 → ±9 → 46–64"]
+    ["Tone and approval", "Half tone, half verdict per post: +0.90, +0.75, −0.65. Weighted: (1.83·0.90 + 2.62·0.75 − 0.33·0.65) / 4.78 = +0.71 → raw score 86"],
+    ["Effective posts", "Kish: 4.78² / (1.83² + 2.62² + 0.33²) = 2.21 · average trust 0.87 = 1.92"],
+    ["Bayesian average", "(1.92 · 0.71 + 4 · 0) / (1.92 + 4) = +0.23 → score 62 · confidence 32%"],
+    ["95% range", "t(1.21 df) × standard error, scaled by 0.32 → ±16 → 46–78"]
   ],
-  verdict: "Three glowing posts read as 55 ± 9, Warm, low confidence — not Electric. Thirty posts like the first two would."
+  verdict: "Three glowing posts read as 62 ± 16, Warm, low confidence — not Electric. Thirty posts like the first two would."
 };
 
 const bands = [

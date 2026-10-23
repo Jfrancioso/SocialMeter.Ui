@@ -7,7 +7,9 @@ import styles from "./TrendLine.module.css";
 // Reconstructed days (rebuilt from post dates, not observed) are hollow.
 const props = defineProps({
   points: { type: Array, default: () => [] }, // [{ day, score, margin, smoothed, reconstructed, totalPosts }]
-  height: { type: Number, default: 170 }
+  height: { type: Number, default: 170 },
+  /** "2026-10-23": the day the scoring formula changed, if it falls inside this series. */
+  methodChangedOn: { type: String, default: null }
 });
 
 const W = 640;
@@ -50,6 +52,15 @@ const firstLabel = computed(() => (props.points.length ? fmt.format(new Date(spa
 const lastLabel = computed(() => (props.points.length > 1 ? fmt.format(new Date(span.value.max)) : ""));
 
 const last = computed(() => dots.value[dots.value.length - 1] ?? null);
+
+// A dashed line where the formula changed, so a one-time step isn't read as the crowd changing its mind.
+const change = computed(() => {
+  if (!props.methodChangedOn || !props.points.length) return null;
+  const t = new Date(`${props.methodChangedOn}T00:00:00Z`).getTime();
+  if (t <= span.value.min || t > span.value.max) return null;
+  const cx = x(t);
+  return { cx, label: `New scoring ${fmt.format(new Date(t))}`, anchor: cx > W - 120 ? "end" : "start" };
+});
 </script>
 
 <template>
@@ -58,6 +69,12 @@ const last = computed(() => dots.value[dots.value.length - 1] ?? null);
       <g :class="styles.grid">
         <line v-for="g in grid" :key="g" :x1="PAD.l" :x2="W - PAD.r" :y1="y(g)" :y2="y(g)" :class="g === 50 && styles.gridMid" />
         <text v-for="g in grid" :key="`t${g}`" :x="PAD.l - 6" :y="y(g) + 3.5" text-anchor="end">{{ g }}</text>
+      </g>
+
+      <g v-if="change" :class="styles.change">
+        <title>The scoring formula changed on this day: tone and approval are now blended. Earlier days used the old formula.</title>
+        <line :x1="change.cx" :x2="change.cx" :y1="PAD.t" :y2="height - PAD.b" />
+        <text :x="change.anchor === 'end' ? change.cx - 5 : change.cx + 5" :y="PAD.t + 9" :text-anchor="change.anchor">{{ change.label }}</text>
       </g>
 
       <path v-if="band" :d="band" :class="styles.band" />

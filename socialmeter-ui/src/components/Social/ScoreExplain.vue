@@ -87,7 +87,7 @@ const covered = (id) => props.shielded && !revealed.value.has(id);
     <!-- Trend -->
     <div :class="[styles.panel, styles.trendPanel]">
       <h3 :class="styles.h3">Last {{ history?.trend?.windowDays ?? 30 }} days</h3>
-      <TrendLine v-if="history" :points="history.points" />
+      <TrendLine v-if="history" :points="history.points" :method-changed-on="history.methodChangedOn" />
       <div v-else :class="[styles.lineSkeleton, 'skeleton']" />
       <p v-if="trendText" :class="[styles.verdict, styles[`dir-${trendText.dir}`]]">
         <span>{{ trendText.text }}</span>
@@ -112,7 +112,7 @@ const covered = (id) => props.shielded && !revealed.value.has(id);
           <dd>{{ stats.lower }}–{{ stats.upper }}</dd>
         </div>
         <div>
-          <dt title="Weighted mean of the posts before the pull toward neutral">Raw mean</dt>
+          <dt title="Weighted blend of tone and approval, before the pull toward neutral">Raw mean</dt>
           <dd>{{ stats.rawScore }}</dd>
         </div>
         <div>
@@ -120,7 +120,7 @@ const covered = (id) => props.shielded && !revealed.value.has(id);
           <dd>{{ signed(stats.priorPull) }}</dd>
         </div>
         <div>
-          <dt title="Kish effective sample size × average trust-and-substance credit">Effective posts</dt>
+          <dt title="Kish effective sample size × average trust">Effective posts</dt>
           <dd>{{ stats.effectivePosts }} <small>of {{ explain.totalPosts }}</small></dd>
         </div>
         <div>
