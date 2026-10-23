@@ -282,3 +282,83 @@
 .link:hover {
   color: var(--text);
 }
+
+/* Operator removal (admin only) */
+.modButton {
+  padding: 2px 10px;
+  border-radius: var(--pill);
+  border: 1px solid rgba(255, 92, 122, 0.35);
+  background: transparent;
+  color: var(--neg);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modButton:hover:not(:disabled) {
+  background: rgba(255, 92, 122, 0.12);
+}
+
+.modPicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line-2);
+}
+
+.modPrompt {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-right: 4px;
+}
+
+.modReason,
+.modCancel {
+  padding: 4px 10px;
+  border-radius: var(--pill);
+  border: 1px solid var(--line-2);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modReason:hover:not(:disabled) {
+  border-color: var(--neg);
+  color: var(--neg);
+}
+
+.modCancel {
+  color: var(--text-3);
+}
+
+.modError {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--neg);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.removed {
+  --s: var(--line-3);
+  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-2);
+}
+
+.removed:hover {
+  background: var(--bg-2);
+}
+
+.removedText {
+  flex: 1;
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+}

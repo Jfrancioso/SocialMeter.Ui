@@ -1,7 +1,9 @@
 <script setup>
 import { authorHandle, platformName } from "../../utils/platforms";
-import { computed, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { formatCompact, timeAgo } from "../../utils/format";
+import { hidePost, restorePost } from "../../api";
+import { useAdmin } from "../../composables/useAdmin";
 import PlatformIcon from "./PlatformIcon.vue";
 import styles from "./PostCard.module.css";
 
@@ -10,6 +12,51 @@ const props = defineProps({
   /** When true the body is blurred behind a "potential spoiler" cover until the reader taps it. */
   shielded: { type: Boolean, default: true }
 });
+
+// ---- Operator removal: only for a signed-in admin, on a page that provides the moderation context (the title page) ----
+const { admin } = useAdmin();
+const moderation = inject("moderation", null);
+const canModerate = computed(() => !!admin.actor && !!moderation);
+const reasons = [
+  { value: "sensitive", label: "Sensitive" },
+  { value: "spam", label: "Spam" },
+  { value: "off-topic", label: "Off-topic" },
+  { value: "wrong-title", label: "Wrong title" },
+  { value: "other", label: "Other" }
+];
+const picking = ref(false);
+const working = ref(false);
+const modError = ref(null);
+const removed = ref(null); // { reason, score, label } once removed here
+
+async function remove(reason) {
+  working.value = true;
+  modError.value = null;
+  try {
+    const result = await hidePost(props.post.id, reason, moderation.titleName.value);
+    removed.value = { reason: reasons.find((r) => r.value === reason)?.label ?? reason, score: result.score, label: result.label };
+    picking.value = false;
+    moderation.onModerated(result);
+  } catch (e) {
+    modError.value = e?.message ?? String(e);
+  } finally {
+    working.value = false;
+  }
+}
+
+async function undo() {
+  working.value = true;
+  modError.value = null;
+  try {
+    const result = await restorePost(props.post.id);
+    removed.value = null;
+    moderation.onModerated(result);
+  } catch (e) {
+    modError.value = e?.message ?? String(e);
+  } finally {
+    working.value = false;
+  }
+}
 
 const expanded = ref(false);
 const revealed = ref(false);
@@ -55,7 +102,15 @@ const share = computed(() => {
 </script>
 
 <template>
-  <article :class="[styles.card, styles[`s-${post.sentiment}`]]">
+  <article v-if="removed" :class="[styles.card, styles.removed]">
+    <p :class="styles.removedText">
+      Removed ({{ removed.reason.toLowerCase() }}) by you.
+      <template v-if="removed.score != null">Score now {{ removed.score }} · {{ removed.label }}.</template>
+    </p>
+    <button type="button" :class="styles.modButton" :disabled="working" @click="undo">{{ working ? "Undoing…" : "Undo" }}</button>
+    <p v-if="modError" :class="styles.modError">{{ modError }}</p>
+  </article>
+  <article v-else :class="[styles.card, styles[`s-${post.sentiment}`]]">
     <header :class="styles.head">
       <PlatformIcon :platform="post.platform" :size="22" />
       <div :class="styles.who">
@@ -129,6 +184,16 @@ const share = computed(() => {
       </span>
       <button v-if="shielded && revealed" type="button" :class="styles.hide" @click="revealed = false">Hide</button>
       <a v-if="post.sourceUrl" :href="post.sourceUrl" target="_blank" rel="noopener" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</a>
+      <button v-if="canModerate && !picking" type="button" :class="styles.modButton" title="Admin: remove this post from the feed and the score" @click="picking = true">
+        Remove
+      </button>
     </footer>
+
+    <div v-if="canModerate && picking" :class="styles.modPicker" role="group" aria-label="Why remove this post?">
+      <span :class="styles.modPrompt">Remove because:</span>
+      <button v-for="r in reasons" :key="r.value" type="button" :class="styles.modReason" :disabled="working" @click="remove(r.value)">{{ r.label }}</button>
+      <button type="button" :class="styles.modCancel" :disabled="working" @click="picking = false">Cancel</button>
+      <p v-if="modError" :class="styles.modError">{{ modError }}</p>
+    </div>
   </article>
 </template>

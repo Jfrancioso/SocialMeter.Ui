@@ -78,3 +78,63 @@ export const getScoreHistory = (type, id, { days = 30 } = {}, opts) =>
 /** keys: ["movie:693134", "tv:1399"] → { "movie:693134": { score, label, ... } } (cached readings only) */
 export const getSnapshots = (keys, opts) =>
   keys.length ? httpGet(`/api/socialmeter/snapshots${qs({ keys: keys.join(",") })}`, opts) : Promise.resolve({});
+
+// ---- Admin (the /admin page and the Remove buttons on posts) ----
+// In production Cloudflare Access signs the operator in on the API's own host, and its cookie rides along on these calls
+// (credentials: "include"); the API checks that token again itself. Local development has no Access: the admin page
+// takes the admin key from your user secrets and keeps it for this browser tab only.
+const DEV_KEY = "chatterbub.adminKey";
+
+export function setDevAdminKey(key) {
+  try {
+    if (key) sessionStorage.setItem(DEV_KEY, key);
+    else sessionStorage.removeItem(DEV_KEY);
+  } catch {
+    // storage blocked: the key just isn't remembered
+  }
+}
+
+function devAdminKey() {
+  try {
+    return import.meta.env.DEV ? sessionStorage.getItem(DEV_KEY) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function adminFetch(path, { method = "GET", body } = {}) {
+  const headers = { Accept: "application/json" };
+  if (body) headers["Content-Type"] = "application/json";
+  const key = devAdminKey();
+  if (key) headers["X-Admin-Key"] = key;
+
+  let res;
+  try {
+    res = await fetch(API_BASE + path, { method, headers, body: body ? JSON.stringify(body) : undefined, credentials: "include" });
+  } catch {
+    // Signed out, Access answers with a redirect to its sign-in page, which a cross-site fetch can't follow.
+    throw new ApiError(0, "Not signed in");
+  }
+  if (!res.ok) {
+    let message = `${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (data?.title) message = data.title;
+    } catch {
+      // not JSON
+    }
+    throw new ApiError(res.status, message);
+  }
+  return res.json();
+}
+
+export const getAdminMe = () => adminFetch("/api/admin/me");
+export const hidePost = (id, reason, titleName) => adminFetch(`/api/admin/posts/${id}/hide`, { method: "POST", body: { reason, titleName } });
+export const restorePost = (id) => adminFetch(`/api/admin/posts/${id}/restore`, { method: "POST" });
+export const getModerationLog = (take = 50) => adminFetch(`/api/admin/moderation${qs({ take })}`);
+
+/** Where the browser goes to sign in: Cloudflare asks for the one-time code, then the API sends it back to /admin. */
+export const adminSignInUrl = () => `${API_BASE}/api/admin/sign-in${qs({ returnTo: `${window.location.origin}/admin` })}`;
+
+/** Ends the Cloudflare Access session on the API's host. */
+export const adminSignOutUrl = () => `${API_BASE}/cdn-cgi/access/logout`;

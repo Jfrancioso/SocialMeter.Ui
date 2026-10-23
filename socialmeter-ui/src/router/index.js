@@ -19,6 +19,8 @@ export default createRouter({
     { path: "/search", name: "search", component: () => import("../pages/SearchPage.vue") },
     { path: "/how-it-works", name: "how-it-works", component: () => import("../pages/HowItWorksPage.vue") },
     { path: "/privacy", name: "privacy", component: () => import("../pages/PrivacyPage.vue") },
+    // Not linked anywhere; its own chunk, so visitors never download it. The API decides who gets in.
+    { path: "/admin", name: "admin", component: () => import("../pages/AdminPage.vue") },
 
     // Old links
     { path: "/movie/:id(\\d+)", redirect: (to) => ({ name: "title", params: { type: "movie", id: to.params.id } }) },

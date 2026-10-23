@@ -177,6 +177,16 @@ export function useTitlePage(route) {
   }
 
   const refresh = () => loadSocial(true, controller?.signal);
+
+  // After an operator removes or restores a post: the API has already recomputed the reading from stored posts, so show
+  // it and reload the breakdown and history (cached data only, never a pull).
+  function applyModeration(result) {
+    if (!social.value?.meter || !result?.meter) return;
+    const { type, id } = route();
+    social.value = { ...social.value, meter: result.meter };
+    cacheReading(type, id, social.value.meter);
+    loadExplanation(controller?.signal);
+  }
   const loadMore = () => loadFeed(feedPage.value + 1);
 
   watch(route, load, { immediate: true });
@@ -190,6 +200,6 @@ export function useTitlePage(route) {
     title, ratings, social, explain, history, loading, notFound, error, refreshing, slowLoad,
     feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
     meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint,
-    refresh, loadMore, setFilter
+    refresh, loadMore, setFilter, applyModeration
   };
 }
