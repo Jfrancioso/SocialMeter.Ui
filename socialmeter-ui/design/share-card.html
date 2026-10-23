@@ -1,6 +1,8 @@
 <!doctype html>
 <!--
   The link-preview card (iMessage, WhatsApp, Slack, Discord, X, Bluesky, Facebook): public/og-image.png, 1200 × 630.
+  The og: tags in index.html point at it. Preview crawlers don't run JavaScript, so every page shares this one card.
+  (No comment about it in index.html: that file ships to every visitor, and the weekly ZAP scan flags comments.)
   Re-render after editing (Windows, from socialmeter-ui):
     msedge --headless --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=5000
            --screenshot=public/og-image.png design/share-card.html
