@@ -163,6 +163,13 @@
   font-weight: 600;
 }
 
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 .overview {
   margin: 16px 0 0;
   color: var(--text-2);

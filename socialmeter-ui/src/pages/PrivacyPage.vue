@@ -61,6 +61,7 @@ const contact = "privacy@chatterbub.com";
             <li>Your browser saves a few display settings on your device, like the spoiler shield and which panels are open. They’re never sent to us.</li>
             <li>When you press Refresh, or a visit brings in new posts, we note the time, the title and whether new posts were pulled. Nothing about who pressed it is kept.</li>
             <li>Cloudflare and Azure receive your IP address to deliver pages and enforce rate limits. Rate-limit records are kept in memory and cleared within an hour.</li>
+            <li>Trailers load only when you press Play trailer. Movie and show trailers then play in YouTube’s privacy-enhanced player, and game trailers stream from Steam, so that service receives your IP address.</li>
             <li>Posters, post images and fonts load from TMDB, Steam, X, Bluesky and Google Fonts. Those services receive your IP address, just as they would from any other site that shows their images.</li>
           </ul>
         </section>
