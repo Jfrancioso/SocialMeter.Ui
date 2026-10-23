@@ -182,3 +182,8 @@
   padding: 6px 14px;
   font-size: 13px;
 }
+
+/* Buttons inside a panel keep their own width instead of stretching across the grid. */
+.panel > :global(.btn) {
+  justify-self: start;
+}
