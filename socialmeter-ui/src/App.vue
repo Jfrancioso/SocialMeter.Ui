@@ -1,16 +1,22 @@
 <script setup>
 import { provide } from "vue";
+import AdminBar from "./components/Admin/AdminBar.vue";
 import NavBar from "./components/NavBar/NavBar.vue";
 import SeasonDecor from "./components/Season/SeasonDecor.vue";
+import { useAdmin } from "./composables/useAdmin";
 import { useSeason } from "./composables/useSeason";
 
 // The site dresses lightly for the season (a horror wordmark in October, snow in December, ...); see docs/SEASONAL-THEMES.md.
 const { season } = useSeason();
 provide("season", season);
+
+// Only a browser that has signed in to /admin before asks the API anything; for everyone else this does nothing.
+useAdmin().check();
 </script>
 
 <template>
   <SeasonDecor :season="season" />
+  <AdminBar />
   <NavBar />
   <main class="app-main">
     <router-view v-slot="{ Component }">
@@ -35,8 +41,8 @@ provide("season", season);
 
 <style>
 .app-main {
-  min-height: calc(100vh - var(--nav-h));
-  padding-top: var(--nav-h);
+  min-height: calc(100vh - var(--nav-h) - var(--admin-h));
+  padding-top: calc(var(--nav-h) + var(--admin-h));
 }
 
 .app-footer {

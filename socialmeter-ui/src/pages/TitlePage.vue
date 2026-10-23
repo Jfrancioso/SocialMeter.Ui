@@ -2,7 +2,6 @@
 import { computed, provide, ref, toRef, watch } from "vue";
 import { tmdbImage } from "../utils/tmdbImage";
 import { mediaLabel, runtimeLabel, yearOf } from "../utils/format";
-import { useAdmin } from "../composables/useAdmin";
 import { useTitlePage } from "../composables/useTitlePage";
 import { useDevicePref } from "../composables/useDevicePref";
 import RatingsStrip from "../components/Ratings/RatingsStrip.vue";
@@ -26,9 +25,7 @@ const {
   refresh, loadMore, setFilter
 } = page;
 
-// Operators get a Remove button on each post (see PostCard). Only a browser that has signed in to /admin before asks.
-const { check: checkAdmin } = useAdmin();
-checkAdmin();
+// Operators get a Remove button on each post while the admin bar's switch is on (see PostCard).
 provide("moderation", { titleName: computed(() => title.value?.name ?? ""), onModerated: page.applyModeration });
 
 // Spoiler shield: on by default; the reader's choice is remembered on this device only.

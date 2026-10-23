@@ -1,0 +1,153 @@
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--admin-h);
+  z-index: 110;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  border-bottom: 1px solid var(--admin-line);
+  transition: background 0.2s ease;
+}
+
+/* Remove buttons on: the strip turns red so the state can't be missed. */
+.armed {
+  background: var(--admin-bg-armed);
+  border-bottom-color: var(--admin-line-armed);
+}
+
+.inner {
+  height: 100%;
+  max-width: var(--page-w);
+  margin: 0 auto;
+  padding: 0 var(--page-x);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px;
+  border-radius: var(--pill);
+  background: rgba(255, 255, 255, 0.12);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--admin-accent);
+  box-shadow: 0 0 8px var(--admin-accent);
+}
+
+.armed .dot {
+  background: var(--admin-accent-armed);
+  box-shadow: 0 0 8px var(--admin-accent-armed);
+}
+
+.who {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.8;
+  font-weight: 600;
+}
+
+.switch {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px 3px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--pill);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  font: inherit;
+  flex-shrink: 0;
+}
+
+.switch:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.track {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  border-radius: var(--pill);
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.2s ease;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.switch[aria-checked="true"] .track {
+  background: var(--admin-accent-armed);
+}
+
+.switch[aria-checked="true"] .knob {
+  transform: translateX(14px);
+}
+
+.labelShort {
+  display: none;
+}
+
+.state {
+  min-width: 22px;
+  padding-right: 6px;
+  text-align: left;
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.link:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Phones: the email gives way; the badge, the switch and the links stay. */
+@media (max-width: 640px) {
+  .inner {
+    gap: 10px;
+  }
+  .who,
+  .labelLong {
+    display: none;
+  }
+  .labelShort {
+    display: inline;
+  }
+}

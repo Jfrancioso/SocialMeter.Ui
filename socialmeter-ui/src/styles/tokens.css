@@ -49,12 +49,26 @@
   --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.55);
   --shadow-pop: 0 24px 60px rgba(0, 0, 0, 0.6);
 
+  /* admin strip (operators only): violet, red while Remove buttons are on; colors used nowhere else on the site */
+  --admin-bg: #2a1458;
+  --admin-line: #43237f;
+  --admin-text: #f1ecff;
+  --admin-accent: #b69cff;
+  --admin-bg-armed: #5a0f22;
+  --admin-line-armed: #8a1a36;
+  --admin-accent-armed: #ff5c7a;
+
   /* layout */
   --nav-h: 64px;
+  --admin-h: 0px; /* the admin strip's height while it shows; everything pinned under the nav adds it */
   --page-w: 1440px;
   --page-x: 24px;
 
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+:root.has-admin-bar {
+  --admin-h: 34px;
 }
 
 @media (max-width: 640px) {
@@ -62,5 +76,8 @@
     --page-x: 16px;
     --nav-h: 58px;
     --tabbar-h: 60px;
+  }
+  :root.has-admin-bar {
+    --admin-h: 40px;
   }
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { adminSignInUrl, adminSignOutUrl, getModerationLog, restorePost, setDevAdminKey } from "../api";
+import { adminSignInUrl, getModerationLog, restorePost, setDevAdminKey } from "../api";
 import { useAdmin } from "../composables/useAdmin";
 import { platformName } from "../utils/platforms";
 import { timeAgo } from "../utils/format";
@@ -8,7 +8,7 @@ import styles from "./AdminPage.module.css";
 
 // The operator's page. Signing in happens at Cloudflare (production) or with the admin key (local development); the
 // API decides who gets in, and this page only shows what it is allowed to see.
-const { admin, check, forget } = useAdmin();
+const { admin, check, signOut } = useAdmin();
 const dev = import.meta.env.DEV;
 const devKey = ref("");
 
@@ -47,15 +47,6 @@ async function useDevKey() {
   setDevAdminKey(devKey.value.trim());
   devKey.value = "";
   await start();
-}
-
-function signOut() {
-  forget();
-  if (dev) {
-    setDevAdminKey(null);
-    return;
-  }
-  window.location.href = adminSignOutUrl();
 }
 
 async function restore(entry) {
@@ -109,8 +100,9 @@ onMounted(start);
         <section :class="styles.panel">
           <h2 :class="styles.h2">Removing a post</h2>
           <p :class="styles.muted">
-            Open any title page. While you're signed in, each post has a <strong>Remove</strong> button: pick a reason and the
-            post leaves the feed and the score at once, with no Claude cost. Every removal is listed below and can be undone.
+            Turn on <strong>Remove buttons</strong> in the admin bar at the top, then open any title page: each post gets a
+            Remove button. Pick a reason and the post leaves the feed and the score at once, with no Claude cost. The switch
+            is off whenever you open the site again. Every removal is listed below and can be undone.
           </p>
         </section>
 

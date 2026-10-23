@@ -1,6 +1,6 @@
 .nav {
   position: fixed;
-  top: 0;
+  top: var(--admin-h);
   left: 0;
   right: 0;
   height: var(--nav-h);

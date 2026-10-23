@@ -1,10 +1,14 @@
 import { reactive, readonly } from "vue";
-import { getAdminMe } from "../api";
+import { adminSignOutUrl, getAdminMe, setDevAdminKey } from "../api";
 
 // Whether this browser is signed in to the admin area. Only a browser that has signed in before ever asks (a flag in
 // localStorage), so ordinary visitors never send a single request to the admin endpoints.
 const FLAG = "chatterbub.admin";
-const state = reactive({ actor: null, checked: false, checking: false, error: null });
+// "Remove buttons" switch in the admin bar: off whenever the site is opened afresh, so browsing never shows them by
+// accident. Kept for the browser tab (sessionStorage), so it survives moving between pages.
+const MODERATING = "chatterbub.moderating";
+
+const state = reactive({ actor: null, checked: false, checking: false, error: null, moderating: readModerating() });
 let pending = null;
 
 function remembered() {
@@ -20,13 +24,21 @@ function remember(on) {
     if (on) localStorage.setItem(FLAG, "1");
     else localStorage.removeItem(FLAG);
   } catch {
-    // storage blocked: the title pages just won't offer Remove
+    // storage blocked: the admin bar just won't appear until /admin is visited
+  }
+}
+
+function readModerating() {
+  try {
+    return sessionStorage.getItem(MODERATING) === "1";
+  } catch {
+    return false;
   }
 }
 
 /**
- * Asks the API who we are. Title pages call it without `force` (a no-op unless this browser has signed in before); the
- * admin page forces it.
+ * Asks the API who we are. The app calls it on every load without `force` (a no-op unless this browser has signed in
+ * before); the admin page forces it.
  */
 function check({ force = false } = {}) {
   if (!force && (state.checked || !remembered())) return Promise.resolve(state.actor);
@@ -52,11 +64,28 @@ function check({ force = false } = {}) {
   return pending;
 }
 
-function forget() {
+function setModerating(on) {
+  state.moderating = !!on;
+  try {
+    if (on) sessionStorage.setItem(MODERATING, "1");
+    else sessionStorage.removeItem(MODERATING);
+  } catch {
+    // storage blocked: the switch still works for this page
+  }
+}
+
+/** Forgets this browser's admin state and ends the Cloudflare session (or drops the local dev key). */
+function signOut() {
   remember(false);
+  setModerating(false);
   state.actor = null;
+  if (import.meta.env.DEV) {
+    setDevAdminKey(null);
+    return;
+  }
+  window.location.href = adminSignOutUrl();
 }
 
 export function useAdmin() {
-  return { admin: readonly(state), check, forget };
+  return { admin: readonly(state), check, setModerating, signOut };
 }

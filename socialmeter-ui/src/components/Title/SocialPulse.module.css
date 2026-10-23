@@ -25,7 +25,7 @@
   gap: 14px;
   min-width: 0;
   position: sticky;
-  top: calc(var(--nav-h) + 16px);
+  top: calc(var(--nav-h) + var(--admin-h) + 16px);
 }
 
 .panel {

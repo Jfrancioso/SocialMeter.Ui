@@ -1,6 +1,6 @@
 <script setup>
 import { authorHandle, platformName } from "../../utils/platforms";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import { formatCompact, timeAgo } from "../../utils/format";
 import { hidePost, restorePost } from "../../api";
 import { useAdmin } from "../../composables/useAdmin";
@@ -13,10 +13,24 @@ const props = defineProps({
   shielded: { type: Boolean, default: true }
 });
 
-// ---- Operator removal: only for a signed-in admin, on a page that provides the moderation context (the title page) ----
+// ---- Operator removal: a signed-in admin with the admin bar's "Remove buttons" switch on, on a page that provides the
+// moderation context (the title page). Picking Remove turns the whole card into a confirm step; nothing happens until a
+// reason is chosen. ----
 const { admin } = useAdmin();
 const moderation = inject("moderation", null);
-const canModerate = computed(() => !!admin.actor && !!moderation);
+const canModerate = computed(() => !!admin.actor && admin.moderating && !!moderation);
+const confirmPanel = ref(null);
+
+async function startRemove() {
+  picking.value = true;
+  modError.value = null;
+  await nextTick();
+  confirmPanel.value?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  confirmPanel.value?.focus({ preventScroll: true });
+}
+
+// Switching Remove buttons off mid-way closes an open confirm step.
+watch(canModerate, (on) => { if (!on) picking.value = false; });
 const reasons = [
   { value: "sensitive", label: "Sensitive" },
   { value: "spam", label: "Spam" },
@@ -102,15 +116,40 @@ const share = computed(() => {
 </script>
 
 <template>
-  <article v-if="removed" :class="[styles.card, styles.removed]">
-    <p :class="styles.removedText">
-      Removed ({{ removed.reason.toLowerCase() }}) by you.
-      <template v-if="removed.score != null">Score now {{ removed.score }} · {{ removed.label }}.</template>
-    </p>
-    <button type="button" :class="styles.modButton" :disabled="working" @click="undo">{{ working ? "Undoing…" : "Undo" }}</button>
+  <article v-if="removed" :class="[styles.card, styles.removed]" role="status">
+    <div :class="styles.removedText">
+      <strong :class="styles.removedTitle">Post removed · {{ removed.reason }}</strong>
+      <span>
+        Gone from the feed and the score.
+        <template v-if="removed.score != null">Score now {{ removed.score }} · {{ removed.label }}.</template>
+      </span>
+    </div>
+    <button type="button" :class="styles.undoButton" :disabled="working" @click="undo">{{ working ? "Undoing…" : "Undo" }}</button>
     <p v-if="modError" :class="styles.modError">{{ modError }}</p>
   </article>
-  <article v-else :class="[styles.card, styles[`s-${post.sentiment}`]]">
+  <article v-else :class="[styles.card, styles[`s-${post.sentiment}`], canModerate && picking && styles.confirming]">
+    <div
+      v-if="canModerate && picking"
+      ref="confirmPanel"
+      :class="styles.confirm"
+      role="group"
+      aria-label="Remove this post"
+      tabindex="-1"
+      @keydown.esc="picking = false"
+    >
+      <p :class="styles.confirmTitle">Remove this post from Chatterbub?</p>
+      <p :class="styles.confirmHint">Pick a reason. It leaves the feed and the score right away, and you can undo it.</p>
+      <div :class="styles.confirmReasons">
+        <button v-for="r in reasons" :key="r.value" type="button" :class="styles.reasonButton" :disabled="working" @click="remove(r.value)">
+          {{ r.label }}
+        </button>
+      </div>
+      <div :class="styles.confirmFoot">
+        <span v-if="working" :class="styles.confirmHint">Removing…</span>
+        <button type="button" :class="styles.cancelButton" :disabled="working" @click="picking = false">Cancel, keep it</button>
+      </div>
+      <p v-if="modError" :class="styles.modError">{{ modError }}</p>
+    </div>
     <header :class="styles.head">
       <PlatformIcon :platform="post.platform" :size="22" />
       <div :class="styles.who">
@@ -184,16 +223,9 @@ const share = computed(() => {
       </span>
       <button v-if="shielded && revealed" type="button" :class="styles.hide" @click="revealed = false">Hide</button>
       <a v-if="post.sourceUrl" :href="post.sourceUrl" target="_blank" rel="noopener" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</a>
-      <button v-if="canModerate && !picking" type="button" :class="styles.modButton" title="Admin: remove this post from the feed and the score" @click="picking = true">
+      <button v-if="canModerate && !picking" type="button" :class="styles.modButton" title="Admin: remove this post from the feed and the score" @click="startRemove">
         Remove
       </button>
     </footer>
-
-    <div v-if="canModerate && picking" :class="styles.modPicker" role="group" aria-label="Why remove this post?">
-      <span :class="styles.modPrompt">Remove because:</span>
-      <button v-for="r in reasons" :key="r.value" type="button" :class="styles.modReason" :disabled="working" @click="remove(r.value)">{{ r.label }}</button>
-      <button type="button" :class="styles.modCancel" :disabled="working" @click="picking = false">Cancel</button>
-      <p v-if="modError" :class="styles.modError">{{ modError }}</p>
-    </div>
   </article>
 </template>

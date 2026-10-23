@@ -298,67 +298,141 @@
   background: rgba(255, 92, 122, 0.12);
 }
 
-.modPicker {
+/* The confirm step: the whole card turns red, the question sits on top, and the post underneath dims. */
+.confirming {
+  --s: var(--neg);
+  border-color: var(--neg);
+  box-shadow: 0 0 0 1px var(--neg), 0 10px 30px rgba(255, 92, 122, 0.18);
+  background: color-mix(in srgb, var(--panel) 88%, var(--neg));
+}
+
+.confirming:hover {
+  background: color-mix(in srgb, var(--panel) 88%, var(--neg));
+}
+
+.confirming > :not(.confirm) {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.confirm {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 92, 122, 0.45);
+  background: rgba(10, 11, 16, 0.6);
+  outline: none;
+  scroll-margin: calc(var(--nav-h) + var(--admin-h) + 12px) 0 calc(var(--tabbar-h, 0px) + 12px);
+}
+
+.confirmTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.confirmHint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.confirmReasons {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--line-2);
+  gap: 8px;
 }
 
-.modPrompt {
-  font-size: 12px;
+.reasonButton {
+  padding: 8px 14px;
+  min-height: 38px;
+  border-radius: var(--pill);
+  border: 1px solid rgba(255, 92, 122, 0.55);
+  background: rgba(255, 92, 122, 0.1);
+  color: var(--text);
+  font-size: 14px;
   font-weight: 700;
-  color: var(--text-2);
-  margin-right: 4px;
 }
 
-.modReason,
-.modCancel {
-  padding: 4px 10px;
+.reasonButton:hover:not(:disabled) {
+  background: var(--neg);
+  border-color: var(--neg);
+  color: #1a0007;
+}
+
+.confirmFoot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelButton {
+  padding: 8px 14px;
+  min-height: 38px;
   border-radius: var(--pill);
   border: 1px solid var(--line-2);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  font-size: 12px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
   font-weight: 700;
 }
 
-.modReason:hover:not(:disabled) {
-  border-color: var(--neg);
-  color: var(--neg);
-}
-
-.modCancel {
-  color: var(--text-3);
+.cancelButton:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--line-3);
 }
 
 .modError {
   flex-basis: 100%;
   margin: 0;
   color: var(--neg);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
+/* After removal: a compact strip with Undo, until the page is reloaded. */
 .removed {
-  --s: var(--line-3);
+  --s: var(--neg);
   align-self: start;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  background: var(--bg-2);
+  gap: 12px;
+  background: color-mix(in srgb, var(--bg-2) 92%, var(--neg));
 }
 
 .removed:hover {
-  background: var(--bg-2);
+  background: color-mix(in srgb, var(--bg-2) 92%, var(--neg));
 }
 
 .removedText {
   flex: 1;
-  margin: 0;
-  color: var(--text-3);
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  color: var(--text-2);
   font-size: 13px;
+}
+
+.removedTitle {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.undoButton {
+  padding: 7px 16px;
+  min-height: 36px;
+  border-radius: var(--pill);
+  border: 1px solid var(--line-3);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.undoButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
 }
