@@ -42,6 +42,11 @@ Routes: Edit. It is kept in Key Vault as `cloudflare-workers-token`:
 CLOUDFLARE_API_TOKEN="$(az keyvault secret show --vault-name socialmeter-jf-kv -n cloudflare-workers-token --query value -o tsv)" node deploy.mjs --routes
 ```
 
+The account has no `workers.dev` address (Cloudflare creates one only when the Workers dashboard is first opened), so
+`--preview` fails. To try a change on one page before all of them, route just that page first, for example
+`chatterbub.com/title/movie/1400940`, check it, then run `--routes` and remove the single route. That is how the first
+deploy went (2026-10-23).
+
 Check a page the way a crawler sees it:
 
 ```bash
