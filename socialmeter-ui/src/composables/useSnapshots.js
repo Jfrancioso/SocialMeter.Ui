@@ -3,7 +3,9 @@ import { getSnapshots } from "../api";
 import { meterKey } from "../utils/meter";
 
 // One shared map of cached readings so every card on a page reads from the same place.
-// `null` means "asked, nothing cached yet"; `undefined` means never requested.
+// `null` means "asked, nothing cached yet"; `undefined` means never requested. An entry that came from the snapshots
+// endpoint carries `fromSnapshot`; one set from a live reading (the hero, a title page) doesn't, and is still fetched
+// once so the card gets the fields only snapshots have (the critics score).
 const snapshots = reactive({});
 const pending = new Set();
 
@@ -11,7 +13,7 @@ export function useSnapshots() {
   async function ensure(titles) {
     // The same title often sits in several rows; ask once.
     const keys = [...new Set(titles.map((t) => meterKey(t.mediaType, t.tmdbId)))]
-      .filter((k) => snapshots[k] === undefined && !pending.has(k));
+      .filter((k) => snapshots[k] !== null && !snapshots[k]?.fromSnapshot && !pending.has(k));
 
     if (!keys.length) return;
     keys.forEach((k) => pending.add(k));
@@ -21,17 +23,22 @@ export function useSnapshots() {
       for (let i = 0; i < keys.length; i += 200) {
         const chunk = keys.slice(i, i + 200);
         const found = await getSnapshots(chunk);
-        chunk.forEach((k) => (snapshots[k] = found[k] ?? null));
+        chunk.forEach((k) => {
+          if (found[k]) snapshots[k] = { ...(snapshots[k] ?? {}), ...found[k], fromSnapshot: true };
+          else if (snapshots[k] === undefined) snapshots[k] = null;
+        });
       }
     } catch {
-      keys.forEach((k) => (snapshots[k] = null));
+      keys.forEach((k) => { if (snapshots[k] === undefined) snapshots[k] = null; });
     } finally {
       keys.forEach((k) => pending.delete(k));
     }
   }
 
+  /** A live reading merges into what's cached, so it never wipes fields it doesn't carry (like the critics score). */
   function set(type, id, reading) {
-    snapshots[meterKey(type, id)] = reading;
+    const k = meterKey(type, id);
+    snapshots[k] = reading ? { ...(snapshots[k] ?? {}), ...reading } : reading;
   }
 
   function get(type, id) {
