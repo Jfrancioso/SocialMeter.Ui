@@ -5,7 +5,10 @@ import { PLATFORM_NAMES } from "./platforms";
 export const CARD_W = 1200;
 export const CARD_H = 630;
 
-const BAND_HEX = { cold: "#5b8cff", lukewarm: "#6fd0c5", warm: "#ffb000", hot: "#ff6a3d", electric: "#ff3d8f", none: "#596073" };
+// Nothing is drawn closer than this to the card's right edge.
+const RIGHT_MARGIN = 48;
+
+const BAND_HEX ={ cold: "#5b8cff", lukewarm: "#6fd0c5", warm: "#ffb000", hot: "#ff6a3d", electric: "#ff3d8f", none: "#596073" };
 const PLATFORM = PLATFORM_NAMES;
 
 /** The caption copied beside the image. */
@@ -78,8 +81,8 @@ export async function renderShareCard({ title, meter, ratings, posterUrl, url, b
   ctx.font = font(900, titleSize);
   const titleLines = wrapText(ctx, title.name, x, 150, 660, titleSize * 1.05, 2, "left");
   ctx.fillStyle = "#7f8799";
-  ctx.font = font(600, 22);
-  ctx.fillText(metaText(title), x, 150 + titleLines * titleSize * 1.05 + 6);
+  fitText(ctx, metaText(title), x, 150 + titleLines * titleSize * 1.05 + 6, CARD_W - x - RIGHT_MARGIN,
+    { weight: 600, size: 22, minSize: 18, lineHeight: 26, maxLines: 1 }, font);
 
   // Gauge with the big number.
   const gx = x, gy = 300, gw = 280;
@@ -90,12 +93,14 @@ export async function renderShareCard({ title, meter, ratings, posterUrl, url, b
   ctx.fillText(String(meter.score), gx + gw / 2, gy + 150);
   ctx.textAlign = "left";
 
-  // Facts beside the gauge.
+  // Facts beside the gauge. The column is only ~350px wide, so each value shrinks or wraps to fit ("368 posts on Steam, X
+  // and Bluesky" ran off the card) and the next fact moves down to make room.
   const fx = x + gw + 40;
+  const fw = CARD_W - fx - RIGHT_MARGIN;
   chip(ctx, fx, 312, `${meter.label} · ±${meter.stats?.margin ?? "?"}`, band, font(800, 22));
-  fact(ctx, fx, 390, "READ FROM", `${meter.totalPosts} posts${platformsText(meter) ? ` on ${platformsText(meter)}` : ""}`, font);
+  const readEnd = fact(ctx, fx, 390, fw, "READ FROM", `${meter.totalPosts} posts${platformsText(meter) ? ` on ${platformsText(meter)}` : ""}`, font);
   const beside = ratingsText(ratings);
-  if (beside) fact(ctx, fx, 462, "BESIDE", beside, font);
+  if (beside) fact(ctx, fx, Math.max(462, readEnd + 40), fw, "BESIDE", beside, font);
 
   // Footer: tagline, then the address on its own line so neither can run into the other.
   ctx.fillStyle = "#7f8799";
@@ -131,13 +136,37 @@ function ratingsText(ratings) {
   return [pick("imdb", "IMDb"), pick("metacritic", "Metacritic"), pick("rottenTomatoes", "RT"), pick("steam", "Steam")].filter(Boolean).slice(0, 2).join(" · ") || null;
 }
 
-function fact(ctx, x, y, label, value, font) {
+/** A small label with its value under it, kept within maxWidth. Returns the baseline of the value's last line. */
+function fact(ctx, x, y, maxWidth, label, value, font) {
   ctx.fillStyle = "#7f8799";
   ctx.font = font(800, 14);
   ctx.fillText(label.split("").join(String.fromCharCode(8202)), x, y);
   ctx.fillStyle = "#f3f5f9";
-  ctx.font = font(900, 26);
-  ctx.fillText(value, x, y + 34);
+  return fitText(ctx, value, x, y + 34, maxWidth, { weight: 900, size: 26, minSize: 22, lineHeight: 30, maxLines: 2 }, font);
+}
+
+/**
+ * Draws text no wider than maxWidth: tries `size` down to `minSize`, then wraps at minSize (up to maxLines, the last one
+ * ending in "…" if it still doesn't fit). Returns the baseline of the last line drawn.
+ */
+function fitText(ctx, text, x, y, maxWidth, { weight, size, minSize, lineHeight, maxLines }, font) {
+  for (let s = size; s >= minSize; s -= 1) {
+    ctx.font = font(weight, s);
+    if (ctx.measureText(text).width <= maxWidth) {
+      ctx.fillText(text, x, y);
+      return y;
+    }
+  }
+  ctx.font = font(weight, minSize);
+  // "368 posts on Steam, X and Bluesky" reads better as "368 posts on" / "Steam, X and Bluesky" than with one word left over.
+  const at = text.indexOf(" on ");
+  if (maxLines >= 2 && at > 0 && ctx.measureText(text.slice(0, at + 3)).width <= maxWidth && ctx.measureText(text.slice(at + 4)).width <= maxWidth) {
+    ctx.fillText(text.slice(0, at + 3), x, y);
+    ctx.fillText(text.slice(at + 4), x, y + lineHeight);
+    return y + lineHeight;
+  }
+  const lines = wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines, "left");
+  return y + (lines - 1) * lineHeight;
 }
 
 function chip(ctx, x, y, text, color, f) {
