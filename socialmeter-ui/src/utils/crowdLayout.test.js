@@ -1,7 +1,7 @@
 // Tests for the crowd layout: run with `npm test` (Node's built-in runner, no dependencies). The data is made up.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { layoutZones, zoneDrift, zoneWidths } from "./crowdLayout.js";
+import { layoutZones, pickDots, zoneDrift, zoneWidths } from "./crowdLayout.js";
 
 let nextId = 1;
 
@@ -100,6 +100,30 @@ test("big crowds fit: 200 posts on desktop, 100 on a phone", () => {
 
 test("many mixed posts (all exactly 0) spread inside their zone", () => {
   check(side(40, "neutral"), { width: 330, height: 180, maxHeight: 300, shares: { negative: 0, neutral: 100, positive: 0 } });
+});
+
+test("when not all posts fit, each side gets dots in proportion to its share (the WARDOGS case)", () => {
+  // The hated posts are each heavier, so the heaviest 100 overall would be nearly all hated.
+  const hated = side(255, "negative", 0.7, 5);
+  const loved = side(113, "positive", 0.7, 1);
+  const all = [...hated, ...loved].sort((a, b) => b.share - a.share);
+  const picked = pickDots(all, 100, { negative: 77.6, neutral: 0.1, positive: 22.3 });
+  const count = (s) => picked.filter((d) => d.sentiment === s).length;
+  assert.equal(picked.length, 100);
+  assert.equal(count("positive"), 22);
+  assert.equal(count("negative"), 78);
+  assert.deepEqual(picked, all.filter((d) => picked.includes(d)), "keeps the heaviest-first order");
+  const lovedPicked = picked.filter((d) => d.sentiment === "positive");
+  assert.deepEqual(lovedPicked, loved.slice(0, 22), "and each side's heaviest");
+});
+
+test("a small side still gets a dot, and a side short of posts passes its room on", () => {
+  const dots = [...side(50, "negative"), ...side(1, "neutral"), ...side(3, "positive")];
+  const picked = pickDots(dots, 20, { negative: 60, neutral: 0.5, positive: 39.5 });
+  assert.equal(picked.filter((d) => d.sentiment === "neutral").length, 1);
+  assert.equal(picked.filter((d) => d.sentiment === "positive").length, 3);
+  assert.equal(picked.length, 20);
+  assert.equal(pickDots(dots.slice(0, 5), 20, { negative: 100 }).length, 5, "fewer posts than room: all of them");
 });
 
 test("the same input gives the same picture, and nothing gives nothing", () => {

@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { getSocialPost } from "../../api";
 import { meterBand } from "../../utils/meter";
 import { platformName } from "../../utils/platforms";
-import { layoutZones, scoreX } from "../../utils/crowdLayout";
+import { layoutZones, pickDots, scoreX } from "../../utils/crowdLayout";
 import { useInView } from "../../composables/useInView";
 import PostCard from "../Social/PostCard.vue";
 import styles from "./CrowdShape.module.css";
@@ -50,7 +50,7 @@ const summary = computed(() => {
 const caption = computed(() => {
   const c = props.crowd;
   const n = visible.value.length;
-  const shown = n < c.posts ? ` Showing the ${n} that count most.` : "";
+  const shown = n < c.posts ? ` Showing ${n}: the ones that count most on each side, as many as its share.` : "";
   return `Each dot is one of the ${c.posts} posts we counted, marked with where it was posted. Each side gets room by its share; bigger dots carry more weight in the score.${shown}`;
 });
 
@@ -84,10 +84,11 @@ const narrow = computed(() => width.value > 0 && width.value < 560);
 const baseHeight = computed(() => (narrow.value ? 180 : 230));
 const MAX_HEIGHT = 300;
 
-// The API sends the heaviest posts first (up to CrowdShape:MaxDots); a phone draws only the front of the list, so dots
-// stay big enough to read and tap and the layout stays quick.
+// The API sends up to CrowdShape:MaxDots, heaviest first; a phone draws at most PHONE_MAX_DOTS, so dots stay big enough
+// to read and tap. Either way each side gets dots in proportion to its share (pickDots).
 const PHONE_MAX_DOTS = 100;
-const visible = computed(() => (narrow.value ? props.crowd.dots.slice(0, PHONE_MAX_DOTS) : props.crowd.dots));
+const shares = computed(() => ({ negative: props.crowd.negative, neutral: props.crowd.neutral, positive: props.crowd.positive }));
+const visible = computed(() => (narrow.value ? pickDots(props.crowd.dots, PHONE_MAX_DOTS, shares.value) : props.crowd.dots));
 
 // Entrance timing (the transition itself is in the CSS, 650 ms): each dot starts STAGGER_MS after the one before it.
 const ENTER_MS = 650;
@@ -102,7 +103,7 @@ const layout = computed(() =>
         height: baseHeight.value,
         maxHeight: MAX_HEIGHT,
         // The zones are sized by every counted post, not just the ones drawn.
-        shares: { negative: props.crowd.negative, neutral: props.crowd.neutral, positive: props.crowd.positive },
+        shares: shares.value,
         rMin: 6,
         rMax: narrow.value ? 13 : 18
       })

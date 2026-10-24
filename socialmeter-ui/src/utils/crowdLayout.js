@@ -40,6 +40,41 @@ export function layoutZones(dots, { width, height, maxHeight = height, shares, r
   return { dots: out, height, zones };
 }
 
+/**
+ * The dots to draw when not all fit: each side's heaviest, in proportion to its share of the weight, so the dots tell
+ * the same story as the shares (the heaviest posts overall can all come from one side). Every side with posts gets one
+ * first, then each next dot goes to the side with the most share per dot (the D'Hondt method). The API's
+ * CrowdShapeRules.DotsPerSide follows the same rule. Keeps the input's order (heaviest first).
+ *
+ * @param {{ sentiment: string, share: number }[]} dots  heaviest first
+ * @param {number} max
+ * @param {{ negative: number, neutral: number, positive: number }} shares  percent of the weight
+ */
+export function pickDots(dots, max, shares) {
+  if (dots.length <= max) return dots;
+  const count = Object.fromEntries(ZONES.map((key) => [key, dots.filter((d) => d.sentiment === key).length]));
+  const given = Object.fromEntries(ZONES.map((key) => [key, 0]));
+  const open = ZONES.filter((key) => count[key] > 0);
+  const share = (key) => Math.max(0, shares?.[key] ?? 0);
+
+  let left = max;
+  for (const key of [...open].sort((a, b) => share(b) - share(a))) {
+    if (left === 0) break;
+    given[key] = 1;
+    left--;
+  }
+  while (left > 0) {
+    const room = open.filter((key) => given[key] < count[key]);
+    if (!room.length) break;
+    const next = room.reduce((a, b) => (share(b) / (given[b] + 1) > share(a) / (given[a] + 1) ? b : a));
+    given[next]++;
+    left--;
+  }
+
+  const taken = Object.fromEntries(ZONES.map((key) => [key, 0]));
+  return dots.filter((d) => taken[d.sentiment] < given[d.sentiment] && ++taken[d.sentiment]);
+}
+
 /** X position of a score (0-100) across the whole strip, for the score line. */
 export function scoreX(score, width) {
   return (score / 100) * width;
