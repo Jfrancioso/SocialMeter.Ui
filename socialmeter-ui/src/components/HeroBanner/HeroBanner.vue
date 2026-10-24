@@ -13,15 +13,19 @@ const props = defineProps({
   label: { type: String, default: "Trending on TMDB" },
   /** Counted posts behind a "Most talked about" pick, and the window they were counted over. */
   posts: { type: Number, default: null },
-  days: { type: Number, default: 3 }
+  days: { type: Number, default: 3 },
+  /** Why it leads: "talked-about", "trending", or "event" (a live event the API is reading on a schedule). */
+  kind: { type: String, default: "" }
 });
 
-const talkedAbout = computed(() => props.posts != null);
-const labelHint = computed(() =>
-  talkedAbout.value
+const event = computed(() => props.kind === "event");
+const talkedAbout = computed(() => !event.value && props.posts != null);
+const labelHint = computed(() => {
+  if (event.value) return "A live event: Chatterbub is re-reading posts about this title on a schedule while it’s on";
+  return talkedAbout.value
     ? `${props.posts} counted posts in the last ${props.days} days, more than any other title we track`
-    : "TMDB's most-visited title today; we haven't measured enough conversation to pick our own"
-);
+    : "TMDB's most-visited title today; we haven't measured enough conversation to pick our own";
+});
 
 const { set } = useSnapshots();
 const meter = ref(null);
@@ -61,7 +65,8 @@ onMounted(async () => {
       <div :class="styles.text">
         <div :class="styles.badges">
           <span :class="styles.trending" :title="labelHint">
-            <svg v-if="talkedAbout" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
+            <span v-if="event" :class="styles.liveDot" aria-hidden="true" />
+            <svg v-else-if="talkedAbout" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
             <svg v-else viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M13.5 2s.5 3.5-2 6.5S8 13 8 13s-1-1.5-1-3c-2.5 2-4 5-4 7.5A7.5 7.5 0 0 0 10.5 22 8.5 8.5 0 0 0 19 13.5c0-4.5-3-8-5.5-11.5Z"/></svg>
             {{ label }}
           </span>

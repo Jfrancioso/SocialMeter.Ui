@@ -69,6 +69,27 @@
   box-shadow: 0 0 16px var(--accent-glow);
 }
 
+/* A live event (an open watch window): a pulsing dot in the pill's text colour. */
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot {
+    animation: none;
+  }
+}
+
 .kind,
 .year {
   color: var(--text-2);
