@@ -99,47 +99,54 @@ const platformChips = computed(() =>
     </div>
 
     <div :class="styles.feed">
+      <!-- Three groups that wrap as a whole, never chip by chip: moods, platforms, then sort and the shield.
+           On a phone each group gets its own row (see the CSS). -->
       <div :class="styles.filters">
-        <button
-          v-for="c in sentimentChips"
-          :key="c.value"
-          type="button"
-          :class="['chip', sentimentFilter === c.value && 'is-active']"
-          @click="$emit('filter', 'sentiment', c.value)"
-        >
-          <span :class="styles.chipDot" :style="{ background: c.color }" />
-          {{ c.label }}
-        </button>
-        <span :class="styles.filterSep" />
-        <button
-          v-for="p in platformChips"
-          :key="p.value"
-          type="button"
-          :class="['chip', platformFilter === p.value && 'is-active']"
-          @click="$emit('filter', 'platform', p.value)"
-        >
-          {{ p.label }}
-        </button>
+        <div :class="styles.group">
+          <button
+            v-for="c in sentimentChips"
+            :key="c.value"
+            type="button"
+            :class="['chip', sentimentFilter === c.value && 'is-active']"
+            @click="$emit('filter', 'sentiment', c.value)"
+          >
+            <span :class="styles.chipDot" :style="{ background: c.color }" />
+            {{ c.label }}
+          </button>
+        </div>
+        <div v-if="platformChips.length" :class="[styles.group, styles.platformGroup]">
+          <button
+            v-for="p in platformChips"
+            :key="p.value"
+            type="button"
+            :class="['chip', platformFilter === p.value && 'is-active']"
+            @click="$emit('filter', 'platform', p.value)"
+          >
+            {{ p.label }}
+          </button>
+        </div>
 
-        <label :class="styles.sort">
-          <span :class="styles.sortLabel">Sort</span>
-          <select :class="styles.sortSelect" :value="sortOrder" @change="$emit('sort', $event.target.value)">
-            <option v-for="o in sortOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-          </select>
-        </label>
+        <div :class="styles.controls">
+          <label :class="styles.sort">
+            <span>Sort</span>
+            <select :class="styles.sortSelect" :value="sortOrder" @change="$emit('sort', $event.target.value)">
+              <option v-for="o in sortOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
+            </select>
+          </label>
 
-        <button
-          type="button"
-          :class="[styles.shieldToggle, shielded && styles.shieldOn]"
-          :aria-pressed="shielded"
-          :title="shielded ? 'Posts are hidden until you tap them' : 'Posts are shown in full'"
-          @click="$emit('toggle-shield')"
-        >
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z" />
-          </svg>
-          Spoiler shield {{ shielded ? "on" : "off" }}
-        </button>
+          <button
+            type="button"
+            :class="[styles.shieldToggle, shielded && styles.shieldOn]"
+            :aria-pressed="shielded"
+            :title="shielded ? 'Posts are hidden until you tap them' : 'Posts are shown in full'"
+            @click="$emit('toggle-shield')"
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z" />
+            </svg>
+            Spoiler shield {{ shielded ? "on" : "off" }}
+          </button>
+        </div>
       </div>
 
       <div v-if="feed.length" :class="styles.posts">

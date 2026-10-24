@@ -87,12 +87,26 @@
   min-width: 0;
 }
 
+/* Groups wrap as a whole: moods | platforms, with sort and the shield at the right end. */
 .filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px 12px;
   margin-bottom: 14px;
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* A thin rule between the moods and the platforms while they share a row. */
+.platformGroup {
+  padding-left: 12px;
+  border-left: 1px solid var(--line-2);
 }
 
 .chipDot {
@@ -101,16 +115,14 @@
   border-radius: 50%;
 }
 
-.filterSep {
-  width: 1px;
-  height: 22px;
-  background: var(--line-2);
-  margin: 0 4px;
+.controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Sort and the spoiler shield sit together at the right end of the filter row. */
 .sort {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -130,12 +142,7 @@
   cursor: pointer;
 }
 
-.sort + .shieldToggle {
-  margin-left: 0;
-}
-
 .shieldToggle {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -210,11 +217,28 @@
   }
 }
 
+/* Phones: one row per group, and sort and the shield split the last row evenly. */
 @media (max-width: 640px) {
-  .shieldToggle {
+  .group {
+    flex-basis: 100%;
+  }
+  .platformGroup {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .controls {
     margin-left: 0;
-    width: 100%;
+    flex-basis: 100%;
+  }
+  .sort,
+  .shieldToggle {
+    flex: 1 1 0;
+    min-width: 0;
     justify-content: center;
+  }
+  .sortSelect {
+    flex: 1;
+    min-width: 0;
   }
   .posts {
     grid-template-columns: 1fr;
