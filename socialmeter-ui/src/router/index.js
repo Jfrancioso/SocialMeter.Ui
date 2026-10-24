@@ -5,7 +5,8 @@ import { setPageMeta } from "../utils/pageMeta";
 const PAGE_TITLES = {
   "how-it-works": "How it works · Chatterbub",
   privacy: "Privacy · Chatterbub",
-  search: "Search · Chatterbub"
+  search: "Search · Chatterbub",
+  shelf: "The shelf · Chatterbub"
 };
 const BROWSE_TITLES = { movie: "Movies", tv: "TV shows", game: "Games" };
 
@@ -30,6 +31,8 @@ const router = createRouter({
     { path: "/privacy", name: "privacy", component: () => import("../pages/PrivacyPage.vue") },
     // Not linked anywhere; its own chunk, so visitors never download it. The API decides who gets in.
     { path: "/admin", name: "admin", component: () => import("../pages/AdminPage.vue") },
+    // Private, like admin: not linked, not in the sitemap, its own chunk; the API decides who gets in.
+    { path: "/shelf", name: "shelf", component: () => import("../pages/ShelfPage.vue") },
 
     // Old links
     { path: "/movie/:id(\\d+)", redirect: (to) => ({ name: "title", params: { type: "movie", id: to.params.id } }) },

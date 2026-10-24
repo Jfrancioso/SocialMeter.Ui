@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /search
 Disallow: /admin
+Disallow: /shelf
 
 Sitemap: https://chatterbub.com/sitemap.xml

@@ -126,8 +126,8 @@ function devAdminKey() {
   }
 }
 
-async function adminFetch(path, { method = "GET", body } = {}) {
-  const headers = { Accept: "application/json" };
+async function adminFetch(path, { method = "GET", body, as = "json" } = {}) {
+  const headers = { Accept: as === "blob" ? "*/*" : "application/json" };
   if (body) headers["Content-Type"] = "application/json";
   const key = devAdminKey();
   if (key) headers["X-Admin-Key"] = key;
@@ -140,7 +140,7 @@ async function adminFetch(path, { method = "GET", body } = {}) {
     throw new ApiError(0, "Not signed in");
   }
   if (!res.ok) throw await errorFrom(res);
-  return res.json();
+  return as === "blob" ? res.blob() : res.json();
 }
 
 export const getAdminMe = () => adminFetch("/api/admin/me");
@@ -157,6 +157,17 @@ export const getGuardrails = () => adminFetch("/api/admin/guardrails");
 
 /** Where the browser goes to sign in: Cloudflare asks for the one-time code, then the API sends it back to /admin. */
 export const adminSignInUrl = () => `${API_BASE}/api/admin/sign-in${qs({ returnTo: `${window.location.origin}/admin` })}`;
+
+// ---- The private reading shelf (/shelf): admins and the readers the API lists; same sign-in as admin ----
+
+/** Ten series, each with its books in order and its first book's cover id. */
+export const getShelf = () => adminFetch("/api/shelf");
+
+/** A shelf cover as an image file. Fetched with the sign-in (an <img> link couldn't carry it in local development). */
+export const getShelfCover = (coverId) => adminFetch(`/api/shelf/covers/${coverId}`, { as: "blob" });
+
+/** Where the browser goes to sign in to the shelf: Cloudflare asks for the one-time code, then the API sends it back. */
+export const shelfSignInUrl = () => `${API_BASE}/api/shelf/sign-in${qs({ returnTo: `${window.location.origin}/shelf` })}`;
 
 /** Ends the Cloudflare Access session on the API's host. */
 export const adminSignOutUrl = () => `${API_BASE}/cdn-cgi/access/logout`;
