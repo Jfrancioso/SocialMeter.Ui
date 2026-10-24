@@ -22,9 +22,9 @@ const props = defineProps({
 const page = useTitlePage(() => ({ type: props.type, id: props.id }));
 const {
   title, ratings, social, explain, history, highlights, crowd, loading, notFound, error, refreshing, slowLoad,
-  feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
+  feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter, sortOrder,
   meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
-  refresh, loadMore, setFilter
+  refresh, loadMore, setFilter, setSort
 } = page;
 
 // Operators get a Remove button on each post while the admin bar's switch is on (see PostCard).
@@ -213,8 +213,10 @@ const metaBits = computed(() => {
             :feed-loading="feedLoading"
             :sentiment-filter="sentimentFilter"
             :platform-filter="platformFilter"
+            :sort-order="sortOrder"
             :shielded="shield"
             @filter="setFilter"
+            @sort="setSort"
             @load-more="loadMore"
             @toggle-shield="toggleShield"
           />

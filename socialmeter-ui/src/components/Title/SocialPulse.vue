@@ -20,6 +20,8 @@ const props = defineProps({
   feedLoading: { type: Boolean, default: false },
   sentimentFilter: { type: String, default: "" },
   platformFilter: { type: String, default: "" },
+  /** "top" (most liked), "newest" or "oldest". */
+  sortOrder: { type: String, default: "top" },
   shielded: { type: Boolean, default: true },
   /** The sources have never been read for this title. */
   neverRead: { type: Boolean, default: false },
@@ -38,7 +40,13 @@ const emptyText = computed(() => {
   return "Nobody has posted about this title in a way we can measure yet. Check back soon.";
 });
 
-defineEmits(["filter", "load-more", "toggle-shield"]);
+defineEmits(["filter", "sort", "load-more", "toggle-shield"]);
+
+const sortOptions = [
+  { value: "top", label: "Most liked" },
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" }
+];
 
 const sentimentChips = [
   { value: "positive", label: "Positive", color: "var(--pos)" },
@@ -112,6 +120,13 @@ const platformChips = computed(() =>
         >
           {{ p.label }}
         </button>
+
+        <label :class="styles.sort">
+          <span :class="styles.sortLabel">Sort</span>
+          <select :class="styles.sortSelect" :value="sortOrder" @change="$emit('sort', $event.target.value)">
+            <option v-for="o in sortOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
+          </select>
+        </label>
 
         <button
           type="button"

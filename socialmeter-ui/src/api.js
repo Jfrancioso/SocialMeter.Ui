@@ -68,8 +68,9 @@ export const getComingSoonGames = (page = 1, opts) => httpGet(`/api/titles/game/
 export const getSocialMeter = (type, id, { refresh = false } = {}, opts) =>
   httpGet(`/api/socialmeter/${type}/${id}${qs({ refresh: refresh ? "true" : undefined })}`, opts);
 
-export const getSocialPosts = (type, id, { sentiment, platform, page = 1, pageSize = 20 } = {}, opts) =>
-  httpGet(`/api/socialmeter/${type}/${id}/posts${qs({ sentiment, platform, page, pageSize })}`, opts);
+/** A page of a title's counted posts. sort: "top" (most liked, the default), "newest" or "oldest". */
+export const getSocialPosts = (type, id, { sentiment, platform, page = 1, pageSize = 20, sort } = {}, opts) =>
+  httpGet(`/api/socialmeter/${type}/${id}/posts${qs({ sentiment, platform, page, pageSize, sort })}`, opts);
 
 /** The numbers behind the cached reading: effective posts, margin, weight by sentiment and substance, top drivers. */
 export const getScoreExplanation = (type, id, opts) => httpGet(`/api/socialmeter/${type}/${id}/explain`, opts);

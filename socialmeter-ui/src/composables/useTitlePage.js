@@ -34,6 +34,7 @@ export function useTitlePage(route) {
   const feedLoading = ref(false);
   const sentimentFilter = ref("");
   const platformFilter = ref("");
+  const sortOrder = ref("top");   // "top" | "newest" | "oldest"
 
   let controller = null;
   let slowTimer = null;
@@ -118,6 +119,7 @@ export function useTitlePage(route) {
     feedPage.value = 1;
     sentimentFilter.value = "";
     platformFilter.value = "";
+    sortOrder.value = "top";
 
     try {
       title.value = await getTitle(type, id, { signal });
@@ -202,7 +204,13 @@ export function useTitlePage(route) {
       const data = await getSocialPosts(
         type,
         id,
-        { sentiment: sentimentFilter.value || undefined, platform: platformFilter.value || undefined, page, pageSize: 12 },
+        {
+          sentiment: sentimentFilter.value || undefined,
+          platform: platformFilter.value || undefined,
+          sort: sortOrder.value === "top" ? undefined : sortOrder.value,
+          page,
+          pageSize: 12
+        },
         { signal }
       );
       feed.value = page === 1 ? data.items : [...feed.value, ...data.items];
@@ -218,6 +226,12 @@ export function useTitlePage(route) {
   function setFilter(kind, value) {
     if (kind === "sentiment") sentimentFilter.value = sentimentFilter.value === value ? "" : value;
     else platformFilter.value = platformFilter.value === value ? "" : value;
+    loadFeed(1);
+  }
+
+  function setSort(value) {
+    if (sortOrder.value === value) return;
+    sortOrder.value = value;
     loadFeed(1);
   }
 
@@ -248,8 +262,8 @@ export function useTitlePage(route) {
 
   return {
     title, ratings, social, explain, history, highlights, crowd, loading, notFound, error, refreshing, slowLoad,
-    feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
+    feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter, sortOrder,
     meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
-    refresh, loadMore, setFilter, applyModeration
+    refresh, loadMore, setFilter, setSort, applyModeration
   };
 }
