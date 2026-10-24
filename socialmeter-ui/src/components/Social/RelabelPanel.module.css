@@ -1,0 +1,128 @@
+/* Admin only: the admin bar's violet, so it never reads as part of the post. */
+.panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--admin-line);
+  background: color-mix(in srgb, var(--admin-bg) 55%, var(--bg));
+  outline: none;
+  scroll-margin: calc(var(--nav-h) + var(--admin-h) + 12px) 0 calc(var(--tabbar-h, 0px) + 12px);
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--admin-text);
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice {
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: var(--pill);
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.choice:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.choice-positive.chosen {
+  background: var(--pos);
+  border-color: var(--pos);
+  color: var(--bg);
+}
+
+.choice-neutral.chosen {
+  background: var(--neu);
+  border-color: var(--neu);
+  color: var(--bg);
+}
+
+.choice-negative.chosen {
+  background: var(--neg);
+  border-color: var(--neg);
+  color: var(--bg);
+}
+
+.now {
+  font-weight: 500;
+}
+
+.noteLabel {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.hint {
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.note {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-2);
+  background: var(--bg);
+  color: var(--text);
+  font: 400 16px var(--font);   /* 16px: iPhone doesn't zoom into the field */
+  resize: vertical;
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel,
+.save {
+  min-height: 38px;
+  padding: 8px 16px;
+  border-radius: var(--pill);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cancel {
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--text-2);
+}
+
+.save {
+  border: 1px solid var(--admin-accent);
+  background: var(--admin-accent);
+  color: var(--admin-bg);
+}
+
+.save:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  color: var(--neg);
+  font-size: 13px;
+  font-weight: 600;
+}

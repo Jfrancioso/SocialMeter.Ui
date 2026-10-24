@@ -298,6 +298,31 @@
   background: rgba(255, 92, 122, 0.12);
 }
 
+/* Relabel: the admin violet, not Remove's red. */
+.relabelButton {
+  border-color: var(--admin-line);
+  color: var(--admin-accent);
+}
+
+.relabelButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--admin-bg) 60%, transparent);
+}
+
+/* After a relabel here: what changed, with Undo, until the page is reloaded. */
+.relabeled {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--admin-bg) 55%, transparent);
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 /* The confirm step: the whole card turns red, the question sits on top, and the post underneath dims. */
 .confirming {
   --s: var(--neg);

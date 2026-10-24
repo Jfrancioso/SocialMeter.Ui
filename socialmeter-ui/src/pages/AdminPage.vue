@@ -1,10 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { adminSignInUrl, getModerationLog, restorePost, setDevAdminKey } from "../api";
+import { adminSignInUrl, getModerationLog, restorePost, setDevAdminKey, undoRelabel } from "../api";
 import HealthPanel from "../components/Admin/HealthPanel.vue";
 import { useAdmin } from "../composables/useAdmin";
 import { mediaLabel, parseUtc, timeAgo } from "../utils/format";
-import { reasonLabel } from "../utils/moderation";
+import { reasonLabel, sentimentName } from "../utils/moderation";
 import { platformName } from "../utils/platforms";
 import styles from "./AdminPage.module.css";
 
@@ -48,10 +48,20 @@ async function useDevKey() {
   await start();
 }
 
-async function restore(entry) {
+// How each log action reads, and its badge's look. The actions match the API's ModerationAction constants.
+const ACTIONS = {
+  hide: { text: "Removed", style: "badgeHide" },
+  restore: { text: "Restored", style: "badgeRestore" },
+  relabel: { text: "Relabeled", style: "badgeRelabel" },
+  "undo-relabel": { text: "Relabel undone", style: "badgeRestore" }
+};
+const actionOf = (e) => ACTIONS[e.action] ?? { text: e.action, style: "badgeRestore" };
+
+// Undo from the log: a removal is restored, a relabel puts the assessor's label back.
+async function undo(entry) {
   busy.value = new Set([...busy.value, entry.id]);
   try {
-    await restorePost(entry.postId);
+    await (entry.action === "relabel" ? undoRelabel(entry.postId) : restorePost(entry.postId));
     await loadLog();
   } catch (e) {
     logError.value = e?.message ?? String(e);
@@ -99,11 +109,13 @@ onMounted(start);
         <HealthPanel />
 
         <section :class="styles.panel">
-          <h2 :class="styles.h2">Removing a post</h2>
+          <h2 :class="styles.h2">Removing or relabelling a post</h2>
           <p :class="styles.muted">
-            Turn on <strong>Remove buttons</strong> in the admin bar at the top, then open any title page: each post gets a
-            Remove button. Pick a reason and the post leaves the feed and the score at once, with no Claude cost. The switch
-            is off whenever you open the site again. Every removal is listed below and can be undone.
+            Turn on <strong>Remove buttons</strong> in the admin bar at the top, then open any title page: each post gets
+            <strong>Relabel</strong> and <strong>Remove</strong> buttons. Remove takes it out of the feed and the score;
+            Relabel corrects how it was read (positive, neutral, negative) and asks why. Both apply at once, with no Claude
+            cost, and outlast later re-reads. Your reasons are kept with what Claude said, to check and improve how it reads
+            posts. The switch is off whenever you open the site again. Everything is listed below and can be undone.
           </p>
         </section>
 
@@ -113,20 +125,20 @@ onMounted(start);
             <button type="button" class="btn" :disabled="logLoading" @click="loadLog">{{ logLoading ? "Loading…" : "Refresh" }}</button>
           </div>
           <p v-if="logError" :class="styles.error">{{ logError }}</p>
-          <p v-if="!logLoading && !log.length && !logError" :class="styles.muted">Nothing removed yet.</p>
+          <p v-if="!logLoading && !log.length && !logError" :class="styles.muted">Nothing moderated yet.</p>
 
           <ol :class="styles.log">
             <li v-for="e in log" :key="e.id" :class="styles.entry">
               <div :class="styles.entryHead">
-                <span :class="[styles.badge, e.action === 'hide' ? styles.badgeHide : styles.badgeRestore]">
-                  {{ e.action === "hide" ? "Removed" : "Restored" }}
-                </span>
+                <span :class="[styles.badge, styles[actionOf(e).style]]">{{ actionOf(e).text }}</span>
                 <span v-if="e.reason" :class="styles.reason">{{ reasonLabel(e.reason) }}</span>
+                <span v-if="e.fromLabel && e.toLabel" :class="styles.reason">{{ sentimentName(e.fromLabel) }} → {{ sentimentName(e.toLabel) }}</span>
                 <router-link :to="`/title/${e.mediaType}/${e.tmdbId}`" :class="styles.titleLink">
                   {{ e.titleName || `${mediaLabel(e.mediaType)} ${e.tmdbId}` }}
                 </router-link>
                 <span :class="styles.when" :title="parseUtc(e.at).toLocaleString()">{{ timeAgo(e.at) }}</span>
               </div>
+              <p v-if="e.note" :class="styles.note">“{{ e.note }}”</p>
               <p v-if="e.postGone" :class="styles.muted">The post has since been deleted where it was published.</p>
               <p v-else :class="styles.excerpt">
                 <span :class="styles.author">{{ platformName(e.platform) }} · {{ e.author }}</span>
@@ -136,8 +148,11 @@ onMounted(start);
                 <span :class="styles.muted">by {{ e.actor }}</span>
                 <!-- A plain link on purpose: the operator checking a post isn't a visitor's click, so it isn't counted. -->
                 <a v-if="e.sourceUrl" :href="e.sourceUrl" target="_blank" rel="noopener" :class="styles.titleLink">Open post ↗</a>
-                <button v-if="e.action === 'hide' && e.currentlyHidden" type="button" class="btn" :disabled="busy.has(e.id)" @click="restore(e)">
+                <button v-if="e.action === 'hide' && e.currentlyHidden" type="button" class="btn" :disabled="busy.has(e.id)" @click="undo(e)">
                   {{ busy.has(e.id) ? "Restoring…" : "Restore" }}
+                </button>
+                <button v-if="e.action === 'relabel' && e.currentlyRelabeled" type="button" class="btn" :disabled="busy.has(e.id)" @click="undo(e)">
+                  {{ busy.has(e.id) ? "Undoing…" : "Undo relabel" }}
                 </button>
               </div>
             </li>

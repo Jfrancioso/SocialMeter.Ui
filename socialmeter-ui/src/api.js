@@ -145,6 +145,10 @@ async function adminFetch(path, { method = "GET", body } = {}) {
 export const getAdminMe = () => adminFetch("/api/admin/me");
 export const hidePost = (id, reason, titleName) => adminFetch(`/api/admin/posts/${id}/hide`, { method: "POST", body: { reason, titleName } });
 export const restorePost = (id) => adminFetch(`/api/admin/posts/${id}/restore`, { method: "POST" });
+/** Correct a post's label by hand ("positive" | "neutral" | "negative") with a reason; the label then outlasts re-reads. */
+export const relabelPost = (id, sentiment, note, titleName) =>
+  adminFetch(`/api/admin/posts/${id}/relabel`, { method: "POST", body: { sentiment, note, titleName } });
+export const undoRelabel = (id) => adminFetch(`/api/admin/posts/${id}/relabel/undo`, { method: "POST" });
 export const getModerationLog = (take = 50) => adminFetch(`/api/admin/moderation${qs({ take })}`);
 
 /** Today's spend and pulls against the limits, each outside service's health, and the watch windows. */

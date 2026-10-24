@@ -2,11 +2,12 @@
 import { authorHandle, platformName } from "../../utils/platforms";
 import { computed, inject, nextTick, ref, watch } from "vue";
 import { formatCompact, timeAgo } from "../../utils/format";
-import { hidePost, restorePost } from "../../api";
+import { hidePost, restorePost, undoRelabel } from "../../api";
 import { useAdmin } from "../../composables/useAdmin";
-import { MODERATION_REASONS, reasonLabel } from "../../utils/moderation";
+import { MODERATION_REASONS, reasonLabel, sentimentName } from "../../utils/moderation";
 import OutboundLink from "../OutboundLink.vue";
 import PlatformIcon from "./PlatformIcon.vue";
+import RelabelPanel from "./RelabelPanel.vue";
 import styles from "./PostCard.module.css";
 
 const props = defineProps({
@@ -31,8 +32,44 @@ async function startRemove() {
   confirmPanel.value?.focus({ preventScroll: true });
 }
 
-// Switching Remove buttons off mid-way closes an open confirm step.
-watch(canModerate, (on) => { if (!on) picking.value = false; });
+// Switching Remove buttons off mid-way closes an open confirm step or relabel panel.
+watch(canModerate, (on) => {
+  if (!on) {
+    picking.value = false;
+    relabeling.value = false;
+  }
+});
+
+// ---- Operator relabel (same switch): correct how the post was read, with a reason (RelabelPanel). The card shows the
+// corrected label at once; the strip under it offers Undo until the page is reloaded. ----
+const label = ref(props.post.sentiment);
+const labelFixed = ref(!!props.post.labelFixed);
+const relabeling = ref(false);
+const relabeled = ref(null); // { from, to } once relabelled here
+
+function relabelDone(result) {
+  relabeled.value = { from: label.value, to: result.sentiment };
+  label.value = result.sentiment;
+  labelFixed.value = result.labelFixed;
+  relabeling.value = false;
+  moderation.onModerated(result);
+}
+
+async function undoLabel() {
+  working.value = true;
+  modError.value = null;
+  try {
+    const result = await undoRelabel(props.post.id);
+    label.value = result.sentiment;
+    labelFixed.value = result.labelFixed;
+    relabeled.value = null;
+    moderation.onModerated(result);
+  } catch (e) {
+    modError.value = e?.message ?? String(e);
+  } finally {
+    working.value = false;
+  }
+}
 const reasons = MODERATION_REASONS;
 const picking = ref(false);
 const working = ref(false);
@@ -93,8 +130,9 @@ const where = computed(() => {
 
 const sentimentLabel = { positive: "Positive", neutral: "Neutral", negative: "Negative" };
 const readAs = computed(() => {
+  if (labelFixed.value) return `A moderator corrected how this post was read: ${(sentimentLabel[label.value] ?? label.value).toLowerCase()}`;
   const s = props.post.sentimentScore;
-  return `Read as ${(sentimentLabel[props.post.sentiment] ?? props.post.sentiment).toLowerCase()} (${s > 0 ? "+" : ""}${s})`;
+  return `Read as ${(sentimentLabel[label.value] ?? label.value).toLowerCase()} (${s > 0 ? "+" : ""}${s})`;
 });
 
 // "Why this score" chips: how much of the author's experience is in the post, and whether the trust policy discounted them.
@@ -123,7 +161,15 @@ const share = computed(() => {
     <button type="button" :class="styles.undoButton" :disabled="working" @click="undo">{{ working ? "Undoing…" : "Undo" }}</button>
     <p v-if="modError" :class="styles.modError">{{ modError }}</p>
   </article>
-  <article v-else :class="[styles.card, styles[`s-${post.sentiment}`], canModerate && picking && styles.confirming]">
+  <article v-else :class="[styles.card, styles[`s-${label}`], canModerate && picking && styles.confirming]">
+    <RelabelPanel
+      v-if="canModerate && relabeling"
+      :post-id="post.id"
+      :current="label"
+      :title-name="moderation.titleName.value"
+      @done="relabelDone"
+      @cancel="relabeling = false"
+    />
     <div
       v-if="canModerate && picking"
       ref="confirmPanel"
@@ -161,8 +207,8 @@ const share = computed(() => {
       <span v-if="post.verdictUp != null" :class="[styles.pill, post.verdictUp ? styles['pill-positive'] : styles['pill-negative']]" :title="readAs">
         {{ post.verdictUp ? "👍 Recommended" : "👎 Not recommended" }}
       </span>
-      <span v-else :class="[styles.pill, styles[`pill-${post.sentiment}`]]" :title="readAs">
-        {{ sentimentLabel[post.sentiment] ?? post.sentiment }}
+      <span v-else :class="[styles.pill, styles[`pill-${label}`]]" :title="readAs">
+        {{ sentimentLabel[label] ?? label }}
       </span>
     </header>
 
@@ -215,12 +261,21 @@ const share = computed(() => {
         </span>
         <span v-if="post.trustLevel === 'reduced'" :class="[styles.chip, styles.chipMuted]" title="The trust policy discounted this author (young account, little history, or little playtime)">reduced weight</span>
         <span v-if="share" :class="styles.chip" title="This post's share of everything that went into the score">{{ share }} of score</span>
+        <span v-if="labelFixed" :class="[styles.chip, styles.chipMuted]" title="A moderator corrected how this post was read">corrected</span>
       </span>
       <button v-if="shielded && revealed" type="button" :class="styles.hide" @click="revealed = false">Hide</button>
       <OutboundLink v-if="post.sourceUrl" :href="post.sourceUrl" kind="post" :class="styles.link">{{ post.platform === "steam" ? "Open review" : "Open post" }} ↗</OutboundLink>
+      <button v-if="canModerate && !picking && !relabeling" type="button" :class="[styles.modButton, styles.relabelButton]" title="Admin: correct how this post was read" @click="relabeling = true">
+        Relabel
+      </button>
       <button v-if="canModerate && !picking" type="button" :class="styles.modButton" title="Admin: remove this post from the feed and the score" @click="startRemove">
         Remove
       </button>
     </footer>
+    <div v-if="canModerate && relabeled" :class="styles.relabeled" role="status">
+      <span>Label changed: {{ sentimentName(relabeled.from) }} → {{ sentimentName(relabeled.to) }}</span>
+      <button type="button" :class="styles.undoButton" :disabled="working" @click="undoLabel">{{ working ? "Undoing…" : "Undo" }}</button>
+    </div>
+    <p v-if="canModerate && relabeled && modError" :class="styles.modError">{{ modError }}</p>
   </article>
 </template>
