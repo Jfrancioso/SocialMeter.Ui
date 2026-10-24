@@ -15,7 +15,8 @@ const pct = (share) => `${Math.round(share)}%`;
 
 function note(word, side) {
   if (!side || side.posts === 0) return `No ${word} posts counted yet.`;
-  if (!side.featured) return `Only ${posts(side.posts, word)}, ${pct(side.weightShare)} of the weight: too small a part of the score to feature one.`;
+  // Too few posts or too little of the weight (HighlightRules.Featured); one sentence that is true either way.
+  if (!side.featured) return `${posts(side.posts, word)} so far, ${pct(side.weightShare)} of the weight: not enough to feature one yet.`;
   return `None of the ${posts(side.posts, word)} reads well on its own: too short, mostly links, or marked as a spoiler.`;
 }
 
