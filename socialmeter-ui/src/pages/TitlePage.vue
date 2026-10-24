@@ -7,6 +7,7 @@ import { useDevicePref } from "../composables/useDevicePref";
 import RatingsStrip from "../components/Ratings/RatingsStrip.vue";
 import MeterCard from "../components/Title/MeterCard.vue";
 import WhyThisScore from "../components/Title/WhyThisScore.vue";
+import InTheirWords from "../components/Title/InTheirWords.vue";
 import SocialPulse from "../components/Title/SocialPulse.vue";
 import TrailerDialog from "../components/Title/TrailerDialog.vue";
 import styles from "./TitlePage.module.css";
@@ -19,7 +20,7 @@ const props = defineProps({
 
 const page = useTitlePage(() => ({ type: props.type, id: props.id }));
 const {
-  title, ratings, social, explain, history, loading, notFound, error, refreshing, slowLoad,
+  title, ratings, social, explain, history, highlights, loading, notFound, error, refreshing, slowLoad,
   feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
   meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
   refresh, loadMore, setFilter
@@ -30,6 +31,9 @@ provide("moderation", { titleName: computed(() => title.value?.name ?? ""), onMo
 
 // Spoiler shield: on by default; the reader's choice is remembered on this device only.
 const { value: shield, toggle: toggleShield } = useDevicePref("sm:spoilerShield", true);
+
+// "In their words" shows once at least one side has a featured post.
+const anyHighlight = computed(() => !!(highlights.value?.positive?.post || highlights.value?.negative?.post));
 
 const overviewOpen = ref(false);
 
@@ -165,6 +169,14 @@ const metaBits = computed(() => {
             </span>
           </div>
           <RatingsStrip :meter="meter" :ratings="ratings?.ratings ?? null" :critics-average="ratings?.criticsAverage ?? null" :baseline-label="ratings?.baselineLabel ?? 'critics'" />
+        </section>
+
+        <section v-if="anyPosts && anyHighlight" :class="styles.section">
+          <div :class="styles.sectionHead">
+            <h2 :class="styles.h2">In their words</h2>
+            <span :class="styles.sectionSub">The strongest take on each side, ranked the way the score weighs posts. Shown exactly as posted.</span>
+          </div>
+          <InTheirWords :highlights="highlights" :shielded="shield" />
         </section>
 
         <section v-if="anyPosts" :class="styles.section">

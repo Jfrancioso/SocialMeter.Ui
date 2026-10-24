@@ -1,6 +1,6 @@
 import { joinNames, platformName } from "../utils/platforms";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
+import { getHighlights, getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
 import { parseUtc } from "../utils/format";
 import { setPageMeta, titleMeta } from "../utils/pageMeta";
 import { useSnapshots } from "./useSnapshots";
@@ -20,6 +20,7 @@ export function useTitlePage(route) {
   const social = ref(null);
   const explain = ref(null);
   const history = ref(null);
+  const highlights = ref(null);
   const loading = ref(true);
   const notFound = ref(false);
   const error = ref(null);
@@ -110,6 +111,7 @@ export function useTitlePage(route) {
     social.value = null;
     explain.value = null;
     history.value = null;
+    highlights.value = null;
     feed.value = [];
     feedPage.value = 1;
     sentimentFilter.value = "";
@@ -147,6 +149,7 @@ export function useTitlePage(route) {
       social.value = data;
       cacheReading(type, id, data.meter);
       loadExplanation(signal);
+      loadHighlights(signal);
       await loadFeed(1, signal);
     } catch (e) {
       if (e?.name !== "AbortError") social.value = { meter: null, sources: [], error: e?.message ?? String(e) };
@@ -167,6 +170,16 @@ export function useTitlePage(route) {
     getScoreHistory(type, id, { days: 30 }, { signal })
       .then((h) => (history.value = h))
       .catch((e) => { if (e?.name !== "AbortError") history.value = null; });
+  }
+
+  // "In their words" (cached data only). Not reloaded after an operator removes a post: the removed card keeps its Undo
+  // button in place, and the next visit features the next post.
+  function loadHighlights(signal) {
+    if (!(social.value?.meter?.totalPosts > 0)) return;
+    const { type, id } = route();
+    getHighlights(type, id, { signal })
+      .then((h) => (highlights.value = h))
+      .catch((e) => { if (e?.name !== "AbortError") highlights.value = null; });
   }
 
   async function loadFeed(page, signal = controller?.signal) {
@@ -221,7 +234,7 @@ export function useTitlePage(route) {
   });
 
   return {
-    title, ratings, social, explain, history, loading, notFound, error, refreshing, slowLoad,
+    title, ratings, social, explain, history, highlights, loading, notFound, error, refreshing, slowLoad,
     feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
     meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
     refresh, loadMore, setFilter, applyModeration

@@ -74,6 +74,9 @@ export const getSocialPosts = (type, id, { sentiment, platform, page = 1, pageSi
 /** The numbers behind the cached reading: effective posts, margin, weight by sentiment and substance, top drivers. */
 export const getScoreExplanation = (type, id, opts) => httpGet(`/api/socialmeter/${type}/${id}/explain`, opts);
 
+/** "In their words": the strongest post on each side, with each side's size. Cached data only. */
+export const getHighlights = (type, id, opts) => httpGet(`/api/socialmeter/${type}/${id}/highlights`, opts);
+
 /** One reading per day plus the trend verdict. */
 export const getScoreHistory = (type, id, { days = 30 } = {}, opts) =>
   httpGet(`/api/socialmeter/${type}/${id}/history${qs({ days })}`, opts);
