@@ -1,6 +1,19 @@
 // Getting a post onto X (posted to by hand) and opening posts in the X and Bluesky apps. On a phone the buttons try the
 // app first (its own link type skips the browser), and fall back to the website when no app opens.
 
+/**
+ * The post for X: X can't quote Bluesky posts, so once the thread is up on Bluesky, a line linking to it (where the case
+ * for and against are quoted) goes in before the title's link. The title's link stays last because X builds its preview
+ * card from the last link. Before the Bluesky post exists, the X post is just the facts.
+ */
+export function xPostText(text, blueskyThreadUrl, { hasFor = false, hasAgainst = false } = {}) {
+  if (!blueskyThreadUrl || !(hasFor || hasAgainst)) return text;
+  const what = hasFor && hasAgainst ? "The case for and against" : hasFor ? "The case for" : "The case against";
+  const lines = text.split("\n");
+  const titleLink = lines.pop();
+  return [...lines, `${what}, on Bluesky: ${blueskyThreadUrl}`, titleLink].join("\n");
+}
+
 /** X's own "compose a post" page with the text filled in. Nothing is sent until you post. */
 export const xComposeUrl = (text) => `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
 
