@@ -77,6 +77,12 @@ export const getScoreExplanation = (type, id, opts) => httpGet(`/api/socialmeter
 /** "In their words": the strongest post on each side, with each side's size. Cached data only. */
 export const getHighlights = (type, id, opts) => httpGet(`/api/socialmeter/${type}/${id}/highlights`, opts);
 
+/** "The crowd" (Crowd Shape pilot): every counted post as a dot, no text. `enabled` is false outside the pilot. */
+export const getCrowd = (type, id, opts) => httpGet(`/api/socialmeter/${type}/${id}/crowd`, opts);
+
+/** One counted post of a title, for a dot clicked in "The crowd". */
+export const getSocialPost = (type, id, postId, opts) => httpGet(`/api/socialmeter/${type}/${id}/posts/${postId}`, opts);
+
 /** One reading per day plus the trend verdict. */
 export const getScoreHistory = (type, id, { days = 30 } = {}, opts) =>
   httpGet(`/api/socialmeter/${type}/${id}/history${qs({ days })}`, opts);

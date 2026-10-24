@@ -1,6 +1,6 @@
 import { joinNames, platformName } from "../utils/platforms";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { getHighlights, getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
+import { getCrowd, getHighlights, getRatings, getScoreExplanation, getScoreHistory, getSocialMeter, getSocialPosts, getTitle } from "../api";
 import { parseUtc } from "../utils/format";
 import { setPageMeta, titleMeta } from "../utils/pageMeta";
 import { useSnapshots } from "./useSnapshots";
@@ -21,6 +21,7 @@ export function useTitlePage(route) {
   const explain = ref(null);
   const history = ref(null);
   const highlights = ref(null);
+  const crowd = ref(null);
   const loading = ref(true);
   const notFound = ref(false);
   const error = ref(null);
@@ -112,6 +113,7 @@ export function useTitlePage(route) {
     explain.value = null;
     history.value = null;
     highlights.value = null;
+    crowd.value = null;
     feed.value = [];
     feedPage.value = 1;
     sentimentFilter.value = "";
@@ -150,6 +152,7 @@ export function useTitlePage(route) {
       cacheReading(type, id, data.meter);
       loadExplanation(signal);
       loadHighlights(signal);
+      loadCrowd(signal);
       await loadFeed(1, signal);
     } catch (e) {
       if (e?.name !== "AbortError") social.value = { meter: null, sources: [], error: e?.message ?? String(e) };
@@ -180,6 +183,16 @@ export function useTitlePage(route) {
     getHighlights(type, id, { signal })
       .then((h) => (highlights.value = h))
       .catch((e) => { if (e?.name !== "AbortError") highlights.value = null; });
+  }
+
+  // "The crowd" (Crowd Shape pilot). The API says enabled=false for every title outside CrowdShape:Titles, and any
+  // failure leaves it null: either way the page renders exactly as it did before the pilot.
+  function loadCrowd(signal) {
+    if (!(social.value?.meter?.totalPosts > 0)) return;
+    const { type, id } = route();
+    getCrowd(type, id, { signal })
+      .then((c) => (crowd.value = c?.enabled && c.dots?.length ? c : null))
+      .catch((e) => { if (e?.name !== "AbortError") crowd.value = null; });
   }
 
   async function loadFeed(page, signal = controller?.signal) {
@@ -234,7 +247,7 @@ export function useTitlePage(route) {
   });
 
   return {
-    title, ratings, social, explain, history, highlights, loading, notFound, error, refreshing, slowLoad,
+    title, ratings, social, explain, history, highlights, crowd, loading, notFound, error, refreshing, slowLoad,
     feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
     meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
     refresh, loadMore, setFilter, applyModeration

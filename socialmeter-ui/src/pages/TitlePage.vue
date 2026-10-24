@@ -8,6 +8,7 @@ import RatingsStrip from "../components/Ratings/RatingsStrip.vue";
 import MeterCard from "../components/Title/MeterCard.vue";
 import WhyThisScore from "../components/Title/WhyThisScore.vue";
 import InTheirWords from "../components/Title/InTheirWords.vue";
+import CrowdShape from "../components/Title/CrowdShape.vue";
 import SocialPulse from "../components/Title/SocialPulse.vue";
 import TrailerDialog from "../components/Title/TrailerDialog.vue";
 import styles from "./TitlePage.module.css";
@@ -20,7 +21,7 @@ const props = defineProps({
 
 const page = useTitlePage(() => ({ type: props.type, id: props.id }));
 const {
-  title, ratings, social, explain, history, highlights, loading, notFound, error, refreshing, slowLoad,
+  title, ratings, social, explain, history, highlights, crowd, loading, notFound, error, refreshing, slowLoad,
   feed, feedPage, feedTotalPages, feedLoading, sentimentFilter, platformFilter,
   meter, anyPosts, configuredSources, locked, trackedReason, trendFact, refreshWaitMinutes, refreshHint, neverRead, pauseNote,
   refresh, loadMore, setFilter
@@ -160,6 +161,15 @@ const metaBits = computed(() => {
             />
           </aside>
         </header>
+
+        <!-- Crowd Shape pilot: only on titles the API lists in CrowdShape:Titles; everywhere else crowd stays null. -->
+        <section v-if="crowd" :class="styles.section">
+          <div :class="styles.sectionHead">
+            <h2 :class="styles.h2">The crowd</h2>
+            <span :class="styles.sectionSub">Every dot is a post we counted. Click one to read it.</span>
+          </div>
+          <CrowdShape :type="type" :id="id" :crowd="crowd" :meter="meter" :shielded="shield" />
+        </section>
 
         <section :class="styles.section">
           <div :class="styles.sectionHead">
