@@ -3,9 +3,13 @@ import { inject, onBeforeUnmount, onMounted, ref } from "vue";
 import styles from "./NavBar.module.css";
 import BrandLogo from "../BrandLogo/BrandLogo.vue";
 import SearchBar from "../SearchBar/SearchBar.vue";
+import { useShelfLink } from "../../composables/useShelfLink";
 
 // Provided by App.vue; the only seasonal thing in the nav is the small tag in October.
 const season = inject("season", ref("thrills"));
+
+// The private reading shelf: a link for admins and readers only (useShelfLink).
+const { showShelf } = useShelfLink();
 
 const scrolled = ref(false);
 const searchOpen = ref(false);
@@ -34,6 +38,7 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
           <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'tv' } }">TV</router-link>
           <router-link :class="styles.link" :to="{ name: 'browse', params: { type: 'game' } }">Games</router-link>
           <router-link :class="[styles.link, styles.linkMuted]" :to="{ name: 'how-it-works' }">How it works</router-link>
+          <router-link v-if="showShelf" :class="[styles.link, styles.linkShelf]" :to="{ name: 'shelf' }">Shelf</router-link>
         </nav>
       </div>
 
@@ -78,6 +83,10 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
       <router-link :class="styles.tab" :to="{ name: 'how-it-works' }">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
         <span>How</span>
+      </router-link>
+      <router-link v-if="showShelf" :class="styles.tab" :to="{ name: 'shelf' }">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z" /><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" /></svg>
+        <span>Shelf</span>
       </router-link>
   </nav>
 </template>

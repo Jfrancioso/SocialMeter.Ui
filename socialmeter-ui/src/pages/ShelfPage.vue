@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { adminSignOutUrl, getShelf, getShelfCover, shelfSignInUrl } from "../api";
+import { useShelfLink } from "../composables/useShelfLink";
 import styles from "./ShelfPage.module.css";
 
 // The private reading shelf: ten hand-picked spicy romance and romantasy series, each with its books in reading order.
@@ -10,16 +11,20 @@ const state = ref("loading");   // loading | signed-out | not-allowed | error | 
 const series = ref([]);
 const covers = ref({});          // coverId -> object URL
 const dev = import.meta.env.DEV;
+// The nav's Shelf link follows what the API said here (see useShelfLink).
+const { rememberShelf } = useShelfLink();
 
 async function load() {
   state.value = "loading";
   try {
     series.value = await getShelf();
     state.value = "ready";
+    rememberShelf(true);
     loadCovers();
   } catch (e) {
     // Signed out, Cloudflare answers with a redirect a cross-site fetch can't follow (status 0); the API says 401.
     state.value = e?.status === 403 ? "not-allowed" : e?.status === 401 || e?.status === 0 ? "signed-out" : "error";
+    if (state.value === "not-allowed") rememberShelf(false);
   }
 }
 

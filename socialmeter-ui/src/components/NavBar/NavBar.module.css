@@ -62,6 +62,11 @@
   color: var(--text-3);
 }
 
+/* The private shelf, shown to admins and readers only: in the loved-it pink, like the shelf page. */
+.linkShelf {
+  color: var(--loved);
+}
+
 /* October's one seasonal cue in the nav, in the same dripping face as the wordmark. */
 .seasonTag {
   display: inline-flex;
@@ -192,8 +197,10 @@
     right: 0;
     bottom: 0;
     z-index: 100;
+    /* As many equal tabs as are showing: five, or six with the private shelf. */
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
     height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: rgba(10, 11, 16, 0.92);

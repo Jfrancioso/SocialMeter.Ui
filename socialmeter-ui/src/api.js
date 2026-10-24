@@ -161,13 +161,13 @@ export const adminSignInUrl = () => `${API_BASE}/api/admin/sign-in${qs({ returnT
 // ---- The private reading shelf (/shelf): admins and the readers the API lists; same sign-in as admin ----
 
 /** Ten series, each with its books in order and its first book's cover id. */
-export const getShelf = () => adminFetch("/api/shelf");
+export const getShelf = () => adminFetch("/api/admin/shelf");
 
 /** A shelf cover as an image file. Fetched with the sign-in (an <img> link couldn't carry it in local development). */
-export const getShelfCover = (coverId) => adminFetch(`/api/shelf/covers/${coverId}`, { as: "blob" });
+export const getShelfCover = (coverId) => adminFetch(`/api/admin/shelf/covers/${coverId}`, { as: "blob" });
 
 /** Where the browser goes to sign in to the shelf: Cloudflare asks for the one-time code, then the API sends it back. */
-export const shelfSignInUrl = () => `${API_BASE}/api/shelf/sign-in${qs({ returnTo: `${window.location.origin}/shelf` })}`;
+export const shelfSignInUrl = () => `${API_BASE}/api/admin/shelf/sign-in${qs({ returnTo: `${window.location.origin}/shelf` })}`;
 
 /** Ends the Cloudflare Access session on the API's host. */
 export const adminSignOutUrl = () => `${API_BASE}/cdn-cgi/access/logout`;
