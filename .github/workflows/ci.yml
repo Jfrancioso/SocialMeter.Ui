@@ -38,6 +38,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Pure front-end logic (src/**/*.test.js, e.g. the crowd layout); Node's built-in runner, no dependencies.
+      - name: Test
+        run: npm test
+
       # The edge Worker (edge/seo-worker) has no dependencies; its tests use Node's built-in runner.
       - name: Test the SEO Worker
         working-directory: edge/seo-worker

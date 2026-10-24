@@ -71,7 +71,9 @@ onBeforeUnmount(() => {
 });
 
 const narrow = computed(() => width.value > 0 && width.value < 560);
-const height = computed(() => (narrow.value ? 180 : 230));
+// The strip's usual height; a lopsided crowd (nearly everyone loved it) grows it up to MAX_HEIGHT (see crowdLayout).
+const baseHeight = computed(() => (narrow.value ? 180 : 230));
+const MAX_HEIGHT = 300;
 
 // The API sends the heaviest posts first (up to CrowdShape:MaxDots); a phone draws only the front of the list, so dots
 // stay big enough to read and tap and the layout stays quick.
@@ -84,16 +86,22 @@ const STAGGER_MS = 10;
 const MAX_STAGGER_MS = 450;
 
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const layout = computed(() =>
+  width.value
+    ? layoutCrowd(visible.value, { width: width.value, height: baseHeight.value, maxHeight: MAX_HEIGHT, pad: PAD, rMin: 6, rMax: narrow.value ? 13 : 18 })
+    : { dots: [], height: baseHeight.value }
+);
+const height = computed(() => layout.value.height);
 const dots = computed(() => {
-  if (!width.value) return [];
-  const placed = layoutCrowd(visible.value, { width: width.value, height: height.value, pad: PAD, rMin: 6, rMax: narrow.value ? 13 : 18 });
-  return placed.map((p, i) => {
+  return layout.value.dots.map((p, i) => {
     const d = visible.value[i];
     return {
       ...d,
       ...p,
       color: meterBand((d.value + 1) * 50).color,
       label: `${cap(d.sentiment)} post on ${platformName(d.platform)}, ${d.share}% of the score`,
+      // Below 12 px across a platform mark is an unreadable speck; the dot alone reads better.
+      glyph: p.r >= 6 ? d.platform : null,
       // Entrance: start just above the strip; the heaviest (first) land first, the whole crowd within MAX_STAGGER_MS.
       drop: -(p.y + p.r + 12),
       delay: Math.min(i * STAGGER_MS, MAX_STAGGER_MS)
@@ -190,13 +198,13 @@ const caretX = computed(() => {
           :aria-pressed="selected === d.id"
           @click="pick(d)"
         >
-          <svg v-if="d.platform === 'x'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" :class="styles.glyph">
+          <svg v-if="d.glyph === 'x'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" :class="styles.glyph">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
-          <svg v-else-if="d.platform === 'bluesky'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" :class="[styles.glyph, styles.glyphWide]">
+          <svg v-else-if="d.glyph === 'bluesky'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" :class="[styles.glyph, styles.glyphWide]">
             <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z" />
           </svg>
-          <svg v-else-if="d.platform === 'steam'" viewBox="0 0 24 24" aria-hidden="true" :class="styles.glyph">
+          <svg v-else-if="d.glyph === 'steam'" viewBox="0 0 24 24" aria-hidden="true" :class="styles.glyph">
             <circle cx="15.5" cy="8.5" r="4.2" fill="none" stroke="currentColor" stroke-width="2.6" />
             <circle cx="7.5" cy="16.5" r="3.6" fill="currentColor" />
             <path d="M10 14.5l3-3.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
