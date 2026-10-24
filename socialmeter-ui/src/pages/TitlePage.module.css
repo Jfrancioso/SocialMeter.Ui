@@ -206,6 +206,13 @@
   margin-top: 44px;
 }
 
+/* Panels stacked inside one section. */
+.stack {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
 .sectionHead {
   display: flex;
   flex-wrap: wrap;

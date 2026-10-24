@@ -5,6 +5,7 @@ import { meterBand } from "../../utils/meter";
 import { platformName } from "../../utils/platforms";
 import { layoutZones, pickDots, scoreX } from "../../utils/crowdLayout";
 import { useInView } from "../../composables/useInView";
+import { useElementWidth } from "../../composables/useElementWidth";
 import PostCard from "../Social/PostCard.vue";
 import styles from "./CrowdShape.module.css";
 
@@ -55,25 +56,10 @@ const caption = computed(() => {
 });
 
 // ---- layout: measured width, fixed height per breakpoint ----
-// The layout is redone when the width settles (not on every pixel of a window drag).
 const strip = ref(null);
-const width = ref(0);
-let observer = null;
-let resizeTimer = null;
-onMounted(() => {
-  width.value = strip.value?.clientWidth ?? 0;
-  if (typeof ResizeObserver !== "undefined" && strip.value) {
-    observer = new ResizeObserver(([entry]) => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => (width.value = Math.round(entry.contentRect.width)), 150);
-    });
-    observer.observe(strip.value);
-  }
-  window.addEventListener("keydown", onKey);
-});
+const width = useElementWidth(strip);
+onMounted(() => window.addEventListener("keydown", onKey));
 onBeforeUnmount(() => {
-  observer?.disconnect();
-  clearTimeout(resizeTimer);
   clearTimeout(enterTimer);
   postController?.abort();
   window.removeEventListener("keydown", onKey);
@@ -222,7 +208,8 @@ function swipeEnd(e) {
   touchY = null;
 }
 
-// A new reading (Refresh) redraws the dots; an open post would point at a dot that may have moved.
+// A new reading (Refresh, or a live event's check for new posts) redraws the dots; an open post would point at a dot
+// that may have moved.
 watch(() => props.crowd, close);
 
 const caretX = computed(() => {

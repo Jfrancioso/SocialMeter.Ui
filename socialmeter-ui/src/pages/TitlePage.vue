@@ -9,6 +9,7 @@ import MeterCard from "../components/Title/MeterCard.vue";
 import WhyThisScore from "../components/Title/WhyThisScore.vue";
 import InTheirWords from "../components/Title/InTheirWords.vue";
 import CrowdShape from "../components/Title/CrowdShape.vue";
+import PulseLine from "../components/Title/PulseLine.vue";
 import SocialPulse from "../components/Title/SocialPulse.vue";
 import TrailerDialog from "../components/Title/TrailerDialog.vue";
 import styles from "./TitlePage.module.css";
@@ -162,13 +163,24 @@ const metaBits = computed(() => {
           </aside>
         </header>
 
-        <!-- "The crowd": only on titles the API picks (listed, live events, most talked about); elsewhere crowd stays null. -->
+        <!-- "The crowd": only on titles the API picks (listed, live events, most talked about); elsewhere crowd stays null.
+             The line over time shows once there are enough recent posts to draw one. -->
         <section v-if="crowd" :class="styles.section">
           <div :class="styles.sectionHead">
             <h2 :class="styles.h2">The crowd</h2>
-            <span :class="styles.sectionSub">Every dot is a post we counted. Click one to read it.</span>
+            <span :class="styles.sectionSub">How the mood is moving, and every post we counted. Click a dot to read it.</span>
           </div>
-          <CrowdShape :type="type" :id="id" :crowd="crowd" :meter="meter" :shielded="shield" />
+          <div :class="styles.stack">
+            <PulseLine
+              v-if="crowd.timeline?.length"
+              :timeline="crowd.timeline"
+              :hours="crowd.timelineHours"
+              :live="crowd.live"
+              :live-label="crowd.liveLabel ?? ''"
+              :score="meter?.score ?? null"
+            />
+            <CrowdShape :type="type" :id="id" :crowd="crowd" :meter="meter" :shielded="shield" />
+          </div>
         </section>
 
         <section :class="styles.section">

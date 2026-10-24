@@ -197,6 +197,45 @@ export function useTitlePage(route) {
       .catch((e) => { if (e?.name !== "AbortError") crowd.value = null; });
   }
 
+  // ---- live events: check back for new posts ----
+  // While a watch window is open the crowd says live, and the page asks for it again every LIVE_CHECK_MS while the tab is
+  // in view. Cheap and safe: the crowd is built from stored posts and cached per reading, so an unchanged reading costs
+  // one small query and never a pull. Only a new reading replaces what's on screen (so an open post stays open until
+  // then), and the score is fetched again with it.
+  const LIVE_CHECK_MS = 120_000;
+  let liveTimer = null;
+  const crowdKey = (c) => [c.posts, c.positive, c.negative, c.neutral, c.timeline?.length, c.timeline?.at(-1)?.at, c.live].join("|");
+
+  watch(
+    () => crowd.value?.live === true,
+    (live) => {
+      clearInterval(liveTimer);
+      if (live) liveTimer = setInterval(checkLive, LIVE_CHECK_MS);
+    }
+  );
+
+  async function checkLive() {
+    if (document.visibilityState !== "visible" || !crowd.value) return;
+    const { type, id } = route();
+    const signal = controller?.signal;
+    try {
+      const next = await getCrowd(type, id, { signal });
+      if (!crowd.value) return;   // the page moved on meanwhile
+      // When the event ends, a title that only had the crowd for it gets none: keep what's on screen, stop checking.
+      if (!(next?.enabled && next.dots?.length)) {
+        crowd.value = { ...crowd.value, live: false };
+        return;
+      }
+      if (crowdKey(next) === crowdKey(crowd.value)) return;
+      crowd.value = next;
+      const data = await getSocialMeter(type, id, { refresh: false }, { signal });
+      social.value = data;
+      cacheReading(type, id, data.meter);
+    } catch {
+      // Aborted (the page moved on) or offline: the next check tries again.
+    }
+  }
+
   async function loadFeed(page, signal = controller?.signal) {
     const { type, id } = route();
     feedLoading.value = true;
@@ -257,6 +296,7 @@ export function useTitlePage(route) {
   onBeforeUnmount(() => {
     controller?.abort();
     clearInterval(clock);
+    clearInterval(liveTimer);
     clearTimeout(slowTimer);
   });
 
