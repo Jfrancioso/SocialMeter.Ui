@@ -185,8 +185,8 @@ export function useTitlePage(route) {
       .catch((e) => { if (e?.name !== "AbortError") highlights.value = null; });
   }
 
-  // "The crowd" (Crowd Shape pilot). The API says enabled=false for every title outside CrowdShape:Titles, and any
-  // failure leaves it null: either way the page renders exactly as it did before the pilot.
+  // "The crowd". The API says enabled=false for titles it doesn't pick (see CrowdShapeService), and any failure leaves it
+  // null: either way the page renders exactly as it does without the section.
   function loadCrowd(signal) {
     if (!(social.value?.meter?.totalPosts > 0)) return;
     const { type, id } = route();

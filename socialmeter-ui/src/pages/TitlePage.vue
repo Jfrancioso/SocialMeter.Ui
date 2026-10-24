@@ -162,7 +162,7 @@ const metaBits = computed(() => {
           </aside>
         </header>
 
-        <!-- Crowd Shape pilot: only on titles the API lists in CrowdShape:Titles; everywhere else crowd stays null. -->
+        <!-- "The crowd": only on titles the API picks (listed, live events, most talked about); elsewhere crowd stays null. -->
         <section v-if="crowd" :class="styles.section">
           <div :class="styles.sectionHead">
             <h2 :class="styles.h2">The crowd</h2>

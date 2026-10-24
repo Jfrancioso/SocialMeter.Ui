@@ -4,12 +4,14 @@ import { getSocialPost } from "../../api";
 import { meterBand } from "../../utils/meter";
 import { platformName } from "../../utils/platforms";
 import { layoutCrowd, scoreX } from "../../utils/crowdLayout";
+import { useInView } from "../../composables/useInView";
 import PostCard from "../Social/PostCard.vue";
 import styles from "./CrowdShape.module.css";
 
-// "The crowd" (the Crowd Shape pilot: only titles listed in the API's CrowdShape:Titles get one). Every counted post is a
-// dot, placed from "hated it" to "loved it" and sized by its weight in the score, with the shape of the whole named on top.
-// Clicking a dot loads that post into the panel underneath, in the same card (and behind the same spoiler shield) as the feed.
+// "The crowd": every counted post is a dot, placed from "hated it" to "loved it" and sized by its weight in the score,
+// with the shape of the whole named on top. The API decides which titles get one (CrowdShapeService: listed titles, live
+// events and the most talked about). Clicking a dot loads that post into the panel underneath, in the same card (and
+// behind the same spoiler shield) as the feed.
 const props = defineProps({
   type: { type: String, required: true },
   id: { type: Number, required: true },
@@ -39,7 +41,8 @@ const summary = computed(() => {
 });
 const caption = computed(() => {
   const c = props.crowd;
-  const shown = c.dots.length < c.posts ? ` Showing the ${c.dots.length} that weigh most.` : "";
+  const n = visible.value.length;
+  const shown = n < c.posts ? ` Showing the ${n} that count most.` : "";
   return `Each dot is one of the ${c.posts} posts we counted, marked with where it was posted. Bigger dots carry more weight in the score.${shown}`;
 });
 
@@ -63,26 +66,62 @@ onMounted(() => {
 onBeforeUnmount(() => {
   observer?.disconnect();
   clearTimeout(resizeTimer);
+  clearTimeout(enterTimer);
   postController?.abort();
 });
 
 const narrow = computed(() => width.value > 0 && width.value < 560);
 const height = computed(() => (narrow.value ? 180 : 230));
 
+// The API sends the heaviest posts first (up to CrowdShape:MaxDots); a phone draws only the front of the list, so dots
+// stay big enough to read and tap and the layout stays quick.
+const PHONE_MAX_DOTS = 100;
+const visible = computed(() => (narrow.value ? props.crowd.dots.slice(0, PHONE_MAX_DOTS) : props.crowd.dots));
+
+// Entrance timing (the transition itself is in the CSS, 650 ms): each dot starts STAGGER_MS after the one before it.
+const ENTER_MS = 650;
+const STAGGER_MS = 10;
+const MAX_STAGGER_MS = 450;
+
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const dots = computed(() => {
   if (!width.value) return [];
-  const placed = layoutCrowd(props.crowd.dots, { width: width.value, height: height.value, pad: PAD, rMin: 6, rMax: narrow.value ? 13 : 18 });
+  const placed = layoutCrowd(visible.value, { width: width.value, height: height.value, pad: PAD, rMin: 6, rMax: narrow.value ? 13 : 18 });
   return placed.map((p, i) => {
-    const d = props.crowd.dots[i];
+    const d = visible.value[i];
     return {
       ...d,
       ...p,
       color: meterBand((d.value + 1) * 50).color,
-      label: `${cap(d.sentiment)} post on ${platformName(d.platform)}, ${d.share}% of the score`
+      label: `${cap(d.sentiment)} post on ${platformName(d.platform)}, ${d.share}% of the score`,
+      // Entrance: start just above the strip; the heaviest (first) land first, the whole crowd within MAX_STAGGER_MS.
+      drop: -(p.y + p.r + 12),
+      delay: Math.min(i * STAGGER_MS, MAX_STAGGER_MS)
     };
   });
 });
+
+// ---- entrance: the first time the strip scrolls into view, the dots drop into place ----
+// The common "reveal on scroll" pattern: useInView says when, each dot's transition-delay sets the order, and the CSS
+// transition does the motion. Plays once per page; reduced-motion visitors get the dots in place (the CSS agrees).
+const field = ref(null);
+const inView = useInView(field, { threshold: 0.3 });
+const reduceMotion = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const phase = ref(reduceMotion ? "done" : "waiting");   // waiting -> entering -> done
+let enterTimer = null;
+watch(
+  [inView, () => dots.value.length],
+  ([seen, count]) => {
+    if (phase.value !== "waiting" || !seen || !count) return;
+    // This runs after the render, so the dots are on the page in their waiting position. Reading the layout makes the
+    // browser apply that position before the class changes, giving the transition its starting point (the usual reflow
+    // trick; unlike animation frames it also works in a background tab).
+    void field.value?.offsetHeight;
+    phase.value = "entering";
+    enterTimer = setTimeout(() => (phase.value = "done"), ENTER_MS + MAX_STAGGER_MS);
+  },
+  { flush: "post" }
+);
 
 const markerX = computed(() => (props.meter?.score != null && width.value ? scoreX(props.meter.score, width.value, PAD) : null));
 const markerFlip = computed(() => markerX.value != null && markerX.value > width.value - 110);
@@ -131,7 +170,7 @@ const caretX = computed(() => {
     </div>
 
     <div ref="strip" :class="styles.strip">
-      <div :class="styles.field" :style="{ height: `${height}px` }">
+      <div ref="field" :class="[styles.field, styles[phase]]" :style="{ height: `${height}px` }">
         <template v-if="markerX != null">
           <span :class="styles.marker" :style="{ left: `${markerX}px` }" aria-hidden="true" />
           <span :class="[styles.markerLabel, markerFlip && styles.markerLabelFlip]" :style="{ left: `${markerX}px` }" aria-hidden="true">
@@ -143,7 +182,10 @@ const caretX = computed(() => {
           :key="d.id"
           type="button"
           :class="[styles.dot, selected === d.id && styles.dotOn, selected != null && selected !== d.id && styles.dotDim]"
-          :style="{ left: `${d.x - d.r}px`, top: `${d.y - d.r}px`, width: `${2 * d.r}px`, height: `${2 * d.r}px`, background: d.color }"
+          :style="{
+            left: `${d.x - d.r}px`, top: `${d.y - d.r}px`, width: `${2 * d.r}px`, height: `${2 * d.r}px`, background: d.color,
+            '--drop': `${d.drop}px`, '--delay': `${d.delay}ms`
+          }"
           :aria-label="d.label"
           :aria-pressed="selected === d.id"
           @click="pick(d)"
