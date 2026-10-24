@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { adminSignInUrl, getModerationLog, restorePost, setDevAdminKey, undoRelabel } from "../api";
 import HealthPanel from "../components/Admin/HealthPanel.vue";
+import OutboxPanel from "../components/Admin/OutboxPanel.vue";
 import { useAdmin } from "../composables/useAdmin";
 import { mediaLabel, parseUtc, timeAgo } from "../utils/format";
 import { reasonLabel, sentimentName } from "../utils/moderation";
@@ -108,6 +109,7 @@ onMounted(start);
 
       <template v-else>
         <HealthPanel />
+        <OutboxPanel />
 
         <section :class="styles.panel">
           <h2 :class="styles.h2">Removing or relabelling a post</h2>

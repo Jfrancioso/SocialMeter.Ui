@@ -158,6 +158,16 @@ export const getGuardrails = () => adminFetch("/api/admin/guardrails");
 /** Where the browser goes to sign in: Cloudflare asks for the one-time code, then the API sends it back to /admin. */
 export const adminSignInUrl = () => `${API_BASE}/api/admin/sign-in${qs({ returnTo: `${window.location.origin}/admin` })}`;
 
+// ---- The Outbox: the brand account's drafted posts. Admins only; nothing posts without a tap ----
+
+/** Drafts waiting for a tap, what was posted or skipped lately, and whether posting is set up. */
+export const getOutbox = () => adminFetch("/api/admin/outbox");
+/** Makes today's draft now instead of waiting for the draft hour. Returns the outbox. */
+export const draftOutboxNow = () => adminFetch("/api/admin/outbox/draft", { method: "POST" });
+/** Posts a draft to the brand's Bluesky account: the post, then the case for and against as quote replies. */
+export const postOutboxItem = (id) => adminFetch(`/api/admin/outbox/${id}/post`, { method: "POST" });
+export const skipOutboxItem = (id) => adminFetch(`/api/admin/outbox/${id}/skip`, { method: "POST" });
+
 // ---- The private reading shelf (/shelf): admins and the readers the API lists; same sign-in as admin ----
 
 /** Ten series, each with its books in order and its first book's cover id. */

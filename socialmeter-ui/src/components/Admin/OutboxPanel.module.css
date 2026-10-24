@@ -1,0 +1,218 @@
+.panel {
+  max-width: 760px;
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.headActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.h2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.muted strong {
+  color: var(--text-2);
+}
+
+.warn {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.error {
+  margin: 0;
+  color: var(--neg);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* One draft: the post as it would read, its two replies, and the buttons. */
+.item {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  min-width: 0;
+}
+
+.itemDone {
+  opacity: 0.75;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.kind {
+  padding: 3px 10px;
+  border-radius: var(--pill);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--mixed);
+}
+
+.kind-split {
+  background: linear-gradient(90deg, var(--hated) 50%, var(--loved) 50%);
+}
+
+.kind-event {
+  background: var(--neg);
+}
+
+.status {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.when {
+  color: var(--text-3);
+}
+
+.post {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  line-height: 1.5;
+  user-select: text;
+}
+
+.card {
+  display: grid;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-2);
+  overflow: hidden;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.91 / 1;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+.card span {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-3);
+  overflow-wrap: anywhere;
+}
+
+.replies {
+  display: grid;
+  gap: 10px;
+}
+
+.reply {
+  display: grid;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 3px solid var(--line-2);
+  min-width: 0;
+}
+
+.reply-for {
+  border-left-color: var(--loved);
+}
+
+.reply-against {
+  border-left-color: var(--hated);
+}
+
+.lead {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.author {
+  display: block;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.link {
+  justify-self: start;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* The armed Post button: one more tap publishes. */
+.armed {
+  background: var(--loved);
+  border-color: var(--loved);
+  color: var(--bg);
+}
