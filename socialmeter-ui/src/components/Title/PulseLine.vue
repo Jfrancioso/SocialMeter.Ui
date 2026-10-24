@@ -59,23 +59,29 @@ function onMove(e) {
 }
 const shown = computed(() => points.value[hover.value] ?? last.value);
 const shownColor = computed(() => (shown.value ? meterBand(shown.value.mood).color : null));
+
+// Up (warmer) takes the loved-it colour and down (colder) the hated-it colour, as in the crowd's zones.
+const UP = TICK.positive;
+const DOWN = TICK.negative;
 const versus = computed(() => {
   const p = shown.value;
-  if (!p) return "";
-  if (props.score == null) return `${p.mood} out of 100`;
+  if (!p) return { text: "" };
+  if (props.score == null) return { text: `${p.mood} out of 100` };
   const gap = p.mood - props.score;
-  if (Math.abs(gap) <= 1) return "in line with the score";
-  return `${Math.abs(gap)} ${gap > 0 ? "above" : "below"} the score`;
+  if (Math.abs(gap) <= 1) return { text: "in line with the score" };
+  return { text: `${Math.abs(gap)} ${gap > 0 ? "above" : "below"} the score`, color: gap > 0 ? UP : DOWN };
 });
 const change = computed(() => recentChange(points.value));
+const trend = computed(() => {
+  const c = change.value;
+  if (!c) return null;
+  if (c.change === 0) return { text: "No change in the last hour" };
+  return { arrow: `${c.change > 0 ? "▲" : "▼"} ${Math.abs(c.change)}`, text: "in the last hour", color: c.change > 0 ? UP : DOWN };
+});
 const detail = computed(() => {
   const p = shown.value;
   if (!p) return "";
-  if (hover.value >= 0) return `After a “${SAID[p.sentiment] ?? "mixed"}” post on ${platformName(p.platform)}`;
-  const c = change.value;
-  if (!c) return `Latest post ${timeLabel(p.at)}`;
-  if (c.change === 0) return "No change in the last hour";
-  return `${c.change > 0 ? "▲" : "▼"} ${Math.abs(c.change)} in the last hour`;
+  return hover.value >= 0 ? `After a “${SAID[p.sentiment] ?? "mixed"}” post on ${platformName(p.platform)}` : `Latest post ${timeLabel(p.at)}`;
 });
 
 const first = computed(() => points.value[0] ?? null);
@@ -101,9 +107,13 @@ const drawn = computed(() => reduceMotion || inView.value);
       <div v-if="shown" :class="styles.now" aria-live="off">
         <strong :class="styles.nowMain">
           {{ hover >= 0 ? timeLabel(shown.at) : "Latest posts" }}:
-          <span :style="{ color: shownColor }">{{ versus }}</span>
+          <span :style="{ color: versus.color }">{{ versus.text }}</span>
         </strong>
-        <span :class="styles.nowDetail">{{ detail }}</span>
+        <span v-if="hover < 0 && trend" :class="styles.nowDetail">
+          <strong v-if="trend.arrow" :style="{ color: trend.color }">{{ trend.arrow }}</strong>
+          {{ trend.text }}
+        </span>
+        <span v-else :class="styles.nowDetail">{{ detail }}</span>
       </div>
     </div>
 
