@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { draftOutboxNow, getOutbox, postOutboxItem, skipOutboxItem } from "../../api";
 import { timeAgo } from "../../utils/format";
 import { safeHref } from "../../utils/outbound";
+import { copyText, xComposeUrl } from "../../utils/shareText";
 import styles from "./OutboxPanel.module.css";
 
 // The brand account's Outbox: the site drafts (one a day, plus live events), the admin posts or skips each one. The
@@ -88,15 +89,18 @@ function tapPost(item) {
   armTimer = setTimeout(() => (arming.value = null), 4000);
 }
 
+// X is posted to by hand. "Post on X" opens X's composer with the text filled in (the easy way on a phone); "Copy" puts
+// it on the clipboard, and when the browser refuses that, shows the text in a box to long-press and copy.
+const copyBox = ref(null);   // id whose text is shown to copy by hand
+
 async function copyForX(item) {
-  let ok = false;
-  try {
-    await navigator.clipboard.writeText(item.text);
-    ok = true;
-  } catch {
-    // Clipboard refused (older browsers, some app views): the text is selectable on the card instead.
-  }
-  notes.value = { ...notes.value, [item.id]: ok ? "Copied. Paste it into X." : "Couldn't copy: select the text above instead." };
+  const ok = await copyText(item.text);
+  copyBox.value = ok ? null : item.id;
+  notes.value = { ...notes.value, [item.id]: ok ? "Copied. Paste it into X." : "Your browser blocked copying: long-press the text below and copy it." };
+}
+
+function selectAll(e) {
+  e.target.select();
 }
 
 onMounted(load);
@@ -153,6 +157,7 @@ onBeforeUnmount(() => clearTimeout(armTimer));
 
       <p v-if="item.error && item.status === 'draft'" :class="styles.error">Last try: {{ item.error }}</p>
       <p v-if="notes[item.id]" :class="styles.note">{{ notes[item.id] }}</p>
+      <textarea v-if="copyBox === item.id" :class="styles.copyBox" :value="item.text" readonly rows="5" @focus="selectAll" />
 
       <div v-if="item.status === 'draft'" :class="styles.actions">
         <button
@@ -164,11 +169,11 @@ onBeforeUnmount(() => clearTimeout(armTimer));
           {{ busy.has(item.id) ? "Posting…" : arming === item.id ? "Tap again to post" : "Post to Bluesky" }}
         </button>
         <button type="button" class="btn" :disabled="busy.has(item.id)" @click="act(item, 'skip')">Skip</button>
-        <button type="button" class="btn" :disabled="!item.text" @click="copyForX(item)">Copy for X</button>
       </div>
-      <div v-else-if="item.status === 'posted'" :class="styles.actions">
-        <a v-if="safeHref(item.postedWebUrl)" :href="safeHref(item.postedWebUrl)" target="_blank" rel="noopener" class="btn">View on Bluesky ↗</a>
-        <button type="button" class="btn" @click="copyForX(item)">Copy for X</button>
+      <div v-if="item.text && item.status !== 'skipped' && item.status !== 'expired'" :class="styles.actions">
+        <a v-if="item.status === 'posted' && safeHref(item.postedWebUrl)" :href="safeHref(item.postedWebUrl)" target="_blank" rel="noopener" class="btn">View on Bluesky ↗</a>
+        <a :href="xComposeUrl(item.text)" target="_blank" rel="noopener" class="btn">Post on X ↗</a>
+        <button type="button" class="btn" @click="copyForX(item)">Copy</button>
       </div>
     </article>
   </section>

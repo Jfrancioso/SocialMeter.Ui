@@ -210,6 +210,19 @@
   gap: 8px;
 }
 
+/* When the browser won't copy: the text in a box to long-press and copy by hand. */
+.copyBox {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  color: var(--text);
+  font: 15px/1.5 var(--font);
+  resize: vertical;
+}
+
 /* The armed Post button: one more tap publishes. */
 .armed {
   background: var(--loved);
