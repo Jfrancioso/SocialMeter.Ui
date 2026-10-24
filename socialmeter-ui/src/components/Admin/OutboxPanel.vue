@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { draftOutboxNow, getOutbox, postOutboxItem, skipOutboxItem } from "../../api";
 import { timeAgo } from "../../utils/format";
 import { safeHref } from "../../utils/outbound";
-import { copyText, xComposeUrl } from "../../utils/shareText";
+import { blueskyAppUrl, copyText, isPhone, openInApp, xAppComposeUrl, xComposeUrl } from "../../utils/shareText";
 import styles from "./OutboxPanel.module.css";
 
 // The brand account's Outbox: the site drafts (one a day, plus live events), the admin posts or skips each one. The
@@ -103,6 +103,14 @@ function selectAll(e) {
   e.target.select();
 }
 
+// On a phone, links to X and Bluesky open their apps (falling back to the website); elsewhere the plain link does.
+const phone = isPhone();
+function openApp(e, appUrl, webUrl) {
+  if (!phone || !appUrl || !webUrl) return;
+  e.preventDefault();
+  openInApp(appUrl, webUrl);
+}
+
 onMounted(load);
 onBeforeUnmount(() => clearTimeout(armTimer));
 </script>
@@ -149,7 +157,14 @@ onBeforeUnmount(() => clearTimeout(armTimer));
               <span :class="styles.author">@{{ side.q.author }}</span>
               {{ side.q.content }}
             </blockquote>
-            <a v-if="safeHref(side.q.sourceUrl)" :href="safeHref(side.q.sourceUrl)" target="_blank" rel="noopener" :class="styles.link">Open on Bluesky ↗</a>
+            <a
+              v-if="safeHref(side.q.sourceUrl)"
+              :href="safeHref(side.q.sourceUrl)"
+              target="_blank"
+              rel="noopener"
+              :class="styles.link"
+              @click="openApp($event, blueskyAppUrl(safeHref(side.q.sourceUrl)), safeHref(side.q.sourceUrl))"
+            >Open on Bluesky ↗</a>
           </template>
           <span v-else :class="styles.muted">No Bluesky post qualifies on this side, so this reply is left out.</span>
         </div>
@@ -171,8 +186,15 @@ onBeforeUnmount(() => clearTimeout(armTimer));
         <button type="button" class="btn" :disabled="busy.has(item.id)" @click="act(item, 'skip')">Skip</button>
       </div>
       <div v-if="item.text && item.status !== 'skipped' && item.status !== 'expired'" :class="styles.actions">
-        <a v-if="item.status === 'posted' && safeHref(item.postedWebUrl)" :href="safeHref(item.postedWebUrl)" target="_blank" rel="noopener" class="btn">View on Bluesky ↗</a>
-        <a :href="xComposeUrl(item.text)" target="_blank" rel="noopener" class="btn">Post on X ↗</a>
+        <a
+          v-if="item.status === 'posted' && safeHref(item.postedWebUrl)"
+          :href="safeHref(item.postedWebUrl)"
+          target="_blank"
+          rel="noopener"
+          class="btn"
+          @click="openApp($event, blueskyAppUrl(safeHref(item.postedWebUrl)), safeHref(item.postedWebUrl))"
+        >View on Bluesky ↗</a>
+        <a :href="xComposeUrl(item.text)" target="_blank" rel="noopener" class="btn" @click="openApp($event, xAppComposeUrl(item.text), xComposeUrl(item.text))">Post on X ↗</a>
         <button type="button" class="btn" @click="copyForX(item)">Copy</button>
       </div>
     </article>
