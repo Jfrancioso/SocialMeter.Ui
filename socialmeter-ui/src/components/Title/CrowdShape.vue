@@ -34,11 +34,12 @@ const SHAPES = {
 };
 const shape = computed(() => SHAPES[props.crowd.shape] ?? SHAPES.early);
 
-// The three zones' names and colours, by the post sentiment each holds (see ZONES in crowdLayout).
+// The three zones' names and colours, by the post sentiment each holds (see ZONES in crowdLayout). The colours are the
+// site's opinion colours (tokens.css), the same as the post cards and the filter chips.
 const ZONE_LOOK = {
-  negative: { name: "Hated it", color: "var(--meter-cold)" },
-  neutral: { name: "Mixed", color: "var(--meter-warm)" },
-  positive: { name: "Loved it", color: "var(--meter-electric)" }
+  negative: { name: "Hated it", color: "var(--hated)" },
+  neutral: { name: "Mixed", color: "var(--mixed)" },
+  positive: { name: "Loved it", color: "var(--loved)" }
 };
 
 const pct = (n) => Math.round(n ?? 0);

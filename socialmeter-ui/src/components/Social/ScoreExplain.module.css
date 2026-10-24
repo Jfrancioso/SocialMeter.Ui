@@ -60,10 +60,10 @@
 }
 
 .dir-up {
-  color: var(--pos);
+  color: var(--loved);
 }
 .dir-down {
-  color: var(--neg);
+  color: var(--hated);
 }
 .dir-flat {
   color: var(--text-2);
@@ -192,7 +192,7 @@
 }
 
 .driver {
-  --s: var(--neu);
+  --s: var(--mixed);
   display: grid;
   grid-template-columns: 74px minmax(0, 1fr);
   gap: 12px;
@@ -204,10 +204,10 @@
 }
 
 .s-positive {
-  --s: var(--pos);
+  --s: var(--loved);
 }
 .s-negative {
-  --s: var(--neg);
+  --s: var(--hated);
 }
 
 .share {
@@ -312,16 +312,16 @@
 }
 
 .chip-positive {
-  background: color-mix(in srgb, var(--pos) 16%, transparent);
-  color: var(--pos);
+  background: color-mix(in srgb, var(--loved) 16%, transparent);
+  color: var(--loved);
 }
 .chip-negative {
-  background: color-mix(in srgb, var(--neg) 16%, transparent);
-  color: var(--neg);
+  background: color-mix(in srgb, var(--hated) 16%, transparent);
+  color: var(--hated);
 }
 .chip-neutral {
-  background: color-mix(in srgb, var(--neu) 16%, transparent);
-  color: var(--neu);
+  background: color-mix(in srgb, var(--mixed) 16%, transparent);
+  color: var(--mixed);
 }
 
 .chipMuted {

@@ -45,8 +45,8 @@ const STOPS = [
   [0.58, "var(--meter-lukewarm)"],
   [0.8, "var(--meter-cold)"]
 ];
-// The post ticks under the line use the crowd's zone colours (CrowdShape's ZONE_LOOK).
-const TICK = { positive: "var(--meter-electric)", neutral: "var(--meter-warm)", negative: "var(--meter-cold)" };
+// The post ticks under the line use the site's opinion colours (tokens.css), like the crowd's zones.
+const TICK = { positive: "var(--loved)", neutral: "var(--mixed)", negative: "var(--hated)" };
 const SAID = { positive: "loved it", neutral: "mixed", negative: "hated it" };
 
 // ---- the readout: the latest post, or the one under the pointer ----

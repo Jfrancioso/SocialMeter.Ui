@@ -49,9 +49,9 @@ const sortOptions = [
 ];
 
 const sentimentChips = [
-  { value: "positive", label: "Positive", color: "var(--pos)" },
-  { value: "neutral", label: "Neutral", color: "var(--neu)" },
-  { value: "negative", label: "Negative", color: "var(--neg)" }
+  { value: "positive", label: "Positive", color: "var(--loved)" },
+  { value: "neutral", label: "Neutral", color: "var(--mixed)" },
+  { value: "negative", label: "Negative", color: "var(--hated)" }
 ];
 
 const platformName = { ...PLATFORM_NAMES, steam: "Steam reviews" };

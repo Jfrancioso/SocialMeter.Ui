@@ -41,20 +41,20 @@
 }
 
 .choice-positive.chosen {
-  background: var(--pos);
-  border-color: var(--pos);
+  background: var(--loved);
+  border-color: var(--loved);
   color: var(--bg);
 }
 
 .choice-neutral.chosen {
-  background: var(--neu);
-  border-color: var(--neu);
+  background: var(--mixed);
+  border-color: var(--mixed);
   color: var(--bg);
 }
 
 .choice-negative.chosen {
-  background: var(--neg);
-  border-color: var(--neg);
+  background: var(--hated);
+  border-color: var(--hated);
   color: var(--bg);
 }
 

@@ -35,9 +35,9 @@ const sentimentShares = computed(() => {
   const s = props.explain?.sentimentWeight;
   if (!s) return [];
   return [
-    { key: "pos", label: "Positive", value: s.positive, color: "var(--pos)" },
-    { key: "neu", label: "Neutral", value: s.neutral, color: "var(--neu)" },
-    { key: "neg", label: "Negative", value: s.negative, color: "var(--neg)" }
+    { key: "pos", label: "Positive", value: s.positive, color: "var(--loved)" },
+    { key: "neu", label: "Neutral", value: s.neutral, color: "var(--mixed)" },
+    { key: "neg", label: "Negative", value: s.negative, color: "var(--hated)" }
   ];
 });
 

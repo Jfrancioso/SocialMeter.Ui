@@ -21,9 +21,8 @@
   --accent-2: #ff6a3d;
   --accent-glow: rgba(255, 176, 0, 0.35);
 
-  /* sentiment */
+  /* status: working / broken (tracking, health checks, errors, removals). Not for opinions: see below. */
   --pos: #3ddc97;
-  --neu: #9aa3b2;
   --neg: #ff5c7a;
 
   /* the meter: cold → electric */
@@ -33,6 +32,13 @@
   --meter-hot: #ff6a3d;
   --meter-electric: #ff3d8f;
   --meter-none: #596073;
+
+  /* opinions: what a post said, and which way a score or the mood moves. The meter's own ends, so a post card, its
+     dot in the crowd and a score leaning the same way share one colour (blue and pink also stay apart for red-green
+     colour blindness, unlike green and red). */
+  --loved: var(--meter-electric);
+  --mixed: var(--meter-warm);
+  --hated: var(--meter-cold);
 
   /* platforms */
   --reddit: #ff4500;

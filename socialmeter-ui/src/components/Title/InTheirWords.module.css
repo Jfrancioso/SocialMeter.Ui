@@ -26,11 +26,11 @@
 }
 
 .positive {
-  background: var(--pos);
+  background: var(--loved);
 }
 
 .negative {
-  background: var(--neg);
+  background: var(--hated);
 }
 
 .labelText {

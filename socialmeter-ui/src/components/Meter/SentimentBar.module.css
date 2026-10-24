@@ -20,13 +20,13 @@
 }
 
 .pos {
-  background: var(--pos);
+  background: var(--loved);
 }
 .neu {
-  background: var(--neu);
+  background: var(--mixed);
 }
 .neg {
-  background: var(--neg);
+  background: var(--hated);
 }
 .empty {
   background: rgba(255, 255, 255, 0.06);

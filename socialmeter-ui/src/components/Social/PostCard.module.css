@@ -1,5 +1,5 @@
 .card {
-  --s: var(--neu);
+  --s: var(--mixed);
   display: grid;
   gap: 10px;
   padding: 14px 16px;
@@ -16,10 +16,10 @@
 }
 
 .s-positive {
-  --s: var(--pos);
+  --s: var(--loved);
 }
 .s-negative {
-  --s: var(--neg);
+  --s: var(--hated);
 }
 
 .head {

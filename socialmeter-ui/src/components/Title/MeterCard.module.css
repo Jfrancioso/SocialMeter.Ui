@@ -99,11 +99,11 @@
 }
 
 .trend-up {
-  color: var(--pos);
+  color: var(--loved);
   font-weight: 700;
 }
 .trend-down {
-  color: var(--neg);
+  color: var(--hated);
   font-weight: 700;
 }
 .trend-flat {

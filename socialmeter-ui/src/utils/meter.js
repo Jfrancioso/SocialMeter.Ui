@@ -22,10 +22,10 @@ export function meterKey(type, id) {
 export function sentimentColor(sentiment) {
   switch (sentiment) {
     case "positive":
-      return "var(--pos)";
+      return "var(--loved)";
     case "negative":
-      return "var(--neg)";
+      return "var(--hated)";
     default:
-      return "var(--neu)";
+      return "var(--mixed)";
   }
 }

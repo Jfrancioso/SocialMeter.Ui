@@ -26,20 +26,20 @@
 }
 
 .pill-pos {
-  background: var(--meter-electric);
+  background: var(--loved);
 }
 
 .pill-neg {
-  background: var(--meter-cold);
+  background: var(--hated);
 }
 
 .pill-mid {
-  background: var(--meter-warm);
+  background: var(--mixed);
 }
 
 /* Split: half "hated it" blue, half "loved it" pink. */
 .pill-split {
-  background: linear-gradient(90deg, var(--meter-cold) 50%, var(--meter-electric) 50%);
+  background: linear-gradient(90deg, var(--hated) 50%, var(--loved) 50%);
 }
 
 .summary {
