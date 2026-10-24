@@ -146,6 +146,7 @@
   transform: translateX(calc(-100% - 16px));
 }
 
+/* The zones: a coloured band each, as wide as the zone above it, with its name and share underneath. */
 .scale {
   display: flex;
   height: 6px;
@@ -154,13 +155,32 @@
   overflow: hidden;
 }
 
+.scale > span + span {
+  box-shadow: inset 2px 0 0 var(--panel);
+}
+
 .ends {
   display: flex;
-  justify-content: space-between;
   margin-top: 6px;
   font-size: 12px;
   font-weight: 700;
   color: var(--text-2);
+}
+
+.zoneLabel {
+  flex: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Where one zone ends and the next begins. */
+.zoneLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed var(--line-2);
 }
 
 .caption {
@@ -209,6 +229,72 @@
   color: var(--text-2);
   font: 600 13px var(--font);
   cursor: pointer;
+}
+
+/* Phones: the picked post in a sheet over the bottom of the screen, above the tab bar. */
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: 55vh;
+  border-top: 1px solid var(--line-2);
+  border-radius: 20px 20px 0 0;
+  background: var(--panel);
+  box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.sheetHead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  border-radius: var(--pill);
+  background: var(--line-3);
+}
+
+.sheetClose {
+  position: absolute;
+  top: 0;
+  right: max(4px, env(safe-area-inset-right, 0px));
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-2);
+  font: 600 18px var(--font);
+  cursor: pointer;
+}
+
+.sheetBody {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) 12px max(12px, env(safe-area-inset-left, 0px));
+}
+
+/* Slides up from the bottom on open, back down on close. */
+.sheetMove {
+  transition: transform 220ms ease;
+}
+
+.sheetOff {
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheetMove {
+    transition: none;
+  }
 }
 
 @media (max-width: 640px) {

@@ -1,17 +1,18 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getSocialPost } from "../../api";
 import { meterBand } from "../../utils/meter";
 import { platformName } from "../../utils/platforms";
-import { layoutCrowd, scoreX } from "../../utils/crowdLayout";
+import { layoutZones, scoreX } from "../../utils/crowdLayout";
 import { useInView } from "../../composables/useInView";
 import PostCard from "../Social/PostCard.vue";
 import styles from "./CrowdShape.module.css";
 
-// "The crowd": every counted post is a dot, placed from "hated it" to "loved it" and sized by its weight in the score,
-// with the shape of the whole named on top. The API decides which titles get one (CrowdShapeService: listed titles, live
-// events and the most talked about). Clicking a dot loads that post into the panel underneath, in the same card (and
-// behind the same spoiler shield) as the feed.
+// "The crowd": every counted post is a dot, in one of three zones (Hated it | Mixed | Loved it) as wide as its share of
+// the score, sized by its weight in the score, with the shape of the whole named on top and the score as a line across.
+// The API decides which titles get one (CrowdShapeService: listed titles, live events and the most talked about).
+// Clicking a dot opens that post, in the same card (and behind the same spoiler shield) as the feed: under the strip on a
+// wide screen, in a sheet from the bottom of the screen on a phone so the dots and the post are both in view.
 const props = defineProps({
   type: { type: String, required: true },
   id: { type: Number, required: true },
@@ -32,6 +33,13 @@ const SHAPES = {
 };
 const shape = computed(() => SHAPES[props.crowd.shape] ?? SHAPES.early);
 
+// The three zones' names and colours, by the post sentiment each holds (see ZONES in crowdLayout).
+const ZONE_LOOK = {
+  negative: { name: "Hated it", color: "var(--meter-cold)" },
+  neutral: { name: "Mixed", color: "var(--meter-warm)" },
+  positive: { name: "Loved it", color: "var(--meter-electric)" }
+};
+
 const pct = (n) => Math.round(n ?? 0);
 const summary = computed(() => {
   const c = props.crowd;
@@ -43,12 +51,11 @@ const caption = computed(() => {
   const c = props.crowd;
   const n = visible.value.length;
   const shown = n < c.posts ? ` Showing the ${n} that count most.` : "";
-  return `Each dot is one of the ${c.posts} posts we counted, marked with where it was posted. Bigger dots carry more weight in the score.${shown}`;
+  return `Each dot is one of the ${c.posts} posts we counted, marked with where it was posted. Each side gets room by its share; bigger dots carry more weight in the score.${shown}`;
 });
 
 // ---- layout: measured width, fixed height per breakpoint ----
-// The layout is redone when the width settles (not on every pixel of a window drag): a big title is ~100 ms of work.
-const PAD = 16;
+// The layout is redone when the width settles (not on every pixel of a window drag).
 const strip = ref(null);
 const width = ref(0);
 let observer = null;
@@ -62,16 +69,18 @@ onMounted(() => {
     });
     observer.observe(strip.value);
   }
+  window.addEventListener("keydown", onKey);
 });
 onBeforeUnmount(() => {
   observer?.disconnect();
   clearTimeout(resizeTimer);
   clearTimeout(enterTimer);
   postController?.abort();
+  window.removeEventListener("keydown", onKey);
 });
 
 const narrow = computed(() => width.value > 0 && width.value < 560);
-// The strip's usual height; a lopsided crowd (nearly everyone loved it) grows it up to MAX_HEIGHT (see crowdLayout).
+// The strip's usual height; a crowded zone grows it up to MAX_HEIGHT before its dots shrink (see crowdLayout).
 const baseHeight = computed(() => (narrow.value ? 180 : 230));
 const MAX_HEIGHT = 300;
 
@@ -88,12 +97,20 @@ const MAX_STAGGER_MS = 450;
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const layout = computed(() =>
   width.value
-    ? layoutCrowd(visible.value, { width: width.value, height: baseHeight.value, maxHeight: MAX_HEIGHT, pad: PAD, rMin: 6, rMax: narrow.value ? 13 : 18 })
-    : { dots: [], height: baseHeight.value }
+    ? layoutZones(visible.value, {
+        width: width.value,
+        height: baseHeight.value,
+        maxHeight: MAX_HEIGHT,
+        // The zones are sized by every counted post, not just the ones drawn.
+        shares: { negative: props.crowd.negative, neutral: props.crowd.neutral, positive: props.crowd.positive },
+        rMin: 6,
+        rMax: narrow.value ? 13 : 18
+      })
+    : { dots: [], height: baseHeight.value, zones: [] }
 );
 const height = computed(() => layout.value.height);
-const dots = computed(() => {
-  return layout.value.dots.map((p, i) => {
+const dots = computed(() =>
+  layout.value.dots.map((p, i) => {
     const d = visible.value[i];
     return {
       ...d,
@@ -106,8 +123,19 @@ const dots = computed(() => {
       drop: -(p.y + p.r + 12),
       delay: Math.min(i * STAGGER_MS, MAX_STAGGER_MS)
     };
-  });
-});
+  })
+);
+
+// The zones under the strip: a coloured band each, and a label as long as there is room for it.
+const zones = computed(() =>
+  layout.value.zones
+    .filter((z) => z.width > 0)
+    .map((z) => ({
+      ...z,
+      ...ZONE_LOOK[z.key],
+      text: z.width >= 96 ? `${ZONE_LOOK[z.key].name} · ${pct(z.share)}%` : z.width >= 34 ? `${pct(z.share)}%` : ""
+    }))
+);
 
 // ---- entrance: the first time the strip scrolls into view, the dots drop into place ----
 // The common "reveal on scroll" pattern: useInView says when, each dot's transition-delay sets the order, and the CSS
@@ -131,26 +159,44 @@ watch(
   { flush: "post" }
 );
 
-const markerX = computed(() => (props.meter?.score != null && width.value ? scoreX(props.meter.score, width.value, PAD) : null));
+const markerX = computed(() => (props.meter?.score != null && width.value ? scoreX(props.meter.score, width.value) : null));
 const markerFlip = computed(() => markerX.value != null && markerX.value > width.value - 110);
 
 // ---- the picked post ----
 const selected = ref(null);
 const post = ref(null);
 const postFailed = ref(false);
+const sheet = ref(null);
 let postController = null;
 
-async function pick(dot) {
+async function pick(dot, event) {
   if (selected.value === dot.id) return close();
   selected.value = dot.id;
   post.value = null;
   postFailed.value = false;
   postController?.abort();
   postController = new AbortController();
+  const dotEl = event?.currentTarget;
   try {
     post.value = await getSocialPost(props.type, props.id, dot.id, { signal: postController.signal });
   } catch (e) {
     if (e?.name !== "AbortError") postFailed.value = true;
+  }
+  if (narrow.value) keepAboveSheet(dotEl);
+}
+
+// On a phone the sheet covers the bottom of the screen: if the tapped dot is now under it (or under the top bar),
+// scroll just enough to bring it into the gap between the two.
+async function keepAboveSheet(dotEl) {
+  await nextTick();
+  if (!dotEl || !sheet.value) return;
+  const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 58;
+  // Where the sheet comes to rest: offsetTop ignores the slide-in transform still running at this point.
+  const bottom = sheet.value.offsetTop;
+  const rect = dotEl.getBoundingClientRect();
+  const centre = rect.top + rect.height / 2;
+  if (centre < top + 12 || centre > bottom - 12) {
+    window.scrollBy({ top: centre - (top + bottom) / 2, behavior: reduceMotion ? "auto" : "smooth" });
   }
 }
 
@@ -159,6 +205,18 @@ function close() {
   selected.value = null;
   post.value = null;
   postFailed.value = false;
+}
+
+function onKey(e) {
+  if (e.key === "Escape" && selected.value != null) close();
+}
+
+// A swipe down on the sheet's top edge closes it, as phones' own sheets do.
+let touchY = null;
+const swipeStart = (e) => (touchY = e.touches[0].clientY);
+function swipeEnd(e) {
+  if (touchY != null && e.changedTouches[0].clientY - touchY > 50) close();
+  touchY = null;
 }
 
 // A new reading (Refresh) redraws the dots; an open post would point at a dot that may have moved.
@@ -179,6 +237,7 @@ const caretX = computed(() => {
 
     <div ref="strip" :class="styles.strip">
       <div ref="field" :class="[styles.field, styles[phase]]" :style="{ height: `${height}px` }">
+        <span v-for="z in zones.slice(1)" :key="z.key" :class="styles.zoneLine" :style="{ left: `${z.x}px` }" aria-hidden="true" />
         <template v-if="markerX != null">
           <span :class="styles.marker" :style="{ left: `${markerX}px` }" aria-hidden="true" />
           <span :class="[styles.markerLabel, markerFlip && styles.markerLabelFlip]" :style="{ left: `${markerX}px` }" aria-hidden="true">
@@ -196,7 +255,7 @@ const caretX = computed(() => {
           }"
           :aria-label="d.label"
           :aria-pressed="selected === d.id"
-          @click="pick(d)"
+          @click="pick(d, $event)"
         >
           <svg v-if="d.glyph === 'x'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" :class="styles.glyph">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -212,27 +271,39 @@ const caretX = computed(() => {
         </button>
       </div>
       <div :class="styles.scale" aria-hidden="true">
-        <span style="flex: 35; background: var(--meter-cold)" />
-        <span style="flex: 15; background: var(--meter-lukewarm)" />
-        <span style="flex: 15; background: var(--meter-warm)" />
-        <span style="flex: 15; background: var(--meter-hot)" />
-        <span style="flex: 20; background: var(--meter-electric)" />
+        <span v-for="z in zones" :key="z.key" :style="{ width: `${z.width}px`, background: z.color }" />
       </div>
       <div :class="styles.ends">
-        <span>Hated it</span>
-        <span>Mixed</span>
-        <span>Loved it</span>
+        <span v-for="z in zones" :key="z.key" :class="styles.zoneLabel" :style="{ width: `${z.width}px` }">{{ z.text }}</span>
       </div>
     </div>
 
     <p :class="styles.caption">{{ caption }}</p>
 
-    <div v-if="selected != null" :class="styles.panel" role="region" aria-live="polite" aria-label="The post you picked">
+    <!-- Wide screens: the post opens under the strip, pointing at its dot. -->
+    <div v-if="selected != null && !narrow" :class="styles.panel" role="region" aria-live="polite" aria-label="The post you picked">
       <span v-if="caretX != null" :class="styles.caret" :style="{ left: `${caretX}px` }" aria-hidden="true" />
       <PostCard v-if="post" :key="post.id" :post="post" :shielded="shielded" />
       <p v-else-if="postFailed" :class="styles.note">Couldn’t load this post. It may have been removed since the page loaded.</p>
       <p v-else :class="styles.note">Loading the post…</p>
       <button type="button" :class="styles.close" @click="close">Close</button>
     </div>
+
+    <!-- Phones: a sheet from the bottom of the screen, above the tab bar, so the dots stay in view above it. -->
+    <Teleport to="body">
+      <Transition :enter-active-class="styles.sheetMove" :leave-active-class="styles.sheetMove" :enter-from-class="styles.sheetOff" :leave-to-class="styles.sheetOff">
+        <section v-if="selected != null && narrow" ref="sheet" :class="styles.sheet" aria-label="The post you picked" aria-live="polite">
+          <div :class="styles.sheetHead" @touchstart.passive="swipeStart" @touchend="swipeEnd">
+            <span :class="styles.handle" aria-hidden="true" />
+            <button type="button" :class="styles.sheetClose" aria-label="Close the post" @click="close">✕</button>
+          </div>
+          <div :class="styles.sheetBody">
+            <PostCard v-if="post" :key="post.id" :post="post" :shielded="shielded" />
+            <p v-else-if="postFailed" :class="styles.note">Couldn’t load this post. It may have been removed since the page loaded.</p>
+            <p v-else :class="styles.note">Loading the post…</p>
+          </div>
+        </section>
+      </Transition>
+    </Teleport>
   </div>
 </template>
