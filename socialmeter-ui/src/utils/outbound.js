@@ -17,14 +17,25 @@ function decorate(url) {
   return url;
 }
 
-/** The address to link to: the original, plus any partner parameters for its site. */
-export function outboundHref(href) {
+// A link that leaves the site only if it's an ordinary web address (http or https); anything else, such as a
+// "javascript:" or "data:" URL arriving in a post or a source's data, or text that isn't a URL, gives no link at all.
+function webUrl(href) {
   if (!href) return undefined;
   try {
-    return decorate(new URL(href)).toString();
+    const url = new URL(href);
+    return url.protocol === "https:" || url.protocol === "http:" ? url : undefined;
   } catch {
-    return href; // not an absolute URL; leave it alone
+    return undefined;
   }
+}
+
+/** The address as given if it's an ordinary web address, else undefined (for links that aren't counted). */
+export const safeHref = (href) => webUrl(href)?.toString();
+
+/** The address to link to: the original, plus any partner parameters for its site. Undefined when it isn't safe. */
+export function outboundHref(href) {
+  const url = webUrl(href);
+  return url ? decorate(url).toString() : undefined;
 }
 
 /** Counts one click on an outbound link. Never blocks or fails the navigation. */

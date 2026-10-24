@@ -6,6 +6,7 @@ import { useAdmin } from "../composables/useAdmin";
 import { mediaLabel, parseUtc, timeAgo } from "../utils/format";
 import { reasonLabel, sentimentName } from "../utils/moderation";
 import { platformName } from "../utils/platforms";
+import { safeHref } from "../utils/outbound";
 import styles from "./AdminPage.module.css";
 
 // The operator's page. Signing in happens at Cloudflare (production) or with the admin key (local development); the
@@ -147,7 +148,7 @@ onMounted(start);
               <div :class="styles.entryFoot">
                 <span :class="styles.muted">by {{ e.actor }}</span>
                 <!-- A plain link on purpose: the operator checking a post isn't a visitor's click, so it isn't counted. -->
-                <a v-if="e.sourceUrl" :href="e.sourceUrl" target="_blank" rel="noopener" :class="styles.titleLink">Open post ↗</a>
+                <a v-if="safeHref(e.sourceUrl)" :href="safeHref(e.sourceUrl)" target="_blank" rel="noopener" :class="styles.titleLink">Open post ↗</a>
                 <button v-if="e.action === 'hide' && e.currentlyHidden" type="button" class="btn" :disabled="busy.has(e.id)" @click="undo(e)">
                   {{ busy.has(e.id) ? "Restoring…" : "Restore" }}
                 </button>

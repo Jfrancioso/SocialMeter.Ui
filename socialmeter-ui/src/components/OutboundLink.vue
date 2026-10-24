@@ -17,6 +17,6 @@ const countMiddle = (e) => { if (e.button === 1) count(); };
 </script>
 
 <template>
-  <a v-if="href" :href="target" target="_blank" rel="noopener" @click="count" @auxclick="countMiddle"><slot /></a>
+  <a v-if="target" :href="target" target="_blank" rel="noopener" @click="count" @auxclick="countMiddle"><slot /></a>
   <a v-else><slot /></a>
 </template>

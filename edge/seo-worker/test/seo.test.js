@@ -49,8 +49,10 @@ test("games use the Steam header image and Steam link", () => {
 test("text from TMDB can never break out of the page", () => {
   const evil = { ...clayface, name: "<script>alert(1)</script>", overview: "</script><img src=x onerror=alert(1)>" };
   const d = describeTitle({ type: "movie", id: 1 }, evil, null);
-  assert.doesNotMatch(d.bodyHtml, /<script>|<img/);
-  assert.doesNotMatch(d.jsonLd.slice(35, -9), /<\/script|<img/);   // inside the JSON-LD block
+  // No tag from the data survives, whatever its case or spacing: every "<" from TMDB is escaped.
+  const tagsIn = (html) => ["<script", "</script", "<img"].filter((t) => html.toLowerCase().replace(/<\s+/g, "<").includes(t));
+  assert.deepEqual(tagsIn(d.bodyHtml), []);
+  assert.deepEqual(tagsIn(d.jsonLd.slice(35, -9)), []);   // inside the JSON-LD block
   assert.equal(escapeHtml(`a"b'<c>&`), "a&quot;b&#39;&lt;c&gt;&amp;");
   // The "<" inside the JSON becomes the six characters \u003c, so the block can never be closed early.
   assert.equal(jsonLdScript({ x: "</script>" }), '<script type="application/ld+json">{"x":"\\u003c/script>"}</script>');

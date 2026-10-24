@@ -1,3 +1,8 @@
+<script>
+// Module scope (outside setup), so every chart on the page counts from the same number.
+let instances = 0;
+</script>
+
 <script setup>
 import { computed, ref } from "vue";
 import { meterBand } from "../../utils/meter";
@@ -19,7 +24,8 @@ const props = defineProps({
   score: { type: Number, default: null }
 });
 
-const uid = `pulse${Math.random().toString(36).slice(2, 8)}`;
+// A page-unique id for the SVG gradient, in case two charts are ever on one page.
+const uid = `pulse${++instances}`;
 
 // ---- layout: measured width, fixed height per breakpoint ----
 const box = ref(null);

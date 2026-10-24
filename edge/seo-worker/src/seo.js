@@ -126,8 +126,10 @@ export const STATIC_PAGES = ["/", "/browse/movie", "/browse/tv", "/browse/game",
  * sitemap.xml from the API's list of titles with a reading (GET /api/seo/titles): [{ type, id, lastModified }].
  */
 export function sitemapXml(titles) {
+  // lastmod only when it's a plain date (YYYY-MM-DD), so nothing else can ever land in the XML.
+  const day = (value) => (/^\d{4}-\d\d-\d\d/.test(String(value)) ? String(value).slice(0, 10) : null);
   const entry = (loc, lastmod) =>
-    `  <url><loc>${escapeHtml(SITE + loc)}</loc>${lastmod ? `<lastmod>${String(lastmod).slice(0, 10)}</lastmod>` : ""}</url>`;
+    `  <url><loc>${escapeHtml(SITE + loc)}</loc>${day(lastmod) ? `<lastmod>${day(lastmod)}</lastmod>` : ""}</url>`;
   const lines = [
     ...STATIC_PAGES.map((p) => entry(p)),
     ...titles
