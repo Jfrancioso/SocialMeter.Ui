@@ -128,13 +128,15 @@ const dots = computed(() =>
 );
 
 // The zones under the strip: a coloured band each, and a label as long as there is room for it.
+// A zone holding a post or two can round to 0%, which reads as a contradiction next to its dot: say "<1%" instead.
+const zonePct = (share) => (share > 0 && share < 0.5 ? "<1%" : `${pct(share)}%`);
 const zones = computed(() =>
   layout.value.zones
     .filter((z) => z.width > 0)
     .map((z) => ({
       ...z,
       ...ZONE_LOOK[z.key],
-      text: z.width >= 96 ? `${ZONE_LOOK[z.key].name} · ${pct(z.share)}%` : z.width >= 34 ? `${pct(z.share)}%` : ""
+      text: z.width >= 96 ? `${ZONE_LOOK[z.key].name} · ${zonePct(z.share)}` : z.width >= 34 ? zonePct(z.share) : ""
     }))
 );
 
