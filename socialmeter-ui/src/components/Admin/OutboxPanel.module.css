@@ -210,6 +210,12 @@
   gap: 8px;
 }
 
+/* The optional X reply under a posted card. */
+.xReply {
+  display: grid;
+  gap: 6px;
+}
+
 /* When the browser won't copy: the text in a box to long-press and copy by hand. */
 .copyBox {
   width: 100%;

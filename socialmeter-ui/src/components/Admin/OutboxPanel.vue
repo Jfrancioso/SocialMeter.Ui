@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { draftOutboxNow, getOutbox, postOutboxItem, skipOutboxItem } from "../../api";
 import { timeAgo } from "../../utils/format";
 import { safeHref } from "../../utils/outbound";
-import { blueskyAppUrl, copyText, isPhone, openInApp, xAppComposeUrl, xComposeUrl, xPostText } from "../../utils/shareText";
+import { blueskyAppUrl, copyText, isPhone, openInApp, xAppComposeUrl, xComposeUrl, xReplyText } from "../../utils/shareText";
 import styles from "./OutboxPanel.module.css";
 
 // The brand account's Outbox: the site drafts (one a day, plus live events), the admin posts or skips each one. The
@@ -93,17 +93,18 @@ function tapPost(item) {
 // it on the clipboard, and when the browser refuses that, shows the text in a box to long-press and copy.
 const copyBox = ref(null);   // id whose text is shown to copy by hand
 
-// The X version: once the thread is on Bluesky, it links there for the case for and against (X can't quote Bluesky posts).
-// The thread's address uses the brand's handle rather than its account id, so it reads well on X.
+// The X post is the facts and the title's link, so X shows the title's preview card. The case for and against goes in an
+// optional reply under it, linking the Bluesky thread (X can't quote Bluesky posts); the thread's address uses the brand's
+// handle rather than its account id, so it reads well.
 function threadUrl(item) {
   const url = safeHref(item.postedWebUrl);
   if (!url) return null;
   return outbox.value?.account ? url.replace(/\/profile\/[^/]+\//, `/profile/${outbox.value.account}/`) : url;
 }
-const xText = (item) => xPostText(item.text, threadUrl(item), { hasFor: !!item.for, hasAgainst: !!item.against });
+const xReply = (item) => xReplyText(threadUrl(item), { hasFor: !!item.for, hasAgainst: !!item.against });
 
 async function copyForX(item) {
-  const ok = await copyText(xText(item));
+  const ok = await copyText(item.text);
   copyBox.value = ok ? null : item.id;
   notes.value = { ...notes.value, [item.id]: ok ? "Copied. Paste it into X." : "Your browser blocked copying: long-press the text below and copy it." };
 }
@@ -181,7 +182,7 @@ onBeforeUnmount(() => clearTimeout(armTimer));
 
       <p v-if="item.error && item.status === 'draft'" :class="styles.error">Last try: {{ item.error }}</p>
       <p v-if="notes[item.id]" :class="styles.note">{{ notes[item.id] }}</p>
-      <textarea v-if="copyBox === item.id" :class="styles.copyBox" :value="xText(item)" readonly rows="6" @focus="selectAll" />
+      <textarea v-if="copyBox === item.id" :class="styles.copyBox" :value="item.text" readonly rows="5" @focus="selectAll" />
 
       <div v-if="item.status === 'draft'" :class="styles.actions">
         <button
@@ -203,12 +204,13 @@ onBeforeUnmount(() => clearTimeout(armTimer));
           class="btn"
           @click="openApp($event, blueskyAppUrl(safeHref(item.postedWebUrl)), safeHref(item.postedWebUrl))"
         >View on Bluesky ↗</a>
-        <a :href="xComposeUrl(xText(item))" target="_blank" rel="noopener" class="btn" @click="openApp($event, xAppComposeUrl(xText(item)), xComposeUrl(xText(item)))">Post on X ↗</a>
+        <a :href="xComposeUrl(item.text)" target="_blank" rel="noopener" class="btn" @click="openApp($event, xAppComposeUrl(item.text), xComposeUrl(item.text))">Post on X ↗</a>
         <button type="button" class="btn" @click="copyForX(item)">Copy</button>
       </div>
-      <p v-if="item.status === 'draft' && (item.for || item.against)" :class="styles.muted">
-        Post to Bluesky first: then the X version links to the case for and against there.
-      </p>
+      <div v-if="xReply(item)" :class="styles.xReply">
+        <span :class="styles.muted">Optional: reply under your X post with the case for and against. Long-press to copy.</span>
+        <textarea :class="styles.copyBox" :value="xReply(item)" readonly rows="2" @focus="selectAll" />
+      </div>
     </article>
   </section>
 </template>
