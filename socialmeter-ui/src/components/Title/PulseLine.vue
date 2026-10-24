@@ -50,17 +50,28 @@ const TICK = { positive: "var(--meter-electric)", neutral: "var(--meter-warm)", 
 const SAID = { positive: "loved it", neutral: "mixed", negative: "hated it" };
 
 // ---- the readout: the latest post, or the one under the pointer ----
+// The page's one headline number is the score. The line is a different measure (the latest posts only), so the readout
+// says where it sits against the score, the dashed line, instead of showing a second number on the same 0-100 scale:
+// "73" beside a score of 69 read as if the score had changed.
 const hover = ref(-1);
 function onMove(e) {
   hover.value = nearestIndex(points.value, e.clientX - e.currentTarget.getBoundingClientRect().left);
 }
 const shown = computed(() => points.value[hover.value] ?? last.value);
 const shownColor = computed(() => (shown.value ? meterBand(shown.value.mood).color : null));
+const versus = computed(() => {
+  const p = shown.value;
+  if (!p) return "";
+  if (props.score == null) return `${p.mood} out of 100`;
+  const gap = p.mood - props.score;
+  if (Math.abs(gap) <= 1) return "in line with the score";
+  return `${Math.abs(gap)} ${gap > 0 ? "above" : "below"} the score`;
+});
 const change = computed(() => recentChange(points.value));
 const detail = computed(() => {
   const p = shown.value;
   if (!p) return "";
-  if (hover.value >= 0) return `${timeLabel(p.at)} · after a “${SAID[p.sentiment] ?? "mixed"}” post on ${platformName(p.platform)}`;
+  if (hover.value >= 0) return `After a “${SAID[p.sentiment] ?? "mixed"}” post on ${platformName(p.platform)}`;
   const c = change.value;
   if (!c) return `Latest post ${timeLabel(p.at)}`;
   if (c.change === 0) return "No change in the last hour";
@@ -69,8 +80,8 @@ const detail = computed(() => {
 
 const first = computed(() => points.value[0] ?? null);
 const ariaLabel = computed(() =>
-  first.value && last.value
-    ? `The mood of the latest posts, post by post: ${first.value.mood} at ${timeLabel(first.value.at)}, ${last.value.mood} now.`
+  first.value && last.value && props.score != null
+    ? `The mood of the latest posts, post by post, against the score of ${props.score}: ${first.value.mood} at ${timeLabel(first.value.at)}, ${last.value.mood} at ${timeLabel(last.value.at)}.`
     : "The mood of the latest posts, post by post."
 );
 
@@ -88,8 +99,10 @@ const drawn = computed(() => reduceMotion || inView.value);
         <span :class="styles.label">{{ live && liveLabel ? liveLabel : `The last ${hours} hours` }}</span>
       </div>
       <div v-if="shown" :class="styles.now" aria-live="off">
-        <span :class="styles.nowWord">{{ hover >= 0 ? "Then" : "Now" }}</span>
-        <strong :class="styles.nowValue" :style="{ color: shownColor }">{{ shown.mood }}</strong>
+        <strong :class="styles.nowMain">
+          {{ hover >= 0 ? timeLabel(shown.at) : "Latest posts" }}:
+          <span :style="{ color: shownColor }">{{ versus }}</span>
+        </strong>
         <span :class="styles.nowDetail">{{ detail }}</span>
       </div>
     </div>
@@ -159,8 +172,8 @@ const drawn = computed(() => reduceMotion || inView.value);
     </div>
 
     <p :class="styles.caption">
-      Each step is a post, in the order they were posted. The line is the mood of the latest dozen, from 0 (hated it) to
-      100 (loved it); the score takes every post, so it moves more slowly.{{ live ? " New posts appear here as we read them, no reload needed." : "" }}
+      Each step is a post, in the order they were posted. The line is the mood of the latest dozen posts; the dashed line
+      is the score, which takes every post and so moves more slowly.{{ live ? " New posts appear here as we read them, no reload needed." : "" }}
     </p>
   </div>
 </template>
